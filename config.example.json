@@ -1,0 +1,32 @@
+{
+  "displayName": "Nguyễn Văn A",
+  "email": "ten.ban@congty.com",
+  "mentionName": "Nguyễn Văn A (Software Engineer)",
+  "timezone": "Asia/Ho_Chi_Minh",
+  "utcOffsetHours": 7,
+  "language": "vi",
+  "defaultProject": "work",
+  "projects": [
+    { "id": "work", "label": "Công việc", "match": [] },
+    { "id": "ca-nhan", "label": "Dự án cá nhân", "match": ["side-project"] }
+  ],
+  "focusAreas": [],
+  "notifyChat": "48:notes",
+  "signals": false,
+  "subagentChatsPerAgent": 5,
+  "maxChats": 40,
+  "skipChatsOverMembers": 40,
+  "channels": ["teamsChats", "teamsChannelMentions", "outlookMail", "jiraMail", "calendar"],
+  "keyChats": [
+    { "id": "19:example-chat-id@thread.v2", "topic": "Nhóm Mobile" }
+  ],
+  "vipPeople": [
+    { "name": "Trần Thị B", "email": "truong.nhom@congty.com", "why": "Trưởng nhóm" }
+  ],
+  "workHours": { "start": "09:00", "end": "18:00", "days": [1, 2, 3, 4, 5] },
+  "role": "Mobile developer",
+  "currentWork": "Màn hình ví điện tử, sprint 12",
+  "keywords": ["MOB-", "ví điện tử"],
+  "storeQuotes": true,
+  "onboardingPending": false
+}

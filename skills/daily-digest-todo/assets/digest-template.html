@@ -1,0 +1,299 @@
+<title>__TITLE__</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Be+Vietnam+Pro:wght@400;500;600&display=swap">
+<style>
+/* Visual thesis: an end-of-day ledger. Calm paper, ink type, one cobalt accent.
+   Layout: one-screen workspace. Left = tomorrow's three (the poster) + today's wins; centre = the task ledger; right = context (meetings, news, scope).
+   Columns are divided by hairlines, never boxed; each scrolls on its own on desktop. */
+:root {
+  --paper: #f4f5f7; --ink: #101318; --soft: #5f6773; --faint: #9aa1ac; --rule: #dfe2e7; --hover: #eaecf0;
+  --accent: #2b45d4; --accent-wash: #e4e8fb;
+  --display: "Bricolage Grotesque", "Be Vietnam Pro", system-ui, sans-serif;
+  --text: "Be Vietnam Pro", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --ease: cubic-bezier(.2,.7,.2,1);
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --paper: #0f1115; --ink: #eceef2; --soft: #a0a7b2; --faint: #6b727d; --rule: #252a32; --hover: #181b21;
+  --accent: #8fa1ff; --accent-wash: #1c2142; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --paper: #0f1115; --ink: #eceef2; --soft: #a0a7b2; --faint: #6b727d; --rule: #252a32; --hover: #181b21;
+  --accent: #8fa1ff; --accent-wash: #1c2142; color-scheme: dark }
+* { box-sizing: border-box }
+html, body { height: 100% }
+body { background: var(--paper); color: var(--ink); font-family: var(--text); font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased }
+.app { height: 100%; display: flex; flex-direction: column; max-width: 1640px; margin: 0 auto;
+  padding-block: 20px 0; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)) }
+
+/* Masthead */
+.mast { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px 28px; padding-bottom: 16px; border-bottom: 1px solid var(--ink) }
+.mast .kicker { font-size: 12px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--soft) }
+.mast h1 { margin: 2px 0 0; font-family: var(--display); font-weight: 800; font-size: clamp(30px, 3.4vw, 46px); line-height: 1; letter-spacing: -.02em }
+.mast h1 em { font-style: normal; color: var(--accent) }
+.tally { margin-left: auto; display: flex; gap: 22px; font-variant-numeric: tabular-nums }
+.tally div { display: flex; flex-direction: column; align-items: flex-end }
+.tally b { font-family: var(--display); font-weight: 700; font-size: 26px; line-height: 1 }
+.tally span { font-size: 11.5px; color: var(--soft); letter-spacing: .04em }
+.tally .hot b { color: var(--accent) }
+.headline { flex-basis: 100%; margin: 0; color: var(--soft); font-size: 14px }
+
+/* Workspace */
+.work { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr) minmax(0, .9fr) }
+.col { min-width: 0; min-height: 0; overflow-y: auto; padding: 20px 26px 32px; scrollbar-width: thin; scrollbar-color: var(--rule) transparent }
+.col + .col { border-left: 1px solid var(--rule) }
+.col:first-child { padding-left: 0 } .col:last-child { padding-right: 0 }
+.label { margin: 0 0 10px; display: flex; align-items: baseline; gap: 8px; font-size: 11.5px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--soft) }
+.label .n { margin-left: auto; font-variant-numeric: tabular-nums; letter-spacing: 0 }
+.label.hot { color: var(--accent) }
+.block + .block { margin-top: 30px }
+
+/* Tomorrow's three: the poster */
+.three { list-style: none; margin: 0; padding: 0; counter-reset: k }
+.three li { counter-increment: k; display: grid; grid-template-columns: 56px 1fr; gap: 4px; padding: 14px 0; border-top: 1px solid var(--rule) }
+.three li:first-child { border-top: 0; padding-top: 4px }
+.three li::before { content: counter(k); font-family: var(--display); font-weight: 800; font-size: 52px; line-height: .9; color: var(--accent); letter-spacing: -.04em }
+.three .tt { font-family: var(--display); font-weight: 700; font-size: 19px; line-height: 1.22; letter-spacing: -.01em; text-wrap: balance }
+.three .sub { margin-top: 4px; font-size: 13px; color: var(--soft) }
+
+/* Wins */
+.wins { list-style: none; margin: 0; padding: 0 }
+.wins li { display: grid; grid-template-columns: 18px 1fr; gap: 10px; padding: 9px 0; border-top: 1px solid var(--rule) }
+.wins li:first-child { border-top: 0 }
+.check { width: 16px; height: 16px; margin-top: 2px; border-radius: 50%; background: var(--accent); position: relative }
+.check::after { content: ""; position: absolute; left: 5px; top: 2.5px; width: 4px; height: 8px; border: solid var(--paper); border-width: 0 2px 2px 0; transform: rotate(45deg) }
+.wins .tt { font-weight: 600 }
+.wins .ev { font-size: 12.5px; color: var(--soft) }
+
+/* Ledger */
+.group + .group { margin-top: 26px }
+.row { position: relative; display: grid; grid-template-columns: 20px 1fr; gap: 12px; padding: 12px 10px 12px 8px; margin: 0 -10px 0 -8px; border-top: 1px solid var(--rule); border-radius: 6px; transition: background .18s var(--ease) }
+.row:first-of-type { border-top-color: transparent }
+.row:hover { background: var(--hover) }
+.row input { appearance: none; width: 16px; height: 16px; margin: 3px 0 0; border: 1.5px solid var(--faint); border-radius: 4px; cursor: pointer; display: grid; place-items: center; transition: background .15s, border-color .15s }
+.row input:checked { background: var(--accent); border-color: var(--accent) }
+.row input:checked::after { content: ""; width: 4px; height: 8px; margin-top: -2px; border: solid var(--paper); border-width: 0 2px 2px 0; transform: rotate(45deg) }
+.row .main { min-width: 0; display: flex; flex-direction: column; gap: 3px }
+.row .tt { position: relative; justify-self: start; font-weight: 600; font-size: 14.5px; line-height: 1.35; cursor: pointer; overflow-wrap: anywhere; width: fit-content; max-width: 100% }
+.row .tt::after { content: ""; position: absolute; left: 0; top: 52%; height: 1.5px; width: 100%; background: var(--ink); transform: scaleX(0); transform-origin: left; transition: transform .35s var(--ease) }
+.row.ticked .tt::after { transform: scaleX(1) }
+.row.ticked .tt, .row.ticked .who, .row.ticked .why { color: var(--faint) }
+.who { font-size: 13px; color: var(--ink) }
+.who b { font-weight: 600 }
+.why { font-size: 13px; color: var(--soft); overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; cursor: pointer }
+.why.open { -webkit-line-clamp: unset }
+.meta { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; margin-top: 2px; font-size: 12px; color: var(--soft) }
+.meta .due { color: var(--accent); font-weight: 600 }
+.meta .aged { color: var(--ink); font-weight: 600 }
+.open-link { color: var(--accent); text-decoration: none; font-weight: 600; opacity: 0; transition: opacity .18s }
+.row:hover .open-link, .row:focus-within .open-link, .plain:hover .open-link { opacity: 1 }
+@media (hover: none) { .open-link { opacity: 1 } }
+a { color: var(--accent) }
+.open-link:hover, .open-link:focus-visible { text-decoration: underline }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px }
+
+/* Communication signals */
+.tag { font: inherit; font-size: 11px; font-weight: 600; letter-spacing: .02em; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--ink); background: transparent; color: var(--ink); cursor: pointer; line-height: 16px; transition: background .15s, color .15s }
+.tag:hover, .tag[aria-expanded="true"] { background: var(--ink); color: var(--paper) }
+.tag.good { border-color: var(--accent); color: var(--accent) }
+.tag.good:hover, .tag.good[aria-expanded="true"] { background: var(--accent); color: var(--paper) }
+.note { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .28s var(--ease) }
+.note > div { overflow: hidden; font-size: 12.5px; color: var(--ink) }
+.note > div > p { margin: 6px 0 0; padding: 6px 0 2px 10px; border-left: 2px solid var(--ink) }
+.note.good > div > p { border-left-color: var(--accent) }
+.note.show { grid-template-rows: 1fr }
+
+/* Context column */
+.plain { padding: 10px 0; border-top: 1px solid var(--rule) }
+.plain:first-of-type { border-top: 0; padding-top: 2px }
+.plain .tt { font-weight: 600 }
+.plain .sm { font-size: 13px; color: var(--soft) }
+.when { font-variant-numeric: tabular-nums; font-weight: 600; color: var(--accent); margin-right: 8px }
+.empty { color: var(--faint); font-size: 13px; padding: 4px 0 }
+.fine { font-size: 12px; color: var(--soft); display: flex; flex-direction: column; gap: 4px }
+.fine .warn { color: var(--ink) }
+.fine .warn::before { content: "! "; font-weight: 700; color: var(--accent) }
+
+/* Motion: entrance for the three, nothing else on load */
+@media (prefers-reduced-motion: no-preference) {
+  .three li { animation: rise .6s var(--ease) both }
+  .three li:nth-child(2) { animation-delay: .08s } .three li:nth-child(3) { animation-delay: .16s }
+  .tally b { animation: rise .5s var(--ease) both .1s }
+  @keyframes rise { from { opacity: .001; transform: translateY(10px) } to { opacity: 1; transform: none } }
+  .bump { animation: bump .45s var(--ease) }
+  @keyframes bump { 40% { transform: translateY(-3px) scale(1.12) } }
+}
+@media (prefers-reduced-motion: reduce) { .note, .row, .row .tt::after { transition: none } }
+
+@media (max-width: 1180px) {
+  .work { grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr) }
+  .col.ctx { grid-column: 1 / -1; border-left: 0; border-top: 1px solid var(--rule); padding-left: 0; padding-right: 0; overflow: visible }
+  .app { height: auto } html, body { height: auto } .col { overflow: visible }
+}
+@media (max-width: 760px) {
+  .work { display: block } .col { padding: 18px 0 8px !important; border-left: 0 !important }
+  .col + .col { border-top: 1px solid var(--rule) }
+  .tally { margin-left: 0; gap: 18px } .tally div { align-items: flex-start }
+  .three li { grid-template-columns: 44px 1fr } .three li::before { font-size: 42px } .three .tt { font-size: 17px }
+}
+</style>
+
+<div class="app" id="app"></div>
+
+<script type="application/json" id="digest-data">__DATA__</script>
+<script>
+(function () {
+  var D = JSON.parse(document.getElementById('digest-data').textContent);
+  var app = document.getElementById('app');
+  var KEY = 'digest-done-' + D.date, ticked = {};
+  try { ticked = JSON.parse(localStorage.getItem(KEY) || '{}') } catch (e) {}
+  /* UI text in both languages. The digest JSON's `language` wins; otherwise follow the browser. */
+  var I18N = {
+    vi: {
+      open: 'Mở ↗', kicker: 'Bản tin tối', SRC: { teams: 'Teams', outlook: 'Outlook', calendar: 'Lịch', jira: 'Jira', other: 'Khác' },
+      WHO: {
+        ask: function (b) { return b ? b + ' nhờ tôi' : 'Có người nhờ tôi' },
+        question: function (b) { return b ? b + ' đang chờ tôi trả lời' : 'Câu hỏi đang chờ tôi' },
+        promise: function (b) { return b ? 'Tôi đã hứa với ' + b : 'Tôi đã hứa' },
+        review: function (b) { return b ? b + ' nhờ tôi review' : 'Cần tôi review' },
+        deadline: function (b) { return b ? 'Deadline do ' + b + ' đặt' : 'Có deadline' },
+        prep: function () { return 'Chuẩn bị trước buổi họp' },
+        followup: function (b) { return b ? 'Tôi đang chờ ' + b : 'Tôi đang chờ người khác' }
+      },
+      SIG: { gaslighting: 'Gaslighting', silent_treatment: 'Silent treatment', passive_aggressive: 'Passive-aggressive',
+        scope_creep: 'Scope creep', false_urgency: 'Gấp ảo', last_minute: 'Phút chót', after_hours: 'Ngoài giờ',
+        blame_shifting: 'Đổ lỗi', hot_potato: 'Đá bóng', micromanaging: 'Micromanage', vague_ask: 'Yêu cầu mơ hồ',
+        credit_taking: 'Nhận công', public_callout: 'Nhắc trước nhóm', kudos: 'Được ghi nhận' },
+      aged: function (n) { return 'Treo ' + n + ' ngày' }, markDone: 'Đánh dấu xong', whyTitle: 'Bấm để đọc đủ', noItems: 'Không có việc nào.',
+      tNow: 'gấp', tWeek: 'tuần này', tWatch: 'đang chờ', tDone: 'đã xong',
+      top: 'Sáng mai làm trước', topEmpty: 'Không có việc gấp. Tối nay nghỉ ngơi.',
+      done: 'Đã xong', doneEmpty: 'Chưa thấy việc nào được đóng trong khoảng này.',
+      gNow: 'Gấp · hôm nay và mai', gWeek: 'Trong tuần', gWatch: 'Đang chờ người khác',
+      meetings: 'Lịch họp sắp tới', prep: 'Chuẩn bị: ', noMeetings: 'Không có lịch họp.',
+      highlights: 'Tin nổi bật', noHighlights: 'Không có tin đáng chú ý.', scope: 'Phạm vi',
+      sigNote: 'Nhãn giao tiếp chỉ là gợi ý dựa trên câu chữ. Bấm vào nhãn để xem lý do.',
+      updated: function (s) { return 'Cập nhật ' + s + '. Dấu tick chỉ lưu trên trình duyệt này.' }
+    },
+    en: {
+      open: 'Open ↗', kicker: 'Evening digest', SRC: { teams: 'Teams', outlook: 'Outlook', calendar: 'Calendar', jira: 'Jira', other: 'Other' },
+      WHO: {
+        ask: function (b) { return b ? b + ' asked me' : 'Someone asked me' },
+        question: function (b) { return b ? b + ' is waiting for my answer' : 'A question is waiting for me' },
+        promise: function (b) { return b ? 'I promised ' + b : 'I promised' },
+        review: function (b) { return b ? b + ' asked me to review' : 'Needs my review' },
+        deadline: function (b) { return b ? 'Deadline set by ' + b : 'Has a deadline' },
+        prep: function () { return 'Prep before the meeting' },
+        followup: function (b) { return b ? 'I’m waiting on ' + b : 'I’m waiting on someone' }
+      },
+      SIG: { gaslighting: 'Gaslighting', silent_treatment: 'Silent treatment', passive_aggressive: 'Passive-aggressive',
+        scope_creep: 'Scope creep', false_urgency: 'False urgency', last_minute: 'Last minute', after_hours: 'After hours',
+        blame_shifting: 'Blame shifting', hot_potato: 'Hot potato', micromanaging: 'Micromanaging', vague_ask: 'Vague ask',
+        credit_taking: 'Credit taking', public_callout: 'Public callout', kudos: 'Kudos' },
+      aged: function (n) { return 'Stuck ' + n + (+n === 1 ? ' day' : ' days') }, markDone: 'Mark done', whyTitle: 'Click to read in full', noItems: 'Nothing here.',
+      tNow: 'urgent', tWeek: 'this week', tWatch: 'waiting', tDone: 'done',
+      top: 'Do first tomorrow morning', topEmpty: 'Nothing urgent. Take the evening off.',
+      done: 'Done', doneEmpty: 'Nothing was closed in this window.',
+      gNow: 'Urgent · today and tomorrow', gWeek: 'This week', gWatch: 'Waiting on others',
+      meetings: 'Upcoming meetings', prep: 'Prep: ', noMeetings: 'No meetings.',
+      highlights: 'Highlights', noHighlights: 'Nothing notable.', scope: 'Coverage',
+      sigNote: 'Communication labels are only hints based on wording. Click a label to see why.',
+      updated: function (s) { return 'Updated ' + s + '. Ticks are saved in this browser only.' }
+    }
+  };
+  var LANG = D.language === 'vi' || D.language === 'en' ? D.language : (/^vi\b/i.test((window.navigator && navigator.language) || '') ? 'vi' : 'en');
+  var T = I18N[LANG];
+  try { document.documentElement.lang = LANG } catch (e) {}
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c] }) }
+  function open(url) { return url ? '<a class="open-link" href="' + esc(url) + '" target="_blank" rel="noopener">' + esc(T.open) + '</a>' : '' }
+  function who(kind, w) { return (T.WHO[kind] || T.WHO.ask)(w ? '<b>' + esc(w) + '</b>' : '') }
+
+  var todos = D.todos || [], done = D.done || [], byId = {};
+  todos.forEach(function (t) { byId[t.id] = t });
+  var cnt = { now: 0, week: 0, watch: 0 }; todos.forEach(function (t) { cnt[t.tier] = (cnt[t.tier] || 0) + 1 });
+
+  function signals(list, uid) {
+    var tags = '', notes = '';
+    (list || []).forEach(function (s, i) {
+      var good = s.type === 'kudos' ? ' good' : '', id = 'n-' + uid + '-' + i;
+      tags += '<button type="button" class="tag' + good + '" aria-expanded="false" aria-controls="' + id + '">' + esc(T.SIG[s.type] || s.type) + '</button>';
+      notes += '<div class="note' + good + '" id="' + id + '"><div><p>' + esc(s.note) + '</p></div></div>';
+    });
+    return { tags: tags, notes: notes };
+  }
+  function row(t) {
+    var on = !!ticked[t.id], s = signals(t.signals, t.id);
+    var meta = [];
+    if (t.dueLabel) meta.push('<span class="due">' + esc(t.dueLabel) + '</span>');
+    if (t.carried) meta.push('<span class="aged">' + esc(T.aged(t.ageDays || 1)) + '</span>');
+    meta.push('<span>' + esc(T.SRC[t.source] || t.source) + (t.sourceLabel ? ' · ' + esc(t.sourceLabel) : '') + '</span>');
+    return '<div class="row' + (on ? ' ticked' : '') + '">' +
+      '<input type="checkbox" id="cb-' + esc(t.id) + '" data-id="' + esc(t.id) + '"' + (on ? ' checked' : '') + ' aria-label="' + esc(T.markDone) + '">' +
+      '<div class="main"><label class="tt" for="cb-' + esc(t.id) + '">' + esc(t.title) + '</label>' +
+      '<div class="who">' + who(t.kind, t.from) + '</div>' +
+      (t.why ? '<div class="why" title="' + esc(T.whyTitle) + '">' + esc(t.why) + '</div>' : '') +
+      '<div class="meta">' + meta.join('') + s.tags + open(t.url) + '</div>' + s.notes + '</div></div>';
+  }
+  function group(key, label, hot) {
+    var items = todos.filter(function (t) { return t.tier === key });
+    return '<section class="group"><h2 class="label' + (hot ? ' hot' : '') + '">' + esc(label) + '<span class="n">' + items.length + '</span></h2>' +
+      (items.length ? items.map(row).join('') : '<div class="empty">' + esc(T.noItems) + '</div>') + '</section>';
+  }
+
+  var top = (D.top3 || []).map(function (id) { return byId[id] }).filter(Boolean);
+  var h = '';
+  h += '<header class="mast"><div><div class="kicker">' + esc(T.kicker) + ' · ' + esc(D.windowLabel || '') + '</div>' +
+       '<h1>' + esc(D.weekday) + ', <em>' + esc(D.dateLabel) + '</em></h1></div>' +
+       '<div class="tally"><div class="hot"><b>' + cnt.now + '</b><span>' + esc(T.tNow) + '</span></div><div><b>' + cnt.week + '</b><span>' + esc(T.tWeek) + '</span></div>' +
+       '<div><b>' + cnt.watch + '</b><span>' + esc(T.tWatch) + '</span></div><div><b id="donecount">' + done.length + '</b><span>' + esc(T.tDone) + '</span></div></div>' +
+       (D.headline ? '<p class="headline">' + esc(D.headline) + '</p>' : '') + '</header>';
+
+  h += '<main class="work"><div class="col">';
+  h += '<section class="block"><h2 class="label hot">' + esc(T.top) + '</h2>' + (top.length ? '<ol class="three">' + top.map(function (t) {
+      return '<li><div><div class="tt">' + esc(t.title) + '</div><div class="sub">' + esc([t.dueLabel, t.from].filter(Boolean).join(' · ')) + '</div></div></li>';
+    }).join('') + '</ol>' : '<div class="empty">' + esc(T.topEmpty) + '</div>') + '</section>';
+  h += '<section class="block"><h2 class="label">' + esc(T.done) + '<span class="n">' + done.length + '</span></h2>' + (done.length ? '<ul class="wins">' + done.map(function (x) {
+      return '<li><span class="check" aria-hidden="true"></span><div><div class="tt">' + esc(x.title) + '</div>' +
+        '<div class="ev">' + esc([x.time, x.evidence].filter(Boolean).join(' · ')) + '</div></div></li>';
+    }).join('') + '</ul>' : '<div class="empty">' + esc(T.doneEmpty) + '</div>') + '</section>';
+  h += '</div><div class="col">' + group('now', T.gNow, true) + group('week', T.gWeek) + group('watch', T.gWatch) + '</div>';
+
+  var mt = D.meetings || [], hl = D.highlights || [], cov = D.coverage || {};
+  h += '<div class="col ctx"><section class="block"><h2 class="label">' + esc(D.meetingsLabel || T.meetings) + '<span class="n">' + mt.length + '</span></h2>' +
+    (mt.length ? mt.map(function (m) {
+      return '<div class="plain"><div class="tt"><span class="when">' + esc(m.time) + '</span>' + esc(m.title) + '</div>' +
+        (m.prep ? '<div class="sm">' + esc(T.prep + m.prep) + '</div>' : '') + '<div class="meta">' + open(m.url) + '</div></div>';
+    }).join('') : '<div class="empty">' + esc(T.noMeetings) + '</div>') + '</section>';
+  h += '<section class="block"><h2 class="label">' + esc(T.highlights) + '<span class="n">' + hl.length + '</span></h2>' +
+    (hl.length ? hl.map(function (x, i) {
+      var s = signals(x.signals, 'h' + i);
+      return '<div class="plain"><div class="tt">' + esc(x.title) + '</div><div class="sm">' + esc(x.summary) + '</div>' +
+        '<div class="meta"><span>' + esc([x.time, T.SRC[x.source] || x.source, x.sourceLabel].filter(Boolean).join(' · ')) + '</span>' + s.tags + open(x.url) + '</div>' + s.notes + '</div>';
+    }).join('') : '<div class="empty">' + esc(T.noHighlights) + '</div>') + '</section>';
+  h += '<section class="block fine"><h2 class="label">' + esc(T.scope) + '</h2>' +
+    (cov.scanned || []).map(function (s) { return '<div>' + esc(s) + '</div>' }).join('') +
+    (cov.warnings || []).map(function (s) { return '<div class="warn">' + esc(s) + '</div>' }).join('') +
+    '<div>' + esc(T.sigNote) + '</div>' +
+    '<div>' + esc(T.updated((D.generatedAt || '').replace('T', ' ').slice(0, 16))) + '</div></section></div></main>';
+  app.innerHTML = h;
+
+  var doneEl = document.getElementById('donecount');
+  function syncDone(bump) {
+    doneEl.textContent = done.length + Object.keys(ticked).length;
+    if (bump) { doneEl.classList.remove('bump'); void doneEl.offsetWidth; doneEl.classList.add('bump') }
+  }
+  syncDone(false);
+  app.addEventListener('change', function (e) {
+    var id = e.target && e.target.getAttribute('data-id'); if (!id) return;
+    if (e.target.checked) ticked[id] = true; else delete ticked[id];
+    e.target.closest('.row').classList.toggle('ticked', e.target.checked);
+    syncDone(e.target.checked);
+    try { localStorage.setItem(KEY, JSON.stringify(ticked)) } catch (err) {}
+  });
+  app.addEventListener('click', function (e) {
+    var b = e.target.closest('.tag');
+    if (b) { var n = document.getElementById(b.getAttribute('aria-controls')), on = !n.classList.contains('show');
+      n.classList.toggle('show', on); b.setAttribute('aria-expanded', String(on)); return }
+    var w = e.target.closest('.why'); if (w) w.classList.toggle('open');
+  });
+})();
+</script>
