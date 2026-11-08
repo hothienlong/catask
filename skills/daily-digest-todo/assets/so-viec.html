@@ -233,6 +233,17 @@ a { color: var(--accent) }
 .dlg .dlg-note { font-size: 11.5px; color: var(--faint) }
 .dlg .dlg-ctx { margin: 14px 0 2px; font-size: 11px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--soft) }
 .dlg .dlg-why { margin: 0 0 10px; font-size: 13.5px; overflow-wrap: anywhere; white-space: pre-wrap }
+/* Communication signals, attached under the quote (or the Context block): badges + their notes, always open */
+.dlg .dlg-sig { margin: -2px 0 12px }
+.dlg .dlg-sig h3 { margin: 0 0 6px; font-size: 11px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--soft) }
+.dlg .dlg-tags { display: flex; flex-wrap: wrap; gap: 6px }
+.dlg .dlg-tags .tag { cursor: default; display: inline-block }
+.dlg .dlg-tags .tag:hover { background: transparent; color: inherit }
+.dlg .dlg-tags .tag.good:hover { color: var(--accent) }
+.dlg .dlg-sig ul { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 4px }
+.dlg .dlg-sig li { font-size: 12.5px; padding: 2px 0 2px 9px; border-left: 2px solid var(--ink); overflow-wrap: anywhere }
+.dlg .dlg-sig li.good { border-left-color: var(--accent) }
+.dlg .dlg-sig li.good b { color: var(--accent) }
 .dlg .dlg-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px }
 .dlg .dlg-open { padding: 6px 14px; border-radius: 999px; background: var(--accent); color: var(--lift); text-decoration: none; font-weight: 600 }
 .dlg .dlg-x { position: absolute; top: 10px; right: 10px; width: 32px; height: 32px; border: 0; border-radius: 50%; background: transparent; cursor: pointer; font-size: 16px; color: var(--soft) }
@@ -522,7 +533,7 @@ textarea.set-in { min-height: 70px; resize: vertical }
       dirMine: 'Tôi cần làm', dirTheirs: 'Tôi đang chờ',
       viewMsg: 'Xem tin', viewMsgAria: 'Xem tin nhắn gốc: {0}', openIn: 'Mở trong {0} ↗', dlgClose: 'Đóng',
       quotedAt: 'Trích lúc {0}', quoteStale: 'Tin gốc có thể đã được sửa sau đó, mở link để xem bản mới nhất.',
-      dlgContext: 'Bối cảnh', noExcerpt: 'Chưa có trích đoạn — bản tin tối nay sẽ lưu đoạn tin gốc.',
+      dlgContext: 'Bối cảnh', dlgSignals: 'Tín hiệu giao tiếp', noExcerpt: 'Chưa có trích đoạn — bản tin tối nay sẽ lưu đoạn tin gốc.',
       PRI: { P0: 'P0 · Nghiêm trọng: sự cố production, đang chặn người khác hoặc release, bảo mật, sếp/VIP leo thang',
         P1: 'P1 · Quan trọng: trễ sẽ ảnh hưởng thật', P2: 'P2 · Bình thường', P3: 'P3 · Có thì tốt / để biết' },
       priCycle: '{0}. Bấm để đổi mức ưu tiên.', priSet: 'Đã đổi ưu tiên thành {0}.', priMine: 'Bạn đã chọn mức này',
@@ -653,7 +664,7 @@ textarea.set-in { min-height: 70px; resize: vertical }
       dirMine: 'I need to do this', dirTheirs: 'I’m waiting',
       viewMsg: 'View message', viewMsgAria: 'View the source message: {0}', openIn: 'Open in {0} ↗', dlgClose: 'Close',
       quotedAt: 'Quoted at {0}', quoteStale: 'The original may have been edited since; open the link for the latest version.',
-      dlgContext: 'Context', noExcerpt: 'No excerpt yet — tonight’s digest will save the original message.',
+      dlgContext: 'Context', dlgSignals: 'Communication signals', noExcerpt: 'No excerpt yet — tonight’s digest will save the original message.',
       PRI: { P0: 'P0 · Critical: production incident, blocking others or a release, security, boss/VIP escalation',
         P1: 'P1 · Important: real impact if it slips', P2: 'P2 · Normal', P3: 'P3 · Nice to have / FYI' },
       priCycle: '{0}. Click to change priority.', priSet: 'Priority set to {0}.', priMine: 'You set this',
@@ -863,6 +874,18 @@ textarea.set-in { min-height: 70px; resize: vertical }
       notes += '<div class="note' + good + '" id="' + id + '"><div><p>' + esc(s.note) + '</p></div></div>';
     });
     return { tags: tags, notes: notes };
+  }
+  /* Dialog version: plain badges (not buttons) with every note listed below, since the dialog has room. */
+  function sigDlg(list) {
+    if (!sigOn() || !list || !list.length) return '';
+    var tags = '', items = '';
+    list.forEach(function (s) {
+      var good = s.type === 'kudos' ? ' good' : '', lab = esc(sigLabel(s.type));
+      tags += '<span class="tag' + good + '">' + lab + '</span>';
+      items += '<li' + (good ? ' class="good"' : '') + '><b>' + lab + '</b>' + (s.note ? ': ' + esc(s.note) : '') + '</li>';
+    });
+    return '<section class="dlg-sig" aria-labelledby="dlgSigH"><h3 id="dlgSigH">' + esc(t('dlgSignals')) + '</h3>' +
+      '<div class="dlg-tags">' + tags + '</div><ul>' + items + '</ul></section>';
   }
   function latestDay() { return S.days[0] || null }
   /* ---------- profile (meta/profile doc, written by the skill from the user's config) ---------- */
@@ -1424,11 +1447,12 @@ textarea.set-in { min-height: 70px; resize: vertical }
   }
   function openMsg(id) {
     var td = findTodo(id); if (!canView(td)) return;
-    var q = hasQuote(td) ? td.quote : null, at = q ? whenLabel(q.at || td.updatedAt || td.firstSeen) : '';
-    /* No excerpt yet (older tasks get one on the next evening run): show who, where and why instead. */
-    var body = q ? '<blockquote>' + esc(String(q.text).slice(0, 500)) + '</blockquote>' +
+    var q = hasQuote(td) ? td.quote : null, at = q ? whenLabel(q.at || td.updatedAt || td.firstSeen) : '', sg = sigDlg(td.signals);
+    /* No excerpt yet (older tasks get one on the next evening run): show who, where and why instead.
+       Signals sit right under the quote (or the Context block) so they read as "this message -> these signals". */
+    var body = q ? '<blockquote>' + esc(String(q.text).slice(0, 500)) + '</blockquote>' + sg +
         '<div class="dlg-note">' + (at ? esc(t('quotedAt', at)) + ' · ' : '') + esc(t('quoteStale')) + '</div>'
-      : (td.why ? '<div class="dlg-ctx">' + esc(t('dlgContext')) + '</div><p class="dlg-why">' + esc(td.why) + '</p>' : '<div style="height:10px"></div>') +
+      : (td.why ? '<div class="dlg-ctx">' + esc(t('dlgContext')) + '</div><p class="dlg-why">' + esc(td.why) + '</p>' : '<div style="height:10px"></div>') + sg +
         '<div class="dlg-note">' + esc(t('noExcerpt')) + '</div>';
     dlg.innerHTML = '<button type="button" class="dlg-x" data-close aria-label="' + esc(t('dlgClose')) + '">✕</button>' +
       '<h2 id="msgTitle">' + esc(td.title) + '</h2>' +
@@ -1785,6 +1809,7 @@ textarea.set-in { min-height: 70px; resize: vertical }
       t6: ['Chờ Gấu Trúc gửi tài liệu API mới', 'Gấu Trúc hẹn gửi trong hôm nay.'],
       t7: ['Chuẩn bị demo tính năng ví cho buổi họp sáng mai', 'Buổi demo 10:00 với cả nhóm sản phẩm.'],
       t8: ['Sửa lỗi hiển thị số dư khi mất mạng', 'Sóc Nâu: "fix nhanh quá, cảm ơn nha!"'],
+      q8: 'Fix nhanh quá, mình test lại thấy số dư hiện đúng khi mất mạng rồi, cảm ơn nha!',
       sample: 'Dữ liệu mẫu để xem giao diện',
       head1: '3 việc gấp, 1 câu hỏi treo 3 ngày, 2 việc đã xong.', head2: 'Ngày tập trung code: 2 việc xong, 1 việc mới.',
       meetingsLabel: 'Lịch họp sắp tới', meet: ['Demo tính năng ví', 'Chuẩn bị tài khoản test và kịch bản 5 phút'],
@@ -1814,6 +1839,7 @@ textarea.set-in { min-height: 70px; resize: vertical }
       t6: ['Waiting on Pat for the new API docs', 'Pat said they’d send them today.'],
       t7: ['Prepare the wallet feature demo for tomorrow morning', 'The 10:00 demo is with the whole product team.'],
       t8: ['Fix the balance display when offline', 'Sam: "that was a fast fix, thanks!"'],
+      q8: 'That was a fast fix! I retested and the balance shows correctly offline now. Thanks!',
       sample: 'Sample data to show the layout',
       head1: '3 urgent tasks, 1 question waiting 3 days, 2 things done.', head2: 'Focused coding day: 2 things done, 1 new task.',
       meetingsLabel: 'Upcoming meetings', meet: ['Wallet feature demo', 'Prepare a test account and a 5-minute script'],
@@ -1845,7 +1871,7 @@ textarea.set-in { min-height: 70px; resize: vertical }
       mk(5, { title: c.t5[0], url: 'https://teams.microsoft.com/', kind: 'followup', from: c.fox, tier: 'watch', priority: 'P3', status: 'waiting', firstSeen: addDays(TODAY, -5), sourceLabel: c.teamProduct, why: c.t5[1], quote: q(c.fox, '14:20', c.q5) }),
       mk(6, { title: c.t6[0], kind: 'followup', from: c.panda, tier: 'watch', status: 'waiting', sourceLabel: c.teamMobile, why: c.t6[1] }),
       mk(7, { title: c.t7[0], kind: 'prep', from: '', tier: 'now', priority: 'P2', sourceLabel: c.calendar, source: 'calendar', why: c.t7[1] }),
-      mk(8, { title: c.t8[0], kind: 'ask', from: c.squirrel, tier: 'now', priority: 'P1', status: 'done', doneAt: TODAY, prevStatus: 'open', sourceLabel: c.teamMobile, signals: [{ type: 'kudos', note: c.t8[1] }] })
+      mk(8, { title: c.t8[0], kind: 'ask', from: c.squirrel, tier: 'now', priority: 'P1', status: 'done', doneAt: TODAY, prevStatus: 'open', sourceLabel: c.teamMobile, signals: [{ type: 'kudos', note: c.t8[1] }], quote: q(c.squirrel, '17:30', c.q8) })
     ];
     function day(date, o) { return Object.assign({ date: date, dateLabel: dm(date), weekday: wd(date), generatedAt: date + 'T19:05:00+07:00', highlights: [], meetings: [], done: [], timeline: [], top3: [], coverage: { scanned: [c.sample], warnings: [] } }, o) }
     var days = [
