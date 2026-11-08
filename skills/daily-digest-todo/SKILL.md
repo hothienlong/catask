@@ -52,7 +52,12 @@ Where this file shows example phrases, they come in pairs (vi / en). Use the one
      - **Communication signals** on or off (default **off**) → `signals`.
      - **Store message quotes for "View message"** (default **yes**) → `storeQuotes`.
    - **Suggest the schedule time**: end of `workHours` + about 1 hour (default 19:00), on the `workHours.days`. Mention it in the closing message; don't create the scheduled task yourself.
-   - **Write / merge**: on first run, write the full config. On "update my profile", show current values as the preselected/default options, then **merge** the answers into the existing file: replace only the fields that were asked, keep every other field (including unknown ones) as is, and set `onboardingPending` to `false` if it was `true`. Then re-sync `meta/profile` (Step 5.3b) right away, even outside a digest run.
+   - **Write / merge**: on first run, write the full config. On "update my profile", show current values as the preselected/default options, then **merge** the answers into the existing file: replace only the fields that were asked, keep every other field (including unknown ones) as is, and set `onboardingPending` to `false` if it was `true`. Then re-sync `meta/profile` (Step 5.3b) and `meta/settings` (step 1b, config wins, `updatedBy: "skill"`) right away, even outside a digest run.
+1b. **Settings edited on the page** (`meta/settings` in the Sổ việc database; skip if `artifact-url.txt` is missing). The page's ⚙ Settings drawer edits only these fields: `language`, `signals`, `storeQuotes`, `channels`, `workHours`, `vipPeople` (`{name, why?}`, no email), `keyChats` (remove only), `keywords`, `role`, `currentWork`. Identity (`displayName`, `email`, `mentionName`, `timezone`), `projects` and the limits never come from it. `ArtifactData` `get` `meta/settings`, then:
+   - **Missing** → `set` it from config: those fields plus `timezone` (shown read-only on the page), `updatedAt` = now, `updatedBy: "skill"`. Set config `settingsSyncedAt` to that `updatedAt`.
+   - **Page wins**: `updatedBy == "page"` and `updatedAt` is newer than config `settingsSyncedAt` (or that is null) → copy those fields into config.json (for `vipPeople`, keep the `email` of a person whose name still matches; people removed on the page are dropped), set `settingsSyncedAt` = its `updatedAt`, write config.json, and use the merged config for this run. Add one coverage line: vi "Đã áp dụng cài đặt bạn đổi trên trang" / en "Applied the settings you changed on the page".
+   - **Config wins**: otherwise, if config.json was modified after `settingsSyncedAt` (file mtime) and any of those fields differ from `meta/settings` → `set` `meta/settings` from config with `updatedBy: "skill"` and a new `updatedAt`, and set `settingsSyncedAt` to it.
+   - Otherwise leave both alone. Page edits take effect on the next digest run; the page itself applies `language` and `signals` at once (it also updates `meta/profile.language`/`signals`).
 2. Config fields (defaults in brackets):
    - `displayName`, `email`: the user, as in Microsoft 365.
    - `mentionName`: how the user's @mention renders in Teams HTML, e.g. `<at ...>Nguyễn Văn A (Software Engineer)</at>` → `"Nguyễn Văn A (Software Engineer)"`. [`displayName`]
@@ -70,6 +75,7 @@ Where this file shows example phrases, they come in pairs (vi / en). Use the one
    - `role`, `currentWork` [`""`]: free text; context for judging whether an ask is the user's (Step 3).
    - `keywords` [`[]`]: ticket prefixes, project or feature names; extra hints for the deadline sweep and for group asks (Steps 2–3).
    - `storeQuotes` [`true`]: keep a short snapshot of the source message on each todo for the page's "View message" (Step 5).
+   - `settingsSyncedAt` [`null`]: the `updatedAt` of `meta/settings` last merged with this file (step 1b). Written by the skill only.
    - `onboardingPending` [`false`]: `true` when the config was written without the full interview; the next interactive run asks only the missing questions (see above), unattended runs only warn.
 3. **Find the Microsoft 365 connector tools.** Never hard-code a connector tool name: claude.ai connectors appear as `mcp__<opaque-id>__<tool>`, and the id differs per person. Use ToolSearch with keywords such as `teams_list_chats`, `read_resource`, `outlook_email_search`, `outlook_calendar_search`, `get_me`, `teams_send_chat_message`, `chat_message_search`, and use the tools whose names end in those suffixes. If none are found, **stop** and tell the user, in their language:
    - vi: "Chưa kết nối Microsoft 365 connector. Vào Settings → Connectors trong app Claude, kết nối Microsoft 365, rồi chạy lại."
@@ -266,7 +272,7 @@ Keep todo ids stable across days for carried items (reuse the old id). Use ids l
 
 3. **Sync into "Sổ việc"**, the one fixed page the user keeps open. Its URL is in `~/Documents/daily-digest/artifact-url.txt`. The page (`assets/so-viec.html`) reads live data, so a nightly run does **not** republish it. It only writes data with the `ArtifactData` tool (load via ToolSearch).
 
-   a. Read current state first: `ArtifactData` `list` on collection `todos` (limit 1000, `out_dir` to a temp folder for big results). The user moves cards on the page, so these docs are the truth for `status`, `plannedFor` and `doneAt`:
+   a. Read current state first: `ArtifactData` `list` on collection `todos` (limit 1000, `out_dir` to a temp folder for big results). The user moves cards on the page, so these docs are the truth for `status`, `plannedFor` and `doneAt`. The page's Undo writes the previous values back; a field it restores to `null` (e.g. `priority`, `priorityBy`, `prevStatus`, `movedBy`) means "absent":
       - `status: "done"` means the user finished it. Never reopen it, never carry it over. When done on the page the doc also has `movedBy: "user"` (legacy: `"page"`) and `prevStatus`; that always means the user did it.
       - An undo on the page writes `{status: prevStatus or "open", doneAt: null, movedBy: "user"}`: treat it as open again, and don't mark it done again from old evidence; only new evidence after that undo counts.
       - `status: "waiting"` means the user parked it. Keep it parked.
@@ -275,6 +281,7 @@ Keep todo ids stable across days for carried items (reuse the old id). Use ids l
 
    b. Build one batch (≤50 writes per call; split if needed). Pin `if_version` on every existing doc:
       - **Profile** → `set` `meta/profile` with `{displayName, language, defaultProject, projects: [{id, label, match}], signals, storeQuotes}` from `config.json` whenever it differs from what's stored. The page builds its UI language, title, project filter and signal UI from this doc. Never put the email, `vipPeople` (names or emails), or anything secret in it.
+      - **Settings** → `meta/settings` is handled in Step 0 (1b); don't write it again here unless that step changed config. It may hold `vipPeople` names and `keyChats` ids (owner-only store) but never emails.
       - **New todo** → `set` `todos/<id>` with the todo fields from the JSON plus:
         - `person`: name without the role
         - `project`: as in Step 5.1
@@ -322,6 +329,6 @@ If the send fails (the connector may lack a Teams send permission, e.g. 403), do
 
 ## When the user asks interactively
 
-If the user says "update my profile" / "cập nhật hồ sơ", run only the onboarding interview (Step 0), merge, sync `meta/profile`, and stop; no digest unless they also ask for one.
+If the user says "update my profile" / "cập nhật hồ sơ", run only the onboarding interview (Step 0, after step 1b so page edits are kept), merge, sync `meta/profile` and `meta/settings`, and stop; no digest unless they also ask for one.
 
 If the user asks mid-day ("did anyone ask me for anything today?" / "hôm nay có ai nhờ gì không?"), run the same flow with window = today 00:00 → now, sync the same way, and answer in chat, in `language`, with the top items directly. If the user only wants one source ("just check Outlook" / "check outlook thôi"), skip the others and say so in coverage.

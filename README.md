@@ -32,7 +32,8 @@
 - ↕️ **Sort order**: overdue / due today → tasks with a real due date (earliest first, so a P2 due tomorrow beats a P1 with no date) → P0→P3 → oldest first. The top 3 uses the same order.
 - 🔁 **Carry-over**: unfinished items stay; items with visible evidence of completion are marked done.
 - 🏆 **Done today**: only recorded when there's real evidence in messages or mail.
-- 🗂 **The ledger page** (a private Artifact): Today / Tomorrow / Waiting / Done board (drag and drop), plus People, Week, Day (timeline) and Cost tabs. **Mark done from anywhere**: any tab, including Day timeline items; undo puts it back.
+- 🗂 **The ledger page** (a private Artifact): Today / Tomorrow / Waiting / Done board (drag and drop), plus People, Week, Day (timeline) and Cost tabs. **Mark done from anywhere**: any tab, including Day timeline items. Every status or priority change shows a small bar with **Undo** (or Ctrl/Cmd+Z) for about 6 seconds.
+- ⚙ **Settings on the page**: change language, channels, working hours, important people, key chats (remove), keywords, role/current work, and the privacy switches from the ⚙ Settings button instead of editing `config.json`. Page edits take effect on the next digest run; language and signals change on the page right away.
 - 💬 **View message**: open a short snapshot (≤500 characters) of the message that created a todo, right on the page, with a link to the original. Turn off with `storeQuotes: false`.
 - ⭐ **Key chats and important people**: chats you pick are always read first; asks from your boss/PO/lead are bumped to at least P1.
 - 📨 **Sends the link** to your own Teams notes chat (only to you, never to anyone else).
@@ -106,14 +107,17 @@ Example: [`config.example.json`](config.example.json).
 | `skipChatsOverMembers` | `40` | Skip chats bigger than this (unless you're tagged) |
 | `channels` | all five | Sources to read: `teamsChats`, `teamsChannelMentions`, `outlookMail`, `jiraMail`, `calendar`. Skipped sources are listed in the coverage notes |
 | `keyChats` | `[]` | `[{id, topic}]`: chats always read first every run (outside `maxChats`); asks there go up one priority level |
-| `vipPeople` | `[]` | `[{name, email?, why?}]`: boss, PO, lead…; their asks are at least P1. Stays in your local config, never on the page |
+| `vipPeople` | `[]` | `[{name, email?, why?}]`: boss, PO, lead…; their asks are at least P1. Names and "why" also show in the page's ⚙ Settings (owner-only store); emails stay in your local config only |
 | `workHours` | `{start:"09:00", end:"18:00", days:[1,2,3,4,5]}` | Working hours (ISO weekdays, Mon = 1). Used for the "after hours" signal and the suggested schedule time |
 | `role`, `currentWork` | `""` | Your role and what you're on now; helps decide whether a group ask is yours |
 | `keywords` | `[]` | Ticket prefixes, project/feature names (e.g. `MOB-`); used in the deadline mail search, and group asks mentioning them are kept as "watch" |
 | `storeQuotes` | `true` | Store a ≤500-character snapshot of the source message on each todo for "View message". `false` = store no message text; the page opens the original link instead |
+| `settingsSyncedAt` | `null` | Written by the skill: when the page's ⚙ Settings were last merged into this file. Don't edit |
 | `onboardingPending` | `false` | `true` = the config was written without the full setup interview (e.g. migrated from an older setup). The next run you start yourself asks only the missing questions, then sets it to `false`; scheduled runs just leave a reminder in the coverage notes |
 
 After you change the config, the next run updates the page (name, language, project filter, signals).
+
+**Editing from the page.** The ⚙ Settings drawer writes your changes to the page's private store (`meta/settings`). At the start of the next digest run, Claude merges them into `config.json` (the page wins for those fields) and records `settingsSyncedAt`. If you edit `config.json` by hand after that, the file wins and the page is refreshed from it. Page edits take effect on the next digest run; language and the signals switch apply on the page immediately. Name, email, time zone and projects are changed with "update my profile", not on the page.
 
 ### Privacy
 
@@ -163,7 +167,8 @@ MIT — see [`LICENSE`](LICENSE). © 2026 Hồ Thiên Long.
 - ↕️ **Thứ tự sắp xếp**: quá hạn / hạn hôm nay → việc có hạn cụ thể (hạn sớm trước, nên P2 hạn mai đứng trước P1 không có hạn) → P0→P3 → việc cũ hơn trước. Top 3 dùng cùng thứ tự này.
 - 🔁 **Carry-over**: việc chưa xong hôm qua tự ở lại, việc đã xong (có bằng chứng) tự được đánh dấu.
 - 🏆 **Đã xong hôm nay**: chỉ ghi khi có bằng chứng thật trong tin nhắn/mail.
-- 🗂 **Trang Sổ việc** (Artifact riêng tư): bảng Hôm nay / Mai / Đang chờ / Xong (kéo thả được), tab Theo người, Tuần, Ngày (dòng thời gian), Chi phí. **Đánh dấu xong ở mọi nơi**: tab nào cũng được, kể cả mục trên dòng thời gian tab Ngày; bấm hoàn tác để trả lại.
+- 🗂 **Trang Sổ việc** (Artifact riêng tư): bảng Hôm nay / Mai / Đang chờ / Xong (kéo thả được), tab Theo người, Tuần, Ngày (dòng thời gian), Chi phí. **Đánh dấu xong ở mọi nơi**: tab nào cũng được, kể cả mục trên dòng thời gian tab Ngày; mỗi lần đổi trạng thái hay mức ưu tiên đều hiện thanh nhỏ có nút **Hoàn tác** (hoặc Ctrl/Cmd+Z) trong khoảng 6 giây.
+- ⚙ **Cài đặt ngay trên trang**: đổi ngôn ngữ, kênh theo dõi, giờ làm, người quan trọng, chat theo dõi (bỏ bớt), từ khoá, vai trò/việc đang làm và hai công tắc riêng tư bằng nút ⚙ Cài đặt, khỏi sửa `config.json`. Thay đổi trên trang áp dụng từ bản tin tới; ngôn ngữ và tín hiệu đổi trên trang ngay.
 - 💬 **Xem tin**: mở ngay trên trang một đoạn trích ngắn (≤500 ký tự) của tin nhắn sinh ra việc, kèm link tới tin gốc. Tắt bằng `storeQuotes: false`.
 - ⭐ **Chat quan trọng và người quan trọng**: chat bạn chọn luôn được đọc trước; việc sếp/PO/lead nhờ được nâng lên ít nhất P1.
 - 📨 **Báo link** vào chat "ghi chú" của chính bạn trên Teams (chỉ gửi cho bạn, không bao giờ gửi cho người khác).
@@ -237,14 +242,17 @@ Mẫu: [`config.example.json`](config.example.json).
 | `skipChatsOverMembers` | `40` | Bỏ qua chat đông hơn mức này (trừ khi bạn bị tag) |
 | `channels` | đủ cả năm | Nguồn cần đọc: `teamsChats`, `teamsChannelMentions`, `outlookMail`, `jiraMail`, `calendar`. Nguồn bị bỏ qua được ghi trong phần độ phủ |
 | `keyChats` | `[]` | `[{id, topic}]`: chat luôn được đọc trước mỗi lần chạy (không tính vào `maxChats`); việc nhờ trong đó được nâng một bậc ưu tiên |
-| `vipPeople` | `[]` | `[{name, email?, why?}]`: sếp, PO, lead…; việc họ nhờ ít nhất là P1. Chỉ nằm trong config trên máy, không đưa lên trang |
+| `vipPeople` | `[]` | `[{name, email?, why?}]`: sếp, PO, lead…; việc họ nhờ ít nhất là P1. Tên và "vì sao" cũng hiện trong ⚙ Cài đặt của trang (kho chỉ chủ trang đọc được); email chỉ nằm trong config trên máy |
 | `workHours` | `{start:"09:00", end:"18:00", days:[1,2,3,4,5]}` | Giờ làm việc (thứ theo ISO, thứ Hai = 1). Dùng cho tín hiệu "ngoài giờ" và giờ chạy lịch gợi ý |
 | `role`, `currentWork` | `""` | Vai trò và việc bạn đang làm; giúp đoán câu hỏi chung trong nhóm có phải việc của bạn không |
 | `keywords` | `[]` | Tiền tố ticket, tên dự án/tính năng (ví dụ `MOB-`); dùng khi dò mail có hạn chót, và câu hỏi chung nhắc tới chúng được giữ ở "Theo dõi" |
 | `storeQuotes` | `true` | Lưu đoạn trích ≤500 ký tự của tin gốc trên mỗi việc cho nút "Xem tin". `false` = không lưu nội dung tin nào; trang mở thẳng link gốc |
+| `settingsSyncedAt` | `null` | Skill tự ghi: lần cuối gộp ⚙ Cài đặt trên trang vào file này. Đừng sửa tay |
 | `onboardingPending` | `false` | `true` = config được tạo mà chưa qua đủ buổi phỏng vấn (ví dụ chuyển từ bản cài cũ). Lần chạy tiếp theo do bạn tự gọi sẽ chỉ hỏi những câu còn thiếu rồi đặt lại thành `false`; lần chạy theo lịch chỉ để lại lời nhắc trong phần độ phủ |
 
 Đổi config xong thì lần chạy sau sẽ tự cập nhật trang (tên, ngôn ngữ, bộ lọc project, tín hiệu).
+
+**Sửa ngay trên trang.** Ngăn ⚙ Cài đặt ghi thay đổi vào kho riêng của trang (`meta/settings`). Đầu lần chạy bản tin tới, Claude gộp chúng vào `config.json` (trang thắng với các trường này) và ghi `settingsSyncedAt`. Nếu sau đó bạn sửa tay `config.json` thì file thắng và trang được cập nhật lại theo file. Thay đổi trên trang áp dụng từ bản tin tới; ngôn ngữ và công tắc tín hiệu đổi trên trang ngay. Tên, email, múi giờ và project thì đổi bằng "cập nhật hồ sơ", không đổi trên trang.
 
 ### Riêng tư
 
