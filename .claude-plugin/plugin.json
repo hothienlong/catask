@@ -3,7 +3,19 @@
   "displayName": "Sổ việc",
   "version": "0.4.0",
   "description": "Evening digest of your Microsoft Teams chats and Outlook mail/calendar: every ask, unanswered question and promise you made becomes a prioritized TODO list on a private Artifact page. Writes in Vietnamese or English.",
-  "author": { "name": "Hồ Thiên Long" },
+  "author": {
+    "name": "Hồ Thiên Long"
+  },
   "license": "MIT",
-  "keywords": ["teams", "outlook", "todo", "daily-digest", "microsoft-365", "vietnamese", "english"]
+  "keywords": [
+    "teams",
+    "outlook",
+    "todo",
+    "daily-digest",
+    "microsoft-365",
+    "vietnamese",
+    "english"
+  ],
+  "homepage": "https://github.com/hothienlong/so-viec",
+  "repository": "https://github.com/hothienlong/so-viec"
 }

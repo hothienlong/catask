@@ -155,6 +155,14 @@ skills/daily-digest-todo/
   assets/peeps/*.svg       # Open Peeps, CC0 (see LICENSE.txt)
 ```
 
+### Releasing a new version
+
+GitHub is the source of truth; the copy in the company's **Organization library** does not update by itself. Every release:
+
+1. Bump `version` in **both** `.claude-plugin/plugin.json` and `.claude-plugin/marketplace.json` (keep them equal), commit and push to `main`.
+2. Republish to the Organization library: ask Claude Code *"đẩy so-viec lên thư viện công ty"* (or republish it from the Plugins page). It replaces the existing entry, so colleagues who click **+** get the new version.
+3. Check: the Organization library entry shows the same version as `plugin.json`.
+
 ### Credits
 
 People illustrations: [Open Peeps](https://www.openpeeps.com/) by Pablo Stanley, CC0 1.0 (see `skills/daily-digest-todo/assets/peeps/LICENSE.txt`).
@@ -298,6 +306,14 @@ skills/daily-digest-todo/
   assets/mascot/*.svg
   assets/peeps/*.svg       # Open Peeps, CC0 (xem LICENSE.txt)
 ```
+
+### Phát hành bản mới
+
+GitHub là nơi duy nhất sửa code. Bản trong **Organization library** của công ty không tự cập nhật. Mỗi lần ra bản mới:
+
+1. Tăng `version` ở **cả hai** file `.claude-plugin/plugin.json` và `.claude-plugin/marketplace.json` (hai số phải giống nhau), commit rồi push lên `main`.
+2. Đẩy lên thư viện công ty: nhắn Claude Code *"đẩy so-viec lên thư viện công ty"* (hoặc đăng lại từ trang Plugins). Bản mới đè lên mục cũ, đồng nghiệp bấm **+** là có bản mới.
+3. Kiểm tra: mục trong Organization library hiện đúng số phiên bản như `plugin.json`.
 
 ### Ghi công
 
