@@ -10,6 +10,11 @@
     <td width="33%"><img src="docs/screenshots/ngay.png" alt="Day tab"><br><sub><b>Ngày / Day</b>: timeline of meetings, AI sessions and finished work</sub></td>
     <td width="33%"><img src="docs/screenshots/chi-phi.png" alt="Cost tab"><br><sub><b>Chi phí / Cost</b>: token cost of each scheduled run</sub></td>
   </tr>
+  <tr>
+    <td width="33%"><img src="docs/screenshots/xem-tin.png" alt="View message dialog"><br><sub><b>Xem tin / View message</b>: short snapshot of the source message, with a link to the original</sub></td>
+    <td width="33%"><img src="docs/screenshots/cai-dat.png" alt="Settings drawer"><br><sub><b>Cài đặt / Settings</b>: language, channels, work hours, important people, right on the page</sub></td>
+    <td width="33%"></td>
+  </tr>
 </table>
 
 <sub>Screenshots use the built-in demo data ("View as others"). No real messages or people. · Ảnh chụp từ bản demo dữ liệu mẫu ("Xem như người khác"), không có tin nhắn hay người thật.</sub>
