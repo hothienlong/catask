@@ -71,6 +71,11 @@ nav.tabs a { padding: 6px 15px; border-radius: 999px; color: var(--soft); text-d
 @media (max-width: 900px) { .howto-grid { grid-template-columns: 1fr } }
 .demo-btn { align-self: center; align-self: center; border: 1.5px dashed var(--accent); background: transparent; color: var(--accent); border-radius: 999px; padding: 4px 13px; font-size: 12.5px; font-weight: 600; cursor: pointer; white-space: nowrap }
 .demo-btn:hover { background: var(--accent-wash) }
+/* Owner-only: the demo entry lives in the how-it-works panel, the way back only shows during the demo. */
+.howto-foot { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--rule); color: var(--soft); font-size: 12.5px }
+.howto-foot[hidden] { display: none }
+.demo-link { padding: 0; border: 0; background: transparent; color: var(--accent); font: inherit; font-weight: 600; text-decoration: underline; text-underline-offset: 2px; cursor: pointer }
+.demo-link:hover { text-decoration-thickness: 2px }
 nav.tabs a:hover { background: var(--hover); color: var(--ink) }
 nav.tabs a[aria-current="page"] { background: var(--accent); color: var(--lift) }
 .status { font-size: 12.5px; color: var(--soft); padding: 6px 0 0; min-height: 24px }
@@ -356,17 +361,37 @@ textarea.set-in { min-height: 70px; resize: vertical }
   .set-panel { width: 100%; border-radius: 0; border-left: 0 }
   .set-head, .set-body, .set-foot { padding-left: 16px; padding-right: 16px }
 }
-/* Undo snackbar: one at a time, bottom-left (full width minus gutters on phones). */
-.snack { position: fixed; z-index: 70; left: max(16px, env(safe-area-inset-left, 0px)); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); max-width: min(520px, calc(100vw - 32px));
-  display: flex; align-items: center; gap: 4px 8px; padding: 8px 6px 8px 16px; border-radius: 14px; background: var(--ink); color: var(--paper); box-shadow: 0 14px 34px -14px rgba(0, 0, 0, .6); font-size: 13.5px }
-.snack[hidden] { display: none }
-.snack-msg { flex: 1; min-width: 0; overflow-wrap: anywhere }
-.snack-undo { flex: none; padding: 6px 10px; border: 0; border-radius: 8px; background: transparent; color: var(--snack-act); font-weight: 700; letter-spacing: .04em; text-transform: uppercase; font-size: 12.5px; cursor: pointer }
-.snack-x { flex: none; width: 30px; height: 30px; border: 0; border-radius: 50%; background: transparent; color: var(--paper); opacity: .75; cursor: pointer }
+/* Undo snackbar: one at a time, a one-line inverted pill at the bottom centre (full width minus
+   16px gutters on phones). Centred with auto margins, not a transform, so the enter slide can use one. */
+.snack { position: fixed; z-index: 70; left: max(16px, env(safe-area-inset-left, 0px)); right: max(16px, env(safe-area-inset-right, 0px));
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px)); margin: 0 auto; width: fit-content; max-width: min(440px, calc(100vw - 32px)); min-height: 44px;
+  display: flex; align-items: center; gap: 8px; padding: 6px 6px 6px 16px; border-radius: 999px; overflow: hidden; white-space: nowrap;
+  background: var(--ink); color: var(--paper); box-shadow: var(--shadow), 0 18px 40px -16px rgba(0, 0, 0, .55); font-size: 13.5px; line-height: 20px;
+  opacity: 1; transition: opacity .15s ease, display .15s allow-discrete }
+.snack[hidden] { display: none; opacity: 0 }
+.snack-ic { flex: none; width: 16px; text-align: center; font-weight: 700 }
+.snack-ic:not(.pri) { color: var(--snack-act) }
+.snack-ic.pri { width: auto; cursor: default; outline: 0 !important }
+.snack-msg { flex: 1 1 auto; min-width: 0; display: flex; align-items: baseline; gap: 6px }
+.snack-v { flex: none }
+.snack-t { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 700 }
+.snack-undo { flex: none; height: 32px; padding: 0 12px; border: 0; border-radius: 999px; background: transparent; color: var(--snack-act); font: inherit; font-weight: 700; cursor: pointer }
+.snack-kbd { flex: none; margin-left: -4px; font: 600 11px/1 var(--text); color: var(--paper); opacity: .6 }
+.snack-x { flex: none; width: 28px; height: 28px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--paper); opacity: .6; font-size: 12px; line-height: 28px; cursor: pointer }
 .snack-undo:hover, .snack-x:hover { background: color-mix(in srgb, var(--paper) 14%, transparent); opacity: 1 }
 .snack :focus-visible { outline-color: var(--snack-act) }
-@media (max-width: 560px) { .snack { right: max(16px, env(safe-area-inset-right, 0px)); max-width: none } }
-@media (prefers-reduced-motion: no-preference) { .snack:not([hidden]) { animation: enter .25s var(--ease) } }
+.snack-bar { position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: var(--snack-act); opacity: .85; transform-origin: left center; pointer-events: none }
+.snack.paused .snack-bar { animation-play-state: paused }
+@media (hover: none), (max-width: 599px) { .snack-kbd { display: none } }
+@media (max-width: 599px) { .snack { width: auto; max-width: none } }
+@media (prefers-reduced-motion: no-preference) {
+  .snack:not([hidden]) { animation: snack-in .18s var(--ease) }
+  .snack-bar { animation: snack-count linear forwards }
+}
+@media (prefers-reduced-motion: reduce) { .snack:not([hidden]) { animation: snack-fade .18s ease } }
+@keyframes snack-in { from { opacity: .001; transform: translateY(8px) } to { opacity: 1; transform: none } }
+@keyframes snack-fade { from { opacity: .001 } to { opacity: 1 } }
+@keyframes snack-count { from { transform: scaleX(1) } to { transform: scaleX(0) } }
 @keyframes enter { from { opacity: .001; transform: translateY(6px) } to { opacity: 1; transform: none } }
 @media (prefers-reduced-motion: no-preference) {
   /* Entry animation only when the tab changes (.view.anim); data-driven re-renders stay still. */
@@ -404,10 +429,14 @@ textarea.set-in { min-height: 70px; resize: vertical }
     <span class="seg proj-seg" id="projBar" role="group" data-i18n-aria="projAria" aria-label="" hidden></span>
     <button type="button" class="info-btn" id="infoBtn" aria-expanded="false" aria-controls="howto" data-i18n="infoBtn"></button>
     <button type="button" class="info-btn" id="setBtn" aria-haspopup="dialog" aria-expanded="false" aria-controls="setPanel" data-i18n="setBtn"></button>
-    <button type="button" class="demo-btn" id="demoBtn" hidden></button>
+    <button type="button" class="demo-btn" id="demoBack" data-i18n="demoBack" hidden></button>
   </nav>
   <section class="howto" id="howto" hidden data-i18n-aria="howtoAria" aria-label="">
     <div class="howto-grid" id="howtoGrid"></div>
+    <div class="howto-foot" id="howtoDemo" hidden>
+      <button type="button" class="demo-link" id="demoOpen" data-i18n="demoBtn"></button>
+      <span class="howto-hint" data-i18n="demoHint"></span>
+    </div>
     <button type="button" class="howto-close" id="howtoClose" data-i18n="howtoClose"></button>
   </section>
   <div class="status" id="status" role="status"></div>
@@ -434,7 +463,8 @@ textarea.set-in { min-height: 70px; resize: vertical }
       kickerOwner: function (n) { return n ? 'Sổ việc của ' + n : 'Sổ việc' },
       kickerDigest: 'bản tin {0} lúc {1}', kickerNone: 'chưa có bản tin',
       tabsAria: 'Các mục', tabToday: 'Hôm nay', tabPeople: 'Theo người', tabWeek: 'Tuần', tabDay: 'Ngày', tabCost: 'Chi phí',
-      projAria: 'Lọc theo dự án', infoBtn: 'ⓘ Cách hoạt động', demoBtn: 'Xem như người khác', demoBack: 'Về sổ của tôi',
+      projAria: 'Lọc theo dự án', infoBtn: 'ⓘ Cách hoạt động', demoBtn: 'Xem bản demo', demoBack: '\u2190 Về sổ của tôi',
+      demoHint: 'Dữ liệu mẫu, đúng như người khác thấy khi mở link này. Thử tick, kéo thả, hoàn tác thoải mái — không lưu gì.',
       howtoAria: 'Cách sổ việc hoạt động', howtoClose: 'Đóng', loading: 'Đang mở sổ việc…',
       howto: [
         ['Khi nào chạy', [
@@ -529,7 +559,7 @@ textarea.set-in { min-height: 70px; resize: vertical }
       noConn: 'Chưa kết nối được dữ liệu. Kiểm tra mạng hoặc đăng nhập claude.ai.',
       demoDefault: 'Bản demo: dữ liệu mẫu để xem giao diện. Kéo thả và tick thử được, nhưng không lưu.',
       demoNoClaude: 'Bản demo: mở trên claude.ai để xem sổ việc thật.',
-      demoSelf: 'Bạn đang xem thử bản demo, đúng như người khác thấy. Bấm "Về sổ của tôi" hoặc tải lại trang để quay về.',
+      demoSelf: 'Bạn đang xem thử bản demo, đúng như người khác thấy. Bấm "\u2190 Về sổ của tôi" hoặc tải lại trang để quay về.',
       lostTodos: 'Mất kết nối danh sách việc ({0}).', lostRuns: 'Mất kết nối dữ liệu chi phí ({0}).', lostDays: 'Mất kết nối bản tin ngày ({0}).',
       /* settings drawer */
       setBtn: '⚙ Cài đặt', setTitle: 'Cài đặt bản tin', setClose: 'Đóng cài đặt',
@@ -553,15 +583,16 @@ textarea.set-in { min-height: 70px; resize: vertical }
       errTime: 'Giờ kết thúc phải sau giờ bắt đầu.', errCh: 'Chọn ít nhất một kênh.', errDays: 'Chọn ít nhất một ngày làm việc.',
       errName: 'Nhập tên trước đã.', errDup: 'Đã có trong danh sách.',
       /* undo snackbar */
-      snDone: 'Đã đánh dấu xong: {0}', snUndone: 'Đã mở lại: {0}', snMoved: 'Đã chuyển sang {0}', snPri: 'Đã đổi ưu tiên {0} → {1}',
-      snDemo: ' (bản demo, không lưu)', undo: 'Hoàn tác', snClose: 'Đóng thông báo', undoneMsg: 'Đã hoàn tác.', undoFail: 'Chưa hoàn tác được ({0}). Tải lại trang để thấy trạng thái thật.'
+      snDone: 'Đã xong', snUndone: 'Đã mở lại', snMoved: 'Sang {0}', snPri: 'Ưu tiên {0} \u2192 {1}',
+      undo: 'Hoàn tác', snClose: 'Đóng thông báo', undoneMsg: 'Đã hoàn tác', undoFail: 'Chưa hoàn tác được ({0}). Tải lại trang để thấy trạng thái thật.'
     },
     en: {
       brand: 'Work ledger',
       kickerOwner: function (n) { return n ? n + '’s work ledger' : 'Work ledger' },
       kickerDigest: 'digest {0} at {1}', kickerNone: 'no digest yet',
       tabsAria: 'Sections', tabToday: 'Today', tabPeople: 'People', tabWeek: 'Week', tabDay: 'Day', tabCost: 'Cost',
-      projAria: 'Filter by project', infoBtn: 'ⓘ How it works', demoBtn: 'View as others', demoBack: 'Back to my ledger',
+      projAria: 'Filter by project', infoBtn: 'ⓘ How it works', demoBtn: 'View demo', demoBack: '\u2190 Back to my ledger',
+      demoHint: 'Sample data, exactly what others see when they open this link. Tick, drag and undo freely — nothing is saved.',
       howtoAria: 'How the ledger works', howtoClose: 'Close', loading: 'Opening your ledger…',
       howto: [
         ['When it runs', [
@@ -659,7 +690,7 @@ textarea.set-in { min-height: 70px; resize: vertical }
       noConn: 'Couldn’t connect to the data. Check your network or sign in to claude.ai.',
       demoDefault: 'Demo: sample data to show the layout. You can drag and tick, but nothing is saved.',
       demoNoClaude: 'Demo: open this page on claude.ai to see the real ledger.',
-      demoSelf: 'You are viewing the demo exactly as others see it. Click "Back to my ledger" or reload the page to return.',
+      demoSelf: 'You are viewing the demo exactly as others see it. Click "\u2190 Back to my ledger" or reload the page to return.',
       lostTodos: 'Lost connection to the task list ({0}).', lostRuns: 'Lost connection to cost data ({0}).', lostDays: 'Lost connection to daily digests ({0}).',
       /* settings drawer */
       setBtn: '⚙ Settings', setTitle: 'Digest settings', setClose: 'Close settings',
@@ -683,8 +714,8 @@ textarea.set-in { min-height: 70px; resize: vertical }
       errTime: 'End time must be after the start time.', errCh: 'Pick at least one channel.', errDays: 'Pick at least one working day.',
       errName: 'Enter a name first.', errDup: 'Already in the list.',
       /* undo snackbar */
-      snDone: 'Marked done: {0}', snUndone: 'Reopened: {0}', snMoved: 'Moved to {0}', snPri: 'Priority {0} → {1}',
-      snDemo: ' (demo, not saved)', undo: 'Undo', snClose: 'Dismiss', undoneMsg: 'Undone.', undoFail: 'Couldn’t undo ({0}). Reload the page to see the real state.'
+      snDone: 'Done', snUndone: 'Reopened', snMoved: 'Moved to {0}', snPri: 'Priority {0} \u2192 {1}',
+      undo: 'Undo', snClose: 'Dismiss', undoneMsg: 'Undone', undoFail: 'Couldn’t undo ({0}). Reload the page to see the real state.'
     }
   };
   function navLang() { try { return /^vi\b/i.test(navigator.language || '') ? 'vi' : 'en' } catch (e) { return 'en' } }
@@ -710,7 +741,6 @@ textarea.set-in { min-height: 70px; resize: vertical }
     document.querySelectorAll('[data-i18n-aria]').forEach(function (el) { el.setAttribute('aria-label', t(el.getAttribute('data-i18n-aria'))) });
     document.getElementById('howtoGrid').innerHTML = L('howto').map(function (col) {
       return '<div><h3>' + col[0] + '</h3><ul>' + col[1].map(function (li) { return '<li>' + li + '</li>' }).join('') + '</ul></div>' }).join('');
-    document.getElementById('demoBtn').textContent = t(S.ownerDemo ? 'demoBack' : 'demoBtn');
   }
   function setLang(l) {
     l = (l === 'vi' || l === 'en') ? l : navLang();
@@ -1280,7 +1310,7 @@ textarea.set-in { min-height: 70px; resize: vertical }
     Object.assign(td, patch);
     if (inPlace) inPlace();
     else { render(); var el = view.querySelector && view.querySelector('.card[data-id="' + CSS.escape(td.id) + '"]'); if (el) el.classList.add('enter') }
-    snackShow(S.demo ? msg + t('snDemo') : msg, act);
+    snackShow(msg, act);
     if (S.demo) return;
     dbWrite('todos/' + td.id, 'update', patch).catch(function (e) {
       if (e && e.code === 'invalid_argument') S.canWrite = false;
@@ -1296,14 +1326,13 @@ textarea.set-in { min-height: 70px; resize: vertical }
     var patch = {}; UNDO_FIELDS.forEach(function (k) { patch[k] = a.snap[k] });
     Object.assign(td, patch);
     if (a.inPlace) updatePriBadges(td); else render();
-    snackShow(t('undoneMsg'), null);
+    snackShow({ kind: 'undone', verb: t('undoneMsg') }, null);
     if (S.demo || !db) return;
     dbWrite('todos/' + td.id, 'update', patch).catch(function (e) {
       if (SN.act === null) snackHide();
       toast(t('undoFail', (e && e.code) || t('err')), true);
     });
   }
-  function short(s) { s = String(s || ''); return s.length > 40 ? s.slice(0, 39).replace(/\s+\S*$/, '') + '…' : s }
 
   /* ---------- undo snackbar ----------
      One at a time: a new action replaces the old one (already written, so it simply stays).
@@ -1312,21 +1341,36 @@ textarea.set-in { min-height: 70px; resize: vertical }
   snackEl.hidden = true;
   var SN = { act: null, timer: null, left: 0, start: 0, paused: false };
   function snackArm() { clearTimeout(SN.timer); SN.start = Date.now(); SN.timer = setTimeout(snackHide, SN.left) }
-  function snackShow(msg, act) {
+  /* m = { kind: done | reopen | move | pri | undone, verb, title?, p? }. Symbols are entities so no
+     encoding slip can garble them; the title is truncated by CSS (one line, ellipsis), not by script. */
+  var SN_IC = { done: '&#x2713;', reopen: '&#x21BA;', undone: '&#x21BA;', move: '&#x2192;' };
+  var IS_MAC = (function () {
+    try { var n = navigator, p = (n.userAgentData && n.userAgentData.platform) || n.platform || n.userAgent || ''; return /mac|iphone|ipad|ipod/i.test(p) } catch (e) { return false }
+  })();
+  function snackShow(m, act) {
     SN.act = act || null; SN.paused = false; SN.left = S.snackMs || 6000;
-    snackEl.innerHTML = '<span class="snack-msg">' + esc(msg) + '</span>' +
-      (act ? '<button type="button" class="snack-undo" data-undo>' + esc(t('undo')) + '</button>' : '') +
-      '<button type="button" class="snack-x" data-snack-x aria-label="' + esc(t('snClose')) + '">✕</button>';
+    if (typeof m === 'string') m = { verb: m };
+    var ic = m.kind === 'pri' ? '<span class="snack-ic pri p' + esc(String(m.p).charAt(1)) + '" aria-hidden="true">' + esc(m.p) + '</span>'
+      : SN_IC[m.kind] ? '<span class="snack-ic" aria-hidden="true">' + SN_IC[m.kind] + '</span>' : '';
+    if (snackEl.classList) snackEl.classList.remove('paused');
+    snackEl.innerHTML = ic + '<span class="snack-msg"><span class="snack-v">' + esc(m.verb) + '</span>' +
+      (m.title ? '<b class="snack-t">' + esc(m.title) + '</b>' : '') + '</span>' +
+      (act ? '<button type="button" class="snack-undo" data-undo aria-keyshortcuts="' + (IS_MAC ? 'Meta+Z' : 'Control+Z') + '">' + esc(t('undo')) + '</button>' +
+        '<span class="snack-kbd" aria-hidden="true">' + (IS_MAC ? '&#x2318;Z' : 'Ctrl+Z') + '</span>' : '') +
+      '<button type="button" class="snack-x" data-snack-x aria-label="' + esc(t('snClose')) + '">&#x2715;</button>' +
+      '<span class="snack-bar" aria-hidden="true" style="animation-duration:' + SN.left + 'ms"></span>';
     snackEl.hidden = false; snackArm();
   }
   function snackHide() {
     clearTimeout(SN.timer); SN.act = null;
     var had = snackEl.contains && document.activeElement && snackEl.contains(document.activeElement);
-    snackEl.hidden = true; snackEl.innerHTML = '';
+    snackEl.hidden = true;
+    /* Keep the content through the 150 ms fade-out, then clear it (unless a new action showed one). */
+    setTimeout(function () { if (snackEl.hidden) snackEl.innerHTML = '' }, 160);
     if (had && view.focus) { try { view.focus({ preventScroll: true }) } catch (e) {} }
   }
-  function snackPause() { if (snackEl.hidden || SN.paused) return; SN.paused = true; clearTimeout(SN.timer); SN.left = Math.max(1500, SN.left - (Date.now() - SN.start)) }
-  function snackResume() { if (snackEl.hidden || !SN.paused) return; SN.paused = false; snackArm() }
+  function snackPause() { if (snackEl.hidden || SN.paused) return; SN.paused = true; clearTimeout(SN.timer); SN.left = Math.max(1500, SN.left - (Date.now() - SN.start)); if (snackEl.classList) snackEl.classList.add('paused') }
+  function snackResume() { if (snackEl.hidden || !SN.paused) return; SN.paused = false; if (snackEl.classList) snackEl.classList.remove('paused'); snackArm() }
   snackEl.addEventListener('click', function (e) {
     if (e.target.closest && e.target.closest('[data-undo]')) { undoLast(); return }
     if (e.target.closest && e.target.closest('[data-snack-x]')) snackHide();
@@ -1351,20 +1395,20 @@ textarea.set-in { min-height: 70px; resize: vertical }
     var patch = on ? { status: 'done', doneAt: TODAY, prevStatus: td.status || 'open' }
       : { status: td.prevStatus && td.prevStatus !== 'done' ? td.prevStatus : 'open', doneAt: null };
     patch.movedBy = 'user';
-    write(td, patch, t(on ? 'snDone' : 'snUndone', short(td.title)));
+    write(td, patch, { kind: on ? 'done' : 'reopen', verb: t(on ? 'snDone' : 'snUndone'), title: td.title });
   }
   function move(id, where) {
     var td = findTodo(id); if (!td || lane(td) === where) return;
     if (where === 'done') { setDone(id, true); return }
     var patch = patchFor(where); patch.movedBy = 'user';
     var names = { today: t('laneToday'), tomorrow: nextLabel(), waiting: t('laneWaiting') };
-    write(td, patch, t('snMoved', names[where]));
+    write(td, patch, { kind: 'move', verb: t('snMoved', names[where]), title: td.title });
   }
   /* Click the P badge to cycle P0 → P1 → P2 → P3; the skill never overrides a user-set priority. */
   function cyclePri(id) {
     var td = findTodo(id); if (!td) return;
     var cur = prio(td), next = PRIS[(PRIS.indexOf(cur) + 1) % PRIS.length];
-    write(td, { priority: next, priorityBy: 'user' }, t('snPri', cur, next), function () { updatePriBadges(td) });
+    write(td, { priority: next, priorityBy: 'user' }, { kind: 'pri', p: next, verb: t('snPri', cur, next), title: td.title }, function () { updatePriBadges(td) });
   }
 
   /* ---------- "View message" dialog ---------- */
@@ -1700,9 +1744,11 @@ textarea.set-in { min-height: 70px; resize: vertical }
   });
 
   /* ---------- how-it-works panel ---------- */
+  var setHowto;
   (function () {
     var b = document.getElementById('infoBtn'), panel = document.getElementById('howto');
     function set(on) { panel.hidden = !on; b.setAttribute('aria-expanded', String(on)) }
+    setHowto = set;
     b.addEventListener('click', function () { set(panel.hidden) });
     document.getElementById('howtoClose').addEventListener('click', function () { set(false); b.focus() });
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !panel.hidden) set(false) });
@@ -1842,12 +1888,18 @@ textarea.set-in { min-height: 70px; resize: vertical }
     db = r[1];
     Promise.resolve(isOwner).then(function (own) {
     if (!own || !db) { db = null; startDemo(); return }
-    var btn = document.getElementById('demoBtn'); btn.hidden = false;
-    btn.addEventListener('click', function () {
-      if (S.demo) { location.reload(); return }
+    /* Owner only: "View demo" sits in the how-it-works panel; "Back to my ledger" shows in the nav
+       only while the owner is in the demo, and reloads into the real ledger. */
+    var demoFoot = document.getElementById('howtoDemo'), back = document.getElementById('demoBack');
+    demoFoot.hidden = false;
+    document.getElementById('demoOpen').addEventListener('click', function () {
+      if (S.demo) return;
       S.ownerDemo = true;
+      setHowto(false); demoFoot.hidden = true; back.hidden = false;
       startDemo('demoSelf');
+      try { back.focus() } catch (e) {}
     });
+    back.addEventListener('click', function () { location.reload() });
     db.collection('todos').onSnapshot(function (snap) {
       if (S.demo) return;
       var next = snap.docs.map(function (d) { var o = Object.assign({}, d.data()); o.id = o.id || d.id; return o });
