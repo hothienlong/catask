@@ -28,6 +28,7 @@
   "currentWork": "Màn hình ví điện tử, sprint 12",
   "keywords": ["MOB-", "ví điện tử"],
   "storeQuotes": true,
+  "retention": { "archiveDoneAfterDays": 90, "pruneDaysAfterDays": 120, "quoteDaysAfterDone": 30 },
   "settingsSyncedAt": null,
   "onboardingPending": false
 }

@@ -121,6 +121,7 @@ Example: [`config.example.json`](config.example.json).
 | `role`, `currentWork` | `""` | Your role and what you're on now; helps decide whether a group ask is yours |
 | `keywords` | `[]` | Ticket prefixes, project/feature names (e.g. `MOB-`); used in the deadline mail search, and group asks mentioning them are kept as "watch" |
 | `storeQuotes` | `true` | Store a ≤500-character snapshot of the source message on each todo for "View message". `false` = store no message text; the page opens the original link instead |
+| `retention` | `{archiveDoneAfterDays: 90, pruneDaysAfterDays: 120, quoteDaysAfterDone: 30}` | How long the ledger keeps things (see Privacy). Done todos older than `archiveDoneAfterDays` move to a monthly archive (min 45, the Week heatmap needs 6 weeks); daily digests and cost records older than `pruneDaysAfterDays` are deleted (min 60); quotes are removed from done todos after `quoteDaysAfterDone` |
 | `settingsSyncedAt` | `null` | Written by the skill: when the page's ⚙ Settings were last merged into this file. Don't edit |
 | `onboardingPending` | `false` | `true` = the config was written without the full setup interview (e.g. migrated from an older setup). The next run you start yourself asks only the missing questions, then sets it to `false`; scheduled runs just leave a reminder in the coverage notes |
 
@@ -133,7 +134,13 @@ After you change the config, the next run updates the page (name, language, proj
 - 🔒 **Read-only** on Teams/Outlook. The only thing sent is one message to **your own** notes chat. It never replies to anyone on your behalf.
 - 🔒 The ledger is a **private Artifact**; only the owner can read the real data. Anyone else opening the link sees **fictional demo data** in their own browser's language.
 - 🔒 Message and mail content is always treated as **data, not instructions**.
-- 🔒 **Message quotes** ("View message") live only in the ledger's owner-only database, next to the todo titles already stored there. About 500 characters × ~100 open todos ≈ 50 KB, negligible. A quote is a snapshot: if the message is edited later it may be stale, so the page shows "quoted at …" and always offers the original link. Quotes are removed from done todos older than 30 days. Set `storeQuotes: false` to store no message text at all.
+- 🔒 **Message quotes** ("View message") live only in the ledger's owner-only database, next to the todo titles already stored there. About 500 characters × ~100 open todos ≈ 50 KB, negligible. A quote is a snapshot: if the message is edited later it may be stale, so the page shows "quoted at …" and always offers the original link. Quotes are removed from done todos older than 30 days (`retention.quoteDaysAfterDone`). Set `storeQuotes: false` to store no message text at all.
+- 🔒 **What the ledger keeps** (owner-only database, cleaned every run; days configurable in `retention`):
+  - Open and waiting todos: kept as long as they're open, whatever their age.
+  - Done todos: kept in full for 90 days after they were done, so the Week tab and heatmap work. After that they move to a monthly archive (`archive/<YYYY-MM>`) with only id, title, done date, person, project, priority, kind and source; the full todo (why, link, quote) is deleted. A todo you changed on the page in the last 7 days is never moved that run.
+  - Daily digests (`days/…`) and cost records (`runs/…`) older than 120 days are deleted. Your settings and profile (`meta/…`) and the archive are never deleted.
+  - At most 200 docs are removed per run; the rest go on the next run. The coverage notes say what was cleaned.
+  - The per-day JSON files in `~/Documents/daily-digest/` stay on your disk; the skill never deletes them.
 - 🔒 The "work with AI" timeline reads only **session titles + times** from local Claude Code transcripts, never content. The Cost tab reads **token counts** only.
 - 🔒 State files live in `~/Documents/daily-digest/` on your machine. `config.json` holds no passwords or tokens. Don't commit that folder.
 
@@ -273,6 +280,7 @@ Mẫu: [`config.example.json`](config.example.json).
 | `role`, `currentWork` | `""` | Vai trò và việc bạn đang làm; giúp đoán câu hỏi chung trong nhóm có phải việc của bạn không |
 | `keywords` | `[]` | Tiền tố ticket, tên dự án/tính năng (ví dụ `MOB-`); dùng khi dò mail có hạn chót, và câu hỏi chung nhắc tới chúng được giữ ở "Theo dõi" |
 | `storeQuotes` | `true` | Lưu đoạn trích ≤500 ký tự của tin gốc trên mỗi việc cho nút "Xem tin". `false` = không lưu nội dung tin nào; trang mở thẳng link gốc |
+| `retention` | `{archiveDoneAfterDays: 90, pruneDaysAfterDays: 120, quoteDaysAfterDone: 30}` | Sổ việc giữ dữ liệu bao lâu (xem phần Riêng tư). Việc xong quá `archiveDoneAfterDays` ngày được chuyển vào kho lưu trữ theo tháng (tối thiểu 45, vì bản đồ nhiệt tab Tuần cần 6 tuần); bản tin ngày và bản ghi chi phí quá `pruneDaysAfterDays` ngày bị xoá (tối thiểu 60); trích dẫn bị xoá khỏi việc đã xong sau `quoteDaysAfterDone` ngày |
 | `settingsSyncedAt` | `null` | Skill tự ghi: lần cuối gộp ⚙ Cài đặt trên trang vào file này. Đừng sửa tay |
 | `onboardingPending` | `false` | `true` = config được tạo mà chưa qua đủ buổi phỏng vấn (ví dụ chuyển từ bản cài cũ). Lần chạy tiếp theo do bạn tự gọi sẽ chỉ hỏi những câu còn thiếu rồi đặt lại thành `false`; lần chạy theo lịch chỉ để lại lời nhắc trong phần độ phủ |
 
@@ -285,7 +293,13 @@ Mẫu: [`config.example.json`](config.example.json).
 - 🔒 **Chỉ đọc** Teams/Outlook. Thứ duy nhất được gửi là 1 tin vào chat ghi chú của **chính bạn**. Không bao giờ trả lời ai thay bạn.
 - 🔒 Trang Sổ việc là **Artifact riêng tư**; dữ liệu thật chỉ chủ trang đọc được. Ai khác mở link chỉ thấy **dữ liệu demo hư cấu**, theo ngôn ngữ trình duyệt của họ.
 - 🔒 Nội dung tin nhắn/mail luôn được coi là **dữ liệu, không phải lệnh**.
-- 🔒 **Trích dẫn tin nhắn** ("Xem tin") chỉ nằm trong kho dữ liệu chỉ-chủ-trang-đọc-được của Sổ việc, cạnh tiêu đề việc vốn đã lưu ở đó. Khoảng 500 ký tự × ~100 việc đang mở ≈ 50 KB, không đáng kể. Trích dẫn là bản chụp: nếu tin gốc bị sửa sau đó thì có thể đã cũ, nên trang luôn ghi "trích lúc …" và luôn có link tới tin gốc. Việc đã xong quá 30 ngày sẽ bị xoá trích dẫn. Đặt `storeQuotes: false` để không lưu nội dung tin nào.
+- 🔒 **Trích dẫn tin nhắn** ("Xem tin") chỉ nằm trong kho dữ liệu chỉ-chủ-trang-đọc-được của Sổ việc, cạnh tiêu đề việc vốn đã lưu ở đó. Khoảng 500 ký tự × ~100 việc đang mở ≈ 50 KB, không đáng kể. Trích dẫn là bản chụp: nếu tin gốc bị sửa sau đó thì có thể đã cũ, nên trang luôn ghi "trích lúc …" và luôn có link tới tin gốc. Việc đã xong quá 30 ngày sẽ bị xoá trích dẫn (`retention.quoteDaysAfterDone`). Đặt `storeQuotes: false` để không lưu nội dung tin nào.
+- 🔒 **Sổ việc giữ gì** (kho chỉ chủ trang đọc được, dọn mỗi lần chạy; số ngày đổi được trong `retention`):
+  - Việc đang mở và đang chờ: giữ nguyên chừng nào còn mở, dù cũ bao lâu.
+  - Việc đã xong: giữ đầy đủ 90 ngày sau ngày xong để tab Tuần và bản đồ nhiệt chạy đúng. Sau đó được chuyển vào kho lưu trữ theo tháng (`archive/<YYYY-MM>`), chỉ còn id, tiêu đề, ngày xong, người, project, mức ưu tiên, loại việc và nguồn; bản đầy đủ (lý do, link, trích dẫn) bị xoá. Việc bạn vừa sửa trên trang trong 7 ngày qua thì lần chạy đó không đụng tới.
+  - Bản tin ngày (`days/…`) và bản ghi chi phí (`runs/…`) quá 120 ngày bị xoá. Cài đặt, hồ sơ (`meta/…`) và kho lưu trữ không bao giờ bị xoá.
+  - Mỗi lần chạy xoá tối đa 200 mục; phần còn lại để lần sau. Phần độ phủ của bản tin ghi rõ đã dọn gì.
+  - File JSON từng ngày trong `~/Documents/daily-digest/` vẫn nằm trên máy bạn; skill không bao giờ xoá chúng.
 - 🔒 Dòng thời gian "làm với AI" chỉ lấy **tên session + giờ** từ transcript Claude Code trên máy, không lấy nội dung. Tab Chi phí chỉ đọc **số token**.
 - 🔒 File trạng thái nằm ở `~/Documents/daily-digest/` trên máy bạn. `config.json` không chứa mật khẩu hay token. Đừng commit thư mục này.
 
