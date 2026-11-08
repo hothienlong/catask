@@ -52,6 +52,15 @@
 
 ### Install
 
+**From GitHub** (anyone, in Claude Code or the Claude desktop app's Code tab):
+
+```
+/plugin marketplace add hothienlong/so-viec
+/plugin install so-viec@so-viec
+```
+
+Update later with `/plugin marketplace update so-viec`.
+
 **From your organization's plugin library** (when published there):
 
 ```
@@ -186,6 +195,15 @@ MIT — see [`LICENSE`](LICENSE). © 2026 Hồ Thiên Long.
 | `get_usage` (session management) | Không | Có thì tab Chi phí ghi thêm % quota tuần; không có thì bỏ qua |
 
 ### Cài đặt
+
+**Từ GitHub** (ai cũng cài được, trong Claude Code hoặc tab Code của app Claude desktop):
+
+```
+/plugin marketplace add hothienlong/so-viec
+/plugin install so-viec@so-viec
+```
+
+Cập nhật bản mới bằng `/plugin marketplace update so-viec`.
 
 **Từ thư viện plugin của tổ chức** (khi đã được publish):
 

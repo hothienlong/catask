@@ -1,0 +1,17 @@
+{
+  "name": "so-viec",
+  "owner": { "name": "Hồ Thiên Long" },
+  "metadata": {
+    "description": "Sổ việc: evening Microsoft Teams and Outlook digest turned into a prioritized TODO ledger page."
+  },
+  "plugins": [
+    {
+      "name": "so-viec",
+      "source": "./",
+      "description": "Evening digest of your Microsoft Teams chats and Outlook mail/calendar: every ask, unanswered question and promise you made becomes a prioritized TODO list on a private Artifact page. Writes in Vietnamese or English.",
+      "version": "0.4.0",
+      "author": { "name": "Hồ Thiên Long" },
+      "license": "MIT"
+    }
+  ]
+}
