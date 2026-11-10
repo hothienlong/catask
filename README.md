@@ -19,6 +19,11 @@
   <tr>
     <td width="33%"><img src="docs/screenshots/xem-tin.png" alt="View message dialog"><br><sub><b>Xem tin / View message</b>: short snapshot of the source message, with a link to the original</sub></td>
     <td width="33%"><img src="docs/screenshots/cai-dat.png" alt="Settings drawer"><br><sub><b>Cài đặt / Settings</b>: language, channels, work hours, important people, right on the page</sub></td>
+    <td width="33%"><img src="docs/screenshots/giao-ai.png" alt="Hand to AI dialog"><br><sub><b>Giao AI / Hand to AI</b>: pick what AI should do; on a Jira ticket, 💻 Code luôn / Write code works in your local repo</sub></td>
+  </tr>
+  <tr>
+    <td width="33%"><img src="docs/screenshots/ai-review.png" alt="Code review panel"><br><sub><b>Duyệt code / Review code</b>: plan, checks and diff from the AI branch; you approve before push + draft MR</sub></td>
+    <td width="33%"></td>
     <td width="33%"></td>
   </tr>
 </table>
