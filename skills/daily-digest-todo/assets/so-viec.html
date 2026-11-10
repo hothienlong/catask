@@ -3982,7 +3982,15 @@ html.ai-fold { --aibar-h: 41px }
     c.globalAlpha = 1;
     /* clouds */
     var line = v('--cloud-line'), top = v('--cloud'), shade = v('--cloud-shade');
+    /* Keep every cloud's top below the hero text (wordmark, kicker, date, stats) + 8 px, at any width:
+       a cloud reaches ~72*s above its base, so shrink s where the text sits low. */
+    var safe = 0;
+    try {
+      var cr = cv.getBoundingClientRect(), host = cv.parentNode;
+      [].forEach.call(host.querySelectorAll('.brand, .tally'), function (el) { var r = el.getBoundingClientRect(); if (r.height) safe = Math.max(safe, r.bottom - cr.top + 8) });
+    } catch (e) {}
     function cloud(x, y, s) {
+      if (safe) s = Math.min(s, Math.max(.3, (y - safe) / 72));
       var puffs = [], i;
       for (i = 0; i < 7; i++) { var off = i - 3; puffs.push([x + off * 23 * s + (R() - .5) * 8 * s, y - (Math.abs(off) < 2 ? 16 : 5) * s - R() * 10 * s, (19 + R() * 13) * s * (1 - Math.abs(off) * .07)]) }
       for (i = 0; i < 3; i++) puffs.push([x + (R() - .5) * 56 * s, y - (32 + R() * 14) * s, (14 + R() * 9) * s]);
@@ -4001,7 +4009,7 @@ html.ai-fold { --aibar-h: 41px }
   }
   var t; function soon() { clearTimeout(t); t = setTimeout(paint, 80) }
   paint();
-  if (window.ResizeObserver) new ResizeObserver(soon).observe(cv); else window.addEventListener('resize', soon);
+  if (window.ResizeObserver) { var ro = new ResizeObserver(soon); ro.observe(cv); [].forEach.call(cv.parentNode.querySelectorAll('.brand, .tally'), function (el) { ro.observe(el) }) } else window.addEventListener('resize', soon);
   try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', soon) } catch (e) {}
   new MutationObserver(soon).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'class'] });
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(soon);
