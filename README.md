@@ -115,12 +115,6 @@ mkdir -p ~/.claude/skills
 cp -R skills/daily-digest-todo ~/.claude/skills/
 ```
 
-<details>
-<summary>Upgrading from the old "Sổ việc" (<code>so-viec</code>) plugin</summary>
-
-Install `catask` as above and uninstall `so-viec`. Your data in `~/Documents/daily-digest/` and your page stay as they are. If you use AI code tasks, say **`install catask runner`** once (it replaces `so-viec-runner`, backup kept), then quit (⌘Q) and reopen the Claude app. Old `so-viec#<id>` references still work.
-</details>
-
 ### First run (about 5 minutes)
 
 1. Connect the **Microsoft 365 connector** in the Claude app.
@@ -373,12 +367,6 @@ Cài xong, gõ **`/catask:setup`**: phỏng vấn thiết lập, đặt lịch b
 mkdir -p ~/.claude/skills
 cp -R skills/daily-digest-todo ~/.claude/skills/
 ```
-
-<details>
-<summary>Nâng cấp từ plugin cũ "Sổ việc" (<code>so-viec</code>)</summary>
-
-Cài `catask` như trên rồi gỡ `so-viec`. Dữ liệu trong `~/Documents/daily-digest/` và trang của bạn giữ nguyên. Dùng AI code thì nói **`cài runner catask`** một lần (thay runner cũ, có bản sao lưu), rồi ⌘Q và mở lại app Claude. Mã cũ `so-viec#<id>` vẫn dùng được.
-</details>
 
 ### Chạy lần đầu (khoảng 5 phút)
 
