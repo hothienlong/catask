@@ -121,6 +121,9 @@ def validate(d):
     for tid in d.get("top3", []):
         if tid not in ids:
             errs.append(f"top3 references unknown todo id {tid}")
+    sug = d.get("suggested", [])
+    if not isinstance(sug, list) or not all(isinstance(x, str) and x for x in sug):
+        errs.append("suggested must be a list of todo ids (strings)")
     return errs
 
 

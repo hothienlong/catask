@@ -552,6 +552,20 @@ html.hero-fold .bt-s { bottom: calc(56px + var(--tabs-h, 0px)) } .bt-s { positio
 .ai-only { margin: -4px 0 8px; align-self: flex-start; padding: 2px 11px; border-radius: 999px; border: 1px solid var(--rule); background: transparent; color: var(--soft); cursor: pointer; font-size: 12px; font-weight: 600 }
 .ai-only[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--lift) }
 .flag.by-ai { background: var(--accent-wash) }
+/* "Looks done?": the evening digest found evidence and asks; the user confirms (never auto-closed). */
+.sug { margin: 7px 0 1px; padding: 5px 6px 6px 9px; border-radius: 8px; background: var(--add-wash); font-size: 12px; line-height: 1.4 }
+.sug-h { display: flex; align-items: center; gap: 6px; flex-wrap: wrap }
+.sug-lab { margin-right: auto; font-weight: 700; color: var(--add); white-space: nowrap }
+.sug-btn { flex: none; font: 600 11.5px/18px var(--text); padding: 1px 9px; border-radius: 999px; border: 1.5px solid var(--add); background: var(--lift); color: var(--add); cursor: pointer; white-space: nowrap }
+.sug-btn.yes { background: var(--add); color: var(--lift) }
+.sug-btn:hover { outline: 1.5px solid var(--ink); outline-offset: 1px }
+.sug-ev { margin-top: 3px; color: var(--soft); overflow-wrap: anywhere }
+.sug-ev a { color: var(--add); font-weight: 600; text-decoration: none; white-space: nowrap }
+.sug-ev a:hover { text-decoration: underline; text-underline-offset: 2px }
+.sug-chip { align-self: flex-start; margin: -4px 0 8px; padding: 2px 11px; border-radius: 999px; border: 1px solid var(--add); background: var(--add-wash); color: var(--add); cursor: pointer; font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap }
+.sug-chip[aria-pressed="true"] { background: var(--add); color: var(--lift) }
+.sug-chip:hover { outline: 1.5px solid var(--ink); outline-offset: 1px }
+.aq .sug { margin-top: 6px }
 /* Code tasks: status chips, wide panel, plan, diff */
 .ai-chip.ai-plan_review { background: var(--soon-wash); color: var(--soon); border-color: var(--soon); font-weight: 700 }
 .ai-chip.ai-push_approved { background: var(--accent-wash); color: var(--accent) }
@@ -939,6 +953,8 @@ html.ai-fold { --aibar-h: 41px }
       cpTitle: 'Chép mã việc', cpAria: 'Chép mã việc: {0}', cpDone: 'Đã chép', cpLink: 'Đã chép link', cpFail: 'Chưa chép được, thử lại',
       /* AI sections + done filter */
       mcToday: '{0} hôm nay', mcOver: '{0} quá hạn', mcRev: '👀 {0} chờ duyệt',
+      sugLab: 'Có vẻ đã xong?', sugYes: '✓ Xong', sugNo: '✗ Chưa', sugYesAria: 'Xác nhận đã xong: {0}', sugNoAria: 'Chưa xong, giữ lại: {0}', sugOpen: 'Xem nguồn',
+      sugChip: '{0} việc có vẻ đã xong', sugChipAria: 'Chỉ hiện {0} việc có vẻ đã xong để xác nhận', snSugNo: 'Giữ lại, chưa xong', sugNone: 'Không có việc chờ xác nhận ở đây.',
       stripWork: '🤖 {0} đang làm', stripRev: '👀 {0} chờ bạn duyệt', stripClose: 'Thu gọn mục AI', stripOpen: 'Mở rộng mục AI',
       secAiWork: '🤖 AI đang làm', secAiReview: '👀 Chờ bạn duyệt', byAi: 'AI làm · bạn duyệt', byAiTitle: 'AI code, bạn duyệt diff và MR', aiOnly: 'Chỉ việc AI', aiOnlyEmpty: 'Hôm nay chưa có việc AI làm xong.',
       /* code luôn */
@@ -1188,6 +1204,8 @@ html.ai-fold { --aibar-h: 41px }
       cpTitle: 'Copy task id', cpAria: 'Copy task id: {0}', cpDone: 'Copied', cpLink: 'Copied link', cpFail: 'Couldn’t copy, try again',
       /* AI sections + done filter */
       mcToday: '{0} today', mcOver: '{0} overdue', mcRev: '👀 {0} to review',
+      sugLab: 'Looks done?', sugYes: '✓ Done', sugNo: '✗ Not yet', sugYesAria: 'Confirm done: {0}', sugNoAria: 'Not done yet, keep it: {0}', sugOpen: 'Source',
+      sugChip: function (n) { return n + (n === 1 ? ' task looks done' : ' tasks look done') }, sugChipAria: function (n) { return 'Show only the ' + n + (n === 1 ? ' task' : ' tasks') + ' that look done' }, snSugNo: 'Kept open', sugNone: 'No tasks to confirm here.',
       stripWork: '🤖 {0} working', stripRev: '👀 {0} waiting for you', stripClose: 'Collapse the AI sections', stripOpen: 'Expand the AI sections',
       secAiWork: '🤖 AI working', secAiReview: '👀 Waiting for you', byAi: 'AI did · you reviewed', byAiTitle: 'AI coded it; you reviewed the diff and the MR', aiOnly: 'AI tasks only', aiOnlyEmpty: 'No AI-done tasks today yet.',
       /* code it */
@@ -1612,11 +1630,24 @@ html.ai-fold { --aibar-h: 41px }
       '<div class="top">' + doneBox(td, ' ') +
       '<div class="tt">' + titleLink(td) + '</div>' + priBadge(td) + '</div>' +
       '<div class="who"><span class="who-l">' + (td.kind === 'prep' ? '' : av(p, 'xs')) + who(td.kind, p) + '</span>' + viewBtn(td) + aiCtl(td) + copyBtn(td) + '</div>' +
-      (td.why && !isDone ? '<div class="why" title="' + esc(t('whyTitle')) + '">' + esc(td.why) + '</div>' : '') +
+      sugStrip(td) + (td.why && !isDone ? '<div class="why" title="' + esc(t('whyTitle')) + '">' + esc(td.why) + '</div>' : '') +
       '<div class="meta">' + meta.join('') + flags(td) + s.tags + '</div>' + s.notes +
       '<div class="moves">' + moves + '</div></article>';
   }
   function sortTodos(list) { return list.slice().sort(cmpTodo) }
+  /* "Looks done?": the evening digest leaves {suggestDone: {at, evidence, url, source, sourceLabel}} instead of
+     closing a task. Shown only on open tasks; ✓ closes it like a tick, ✗ records suggestRejectedAt. */
+  function sugOf(td) { var g = td && td.status !== 'done' ? td.suggestDone : null; return g && typeof g === 'object' && g.evidence ? g : null }
+  function sugUrl(u) { return /^https?:\/\//i.test(String(u || '')) ? String(u) : '' }
+  function sugStrip(td) {
+    var g = sugOf(td); if (!g) return '';
+    var u = sugUrl(g.url), src = [srcLabel(g.source), g.sourceLabel].filter(Boolean).join(' · ');
+    return '<div class="sug" role="group" aria-label="' + esc(t('sugLab')) + '"><div class="sug-h"><span class="sug-lab">' + esc(t('sugLab')) + '</span>' +
+      '<button type="button" class="sug-btn yes" data-sug-yes="' + esc(td.id) + '" aria-label="' + esc(t('sugYesAria', td.title)) + '">' + esc(t('sugYes')) + '</button>' +
+      '<button type="button" class="sug-btn no" data-sug-no="' + esc(td.id) + '" aria-label="' + esc(t('sugNoAria', td.title)) + '">' + esc(t('sugNo')) + '</button></div>' +
+      '<div class="sug-ev">' + esc(g.evidence) + (u ? ' · <a href="' + esc(u) + '" target="_blank" rel="noopener"' + (src ? ' title="' + esc(src) + '"' : '') + '>' + esc(t('sugOpen')) + ' &#x2197;</a>' : '') + '</div></div>';
+  }
+  function sugList() { return S.todos.filter(sugOf) }
   function byAiBadge(td) { return td && td.doneBy === 'ai+user' ? '<span class="flag by-ai" title="' + esc(t('byAiTitle')) + '">' + esc(t('byAi')) + '</span>' : '' }
   /* ---------- AI sections (Today, above the lanes) ----------
      "AI working" (queued / running / push queued) and "Waiting for you" (plan or diff to review, errors,
@@ -1630,7 +1661,7 @@ html.ai-fold { --aibar-h: 41px }
   function aiRow(td) {
     var a = aiOf(td), sub = isCode(a) && a.repo && (a.repo.name || a.repo.path) ? a.repo.name || a.repo.path : person(td);
     return '<article class="aq" data-id="' + esc(td.id) + '"><div class="aq-top">' + doneBox(td) + '<div class="tt">' + titleLink(td) + '</div>' + priBadge(td) + '</div>' +
-      '<div class="aq-meta">' + aiChip(td) + '<span class="aq-sub">' + esc(sub) + '</span>' + flags(td) + copyBtn(td) + '</div></article>';
+      '<div class="aq-meta">' + aiChip(td) + '<span class="aq-sub">' + esc(sub) + '</span>' + flags(td) + copyBtn(td) + '</div>' + sugStrip(td) + '</article>';
   }
   function aiSections() {
     if (!aiOn()) return '';
@@ -1750,8 +1781,12 @@ html.ai-fold { --aibar-h: 41px }
         : '<div class="empty">' + esc(t('noHighlights')) + '</div>') + '</section></aside>';
 
     var nl = nextLabel();
+    /* "N tasks look done" chip (top of the Today lane, like "AI tasks only" in Done): filters the open lanes
+       to the suggested ones; gone when there are none. */
+    var sugN = sugList().length; if (!sugN) S.sugOnly = false;
+    var sugBar = sugN ? '<button type="button" class="sug-chip" data-sug-only aria-pressed="' + !!S.sugOnly + '" aria-label="' + esc(t('sugChipAria', sugN)) + '">&#x2713;? ' + esc(t('sugChip', sugN)) + '</button>' : '';
     var board = lanes().map(function (l) {
-      var items = sortTodos(S.todos.filter(function (td) { return lane(td) === l[0] && !aiSec(td) }));
+      var items = sortTodos(S.todos.filter(function (td) { return lane(td) === l[0] && !aiSec(td) && (!S.sugOnly || l[0] === 'done' || sugOf(td)) }));
       var body;
       if (l[0] === 'done') {
         var recent = items.filter(function (td) { return td.doneAt === TODAY });
@@ -1770,8 +1805,8 @@ html.ai-fold { --aibar-h: 41px }
           (aiOn() ? '<button type="button" class="ai-only" data-ai-only aria-pressed="' + !!only + '">' + esc(t('aiOnly')) + '</button>' : '') + '<div class="scroll"><i class="lane-top" aria-hidden="true"></i>' + body + '</div></section>';
       }
       var emptyText = { today: t('emptyToday'), tomorrow: t('emptyTomorrow', nl), waiting: t('emptyWaiting') }[l[0]];
-      body = items.length ? items.map(card).join('') : '<div class="empty' + (l[0] === 'today' ? ' happy' : '') + '">' + esc(emptyText) + '</div>';
-      return '<section class="lane" data-lane="' + l[0] + '"><h2 class="label">' + esc(l[1]) + '<span class="n">' + items.length + '</span></h2><div class="scroll"><i class="lane-top" aria-hidden="true"></i>' + body + '</div></section>';
+      body = items.length ? items.map(card).join('') : S.sugOnly ? '<div class="empty">' + esc(t('sugNone')) + '</div>' : '<div class="empty' + (l[0] === 'today' ? ' happy' : '') + '">' + esc(emptyText) + '</div>';
+      return '<section class="lane" data-lane="' + l[0] + '"><h2 class="label">' + esc(l[1]) + '<span class="n">' + items.length + '</span></h2>' + (l[0] === 'today' ? sugBar : '') + '<div class="scroll"><i class="lane-top" aria-hidden="true"></i>' + body + '</div></section>';
     }).join('');
     view.innerHTML = '<div class="today">' + rail + '<div class="today-main"><i class="board-top" aria-hidden="true"><i class="bt-s"></i></i>' + aiSections() + '<div class="board">' + board + '</div></div></div>';
     wireStrip(); wireLanes();
@@ -2008,7 +2043,7 @@ html.ai-fold { --aibar-h: 41px }
   function scrollBoxes() { return view.querySelectorAll ? [].slice.call(view.querySelectorAll('.scroll')) : [] }
   function boxKey(el, i) { var l = el.closest && el.closest('[data-lane]'); return l ? 'lane:' + l.getAttribute('data-lane') : 'i:' + i }
   function winY() { var se = document.scrollingElement || document.documentElement || {}; return window.pageYOffset || window.scrollY || se.scrollTop || 0 }
-  var FOCUS_ATTRS = ['data-strip-tg', 'data-strip-sum', 'data-pri', 'data-check', 'data-view', 'data-ai-req', 'data-ai-open', 'data-cp-id', 'data-ai-only', 'data-move', 'data-owe', 'data-day'];
+  var FOCUS_ATTRS = ['data-strip-tg', 'data-strip-sum', 'data-pri', 'data-check', 'data-view', 'data-ai-req', 'data-ai-open', 'data-cp-id', 'data-ai-only', 'data-sug-only', 'data-sug-yes', 'data-sug-no', 'data-move', 'data-owe', 'data-day'];
   function focusSel(a) {
     for (var i = 0; i < FOCUS_ATTRS.length; i++) {
       var v = a.getAttribute ? a.getAttribute(FOCUS_ATTRS[i]) : null; if (v == null) continue;
@@ -2094,10 +2129,12 @@ html.ai-fold { --aibar-h: 41px }
   /* An AI request/answer touches only `ai`, so its undo restores only `ai` (never the lane or priority,
      and never anything the worker wrote to other fields in between). */
   var AI_UNDO = ['ai', 'updatedAt'];
+  /* A "looks done?" answer also restores the suggestion on undo. */
+  var SUG_UNDO = UNDO_FIELDS.concat(['suggestDone', 'suggestRejectedAt']);
   function snapOf(td, fields) { var o = {}; fields.forEach(function (k) { o[k] = td[k] === undefined ? null : td[k] }); return o }
   function write(td, patch, msg, inPlace) {
     if (!S.demo && (!db || !S.canWrite)) { toast(t('ownerOnly'), true); render(); return }
-    var fields = 'ai' in patch ? AI_UNDO : UNDO_FIELDS;
+    var fields = 'ai' in patch ? AI_UNDO : 'suggestDone' in patch ? SUG_UNDO : UNDO_FIELDS;
     var act = { id: td.id, fields: fields, snap: snapOf(td, fields), mode: 'ai' in patch ? 'ai' : inPlace ? 'pri' : 'full' };
     if (!S.demo) patch.updatedAt = new Date().toISOString();
     Object.assign(td, patch);
@@ -2137,7 +2174,7 @@ html.ai-fold { --aibar-h: 41px }
   function snackArm() { clearTimeout(SN.timer); SN.start = Date.now(); SN.timer = setTimeout(snackHide, SN.left) }
   /* m = { kind: done | reopen | move | pri | undone, verb, title?, p? }. Symbols are entities so no
      encoding slip can garble them; the title is truncated by CSS (one line, ellipsis), not by script. */
-  var SN_IC = { done: '&#x2713;', reopen: '&#x21BA;', undone: '&#x21BA;', move: '&#x2192;', ai: '&#x1F916;', copy: '&#x29C9;' };
+  var SN_IC = { done: '&#x2713;', reopen: '&#x21BA;', undone: '&#x21BA;', move: '&#x2192;', no: '&#x2717;', ai: '&#x1F916;', copy: '&#x29C9;' };
   var IS_MAC = (function () {
     try { var n = navigator, p = (n.userAgentData && n.userAgentData.platform) || n.platform || n.userAgent || ''; return /mac|iphone|ipad|ipod/i.test(p) } catch (e) { return false }
   })();
@@ -2191,7 +2228,16 @@ html.ai-fold { --aibar-h: 41px }
     patch.movedBy = 'user';
     /* Ticking off a code task whose MR is out (or merged) records that AI did it and you reviewed it. */
     var ca = aiOf(td); if (on && isCode(ca) && (ca.status === 'mr_open' || ca.status === 'applied')) patch.doneBy = 'ai+user';
+    /* Ticking a task that had a "looks done?" suggestion answers it too. */
+    if (on && sugOf(td)) patch.suggestDone = null;
     write(td, patch, { kind: on ? 'done' : 'reopen', verb: t(on ? 'snDone' : 'snUndone'), title: td.title });
+  }
+  /* ✓ on a suggestion = the normal tick (same fields, same Undo). ✗ = keep it open and remember when,
+     so the digest only suggests again on evidence newer than this. */
+  function sugAnswer(id, yes) {
+    var td = findTodo(id); if (!td || !sugOf(td)) return;
+    if (yes) { setDone(id, true); return }
+    write(td, { suggestDone: null, suggestRejectedAt: new Date().toISOString(), movedBy: 'user' }, { kind: 'no', verb: t('snSugNo'), title: td.title });
   }
   function move(id, where) {
     var td = findTodo(id); if (!td || lane(td) === where) return;
@@ -3596,6 +3642,9 @@ html.ai-fold { --aibar-h: 41px }
     if (e.target.closest('[data-strip-sum]')) { stripOpen(); return }
     var ao1 = e.target.closest('[data-ai-only]');
     if (ao1) { S.aiOnly = !S.aiOnly; try { localStorage.setItem('ai-only', S.aiOnly ? '1' : '0') } catch (err) {} render(); return }
+    var sy = e.target.closest('[data-sug-yes]'); if (sy) { sugAnswer(sy.getAttribute('data-sug-yes'), true); return }
+    var sn = e.target.closest('[data-sug-no]'); if (sn) { sugAnswer(sn.getAttribute('data-sug-no'), false); return }
+    if (e.target.closest('[data-sug-only]')) { S.sugOnly = !S.sugOnly; render(); return }
     var m = e.target.closest('[data-move]'); if (m) { move(m.dataset.id, m.dataset.move); return }
     var pr = e.target.closest('[data-pri]'); if (pr) { e.preventDefault(); cyclePri(pr.getAttribute('data-pri')); return }
     var vw = e.target.closest('[data-view]'); if (vw) { openMsg(vw.getAttribute('data-view')); return }
@@ -3748,6 +3797,8 @@ html.ai-fold { --aibar-h: 41px }
       t13: ['MOB-2066: Hiện số tiền có dấu chấm ngăn cách hàng nghìn', 'Sóc Nâu báo: 1000000 hiện liền một dãy, khó đọc.'],
       t14: ['MOB-2070: Ẩn số dư khi bật chế độ riêng tư', 'MR đã tạo, chờ Gấu Trúc review.'],
       t15: ['MOB-2058: Sửa crash khi mở lịch sử giao dịch trống', 'AI code, bạn duyệt diff, MR đã merge.'],
+      t16: ['Gửi Thỏ Trắng link build 1.5 cho UAT', 'Thỏ Trắng cần link trước buổi UAT chiều mai.'], sug16: 'Tôi đã gửi link build 1.5 trong Nhóm Sản phẩm lúc 15:40.',
+      t17: ['MOB-2072: Sửa icon bị mờ ở màn hình chính', 'Sóc Nâu báo icon mờ trên máy màn hình nhỏ.'], sug17: 'Thấy ở chat khác: Nhóm Mobile — "icon mờ fix rồi nhé, build tối nay có"',
       cd1: 'Đọc ticket và acceptance criteria', cd2: 'Tìm thấy nhánh feature/MOB-2060 có sẵn', cd3: 'Bỏ qua duyệt plan: 2 file, rủi ro thấp', cd4: 'Đang sửa WalletScreen.tsx',
       cd5: 'Đọc ticket và tin chốt nội dung', cd6: 'Lên plan: 3 file, rủi ro thấp', cd7: 'Code xong, chạy typecheck và test', cd8: 'Đã push và tạo draft MR',
       pSum: 'Thay nội dung thông báo lỗi mất mạng bằng bản Cáo Nhỏ đã chốt, thêm nút "Thử lại" gọi lại bước thanh toán.',
@@ -3800,6 +3851,8 @@ html.ai-fold { --aibar-h: 41px }
       t13: ['MOB-2066: Show amounts with thousand separators', 'Sam reported: 1000000 shows as one long run of digits.'],
       t14: ['MOB-2070: Hide the balance in privacy mode', 'MR is open, waiting for Pat to review.'],
       t15: ['MOB-2058: Fix the crash on an empty transaction history', 'AI coded it, you reviewed the diff, the MR is merged.'],
+      t16: ['Send Ruby the build 1.5 link for UAT', 'Ruby needs the link before tomorrow afternoon’s UAT.'], sug16: 'I posted the build 1.5 link in the Product team chat at 15:40.',
+      t17: ['MOB-2072: Fix the blurry icon on the home screen', 'Sam reported a blurry icon on small screens.'], sug17: 'Found in another chat: Mobile team — "blurry icon is fixed, it’s in tonight’s build"',
       cd1: 'Read the ticket and acceptance criteria', cd2: 'Found the existing branch feature/MOB-2060', cd3: 'Skipped plan review: 2 files, low risk', cd4: 'Editing WalletScreen.tsx',
       cd5: 'Read the ticket and the final copy', cd6: 'Planned: 3 files, low risk', cd7: 'Coded, ran typecheck and tests', cd8: 'Pushed and opened a draft MR',
       pSum: 'Replace the offline error copy with Finn’s final version and add a "Try again" button that retries the payment step.',
@@ -3869,6 +3922,10 @@ html.ai-fold { --aibar-h: 41px }
           steps: [{ at: Y + 'T14:20:00+07:00', text: c.cd7, state: 'done' }, { at: Y + 'T16:05:00+07:00', text: c.cd8, state: 'done' }] }) }),
       mk(15, { title: c.t15[0], url: 'https://example.atlassian.net/browse/MOB-2058', ref: { source: 'jira', issueKey: 'MOB-2058' }, kind: 'ask', from: c.squirrel, tier: 'week', priority: 'P2', source: 'jira', sourceLabel: 'Jira', status: 'done', doneAt: TODAY, prevStatus: 'open', doneBy: 'ai+user', why: c.t15[1],
         ai: Object.assign(codeAi(addDays(TODAY, -2) + 'T10:00:00+07:00', 'MOB'), { status: 'applied', planApproved: true, result: Object.assign({}, dc.result, { branch: 'feature/MOB-2058', mr: { url: 'https://gitlab.example.com/mobile/app/-/merge_requests/476', iid: 476 } }) }) }),
+      mk(16, { title: c.t16[0], url: 'https://teams.microsoft.com/', kind: 'ask', from: c.rabbit, tier: 'now', priority: 'P2', sourceLabel: c.teamProduct, why: c.t16[1],
+        suggestDone: { at: TODAY + 'T19:03:00+07:00', evidence: c.sug16, url: 'https://teams.microsoft.com/', source: 'teams', sourceLabel: c.teamProduct } }),
+      mk(17, { title: c.t17[0], url: 'https://example.atlassian.net/browse/MOB-2072', ref: { source: 'jira', issueKey: 'MOB-2072' }, kind: 'ask', from: c.squirrel, tier: 'week', priority: 'P3', plannedFor: N, source: 'jira', sourceLabel: 'Jira', why: c.t17[1],
+        suggestDone: { at: TODAY + 'T19:03:00+07:00', evidence: c.sug17, url: 'https://teams.microsoft.com/', source: 'teams', sourceLabel: c.teamMobile } }),
       mk(8, { title: c.t8[0], kind: 'ask', from: c.squirrel, tier: 'now', priority: 'P1', status: 'done', doneAt: TODAY, prevStatus: 'open', sourceLabel: c.teamMobile, signals: [{ type: 'kudos', note: c.t8[1] }], quote: q(c.squirrel, '17:30', c.q8) })
     ];
     function day(date, o) { return Object.assign({ date: date, dateLabel: dm(date), weekday: wd(date), generatedAt: date + 'T' + dT5 + ':00+07:00', highlights: [], meetings: [], done: [], timeline: [], top3: [], coverage: { scanned: [c.sample], warnings: [] } }, o) }

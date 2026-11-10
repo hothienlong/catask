@@ -176,7 +176,7 @@ Writing to Jira is **not** this skill's job, in any run (manual or scheduled): n
 | `result` | `{branch, baseBranch, branchReused, commits: [{sha, msg}], diffstat: {files, add, del}, diff, diffTruncated?, checks: [{name, ok, summary}], mr?: {url, iid}}`. |
 | `error` | One short line when `status: "error"`. |
 
-Statuses: `queued` (waiting; also after the user approves the plan or requests changes) → `running` (+ `phase`) → `plan_review` (plan waits for the user) or `needs_review` (code done, waiting for the user) → `push_approved` (set by the page after the user approves the push) → `running` (`phase: "push"`) → `mr_open` → `applied` (MR merged; set by the evening digest, which also marks the todo done with `doneBy: "ai+user"`). Plus `cancelled` (page) and `error`.
+Statuses: `queued` (waiting; also after the user approves the plan or requests changes) → `running` (+ `phase`) → `plan_review` (plan waits for the user) or `needs_review` (code done, waiting for the user) → `push_approved` (set by the page after the user approves the push) → `running` (`phase: "push"`) → `mr_open` → `applied` (MR merged; set by the evening digest, which then asks "looks done?" on the page; the todo is closed with `doneBy: "ai+user"` only when the user confirms). Plus `cancelled` (page) and `error`.
 
 Ledger mode: write every update the same way as other kinds: only `{ai: {...}}`, the **complete** object, pinned with `if_version`, `updatedBy: "worker"`. File mode: rewrite the out file instead (see Run modes). Write a progress step (and the update) **at each stage below** so the page shows live progress. Ledger mode only: before each long stage (checks, push), re-`get` the doc: if `ai.status` became `cancelled` or a newer `requestedAt`/`round` appeared, stop at once (leave the repo clean: switch back to the original branch; keep any commits already made on the AI branch).
 
@@ -223,7 +223,7 @@ Skip when `planApproved` is true and `plan` already exists (go to C4), and in ro
 2. Open a **draft** MR/PR targeting `result.baseBranch`, title `<KEY>: <summary>`, description = the plan summary + checks + the Jira link (no AI trailer):
    - GitLab remote: whichever exists — `glab mr create --draft --source-branch <branch> --target-branch <base> --title … --description … --yes`, or the GitLab MCP `mcp__GitLab__create_merge_request` (title prefixed `Draft: `, or `draft: true` when the tool has it; find it with ToolSearch). If an open MR for the branch already exists, reuse it.
    - GitHub remote: `gh pr create --draft --base <base> --head <branch> …` (reuse an open PR for the branch).
-3. Set `result.mr = {url, iid}`, `status: "mr_open"`, step vi "Đã mở MR nháp" / en "Draft MR opened". **Never merge, approve, or mark it ready.** The evening digest watches it and marks the task done when it's merged.
+3. Set `result.mr = {url, iid}`, `status: "mr_open"`, step vi "Đã mở MR nháp" / en "Draft MR opened". **Never merge, approve, or mark it ready.** The evening digest watches it and, when it's merged, suggests the task done; the user confirms on the page.
 
 ### Code safety
 
