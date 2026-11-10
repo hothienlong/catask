@@ -6,6 +6,14 @@
 
 > **Renamed from Sổ việc (`so-viec`)** in 1.0.0. Install `catask` (below) and uninstall `so-viec`; your data in `~/Documents/daily-digest/` and your page stay as they are. If you use AI code tasks, say **`cài runner catask`** / **`install catask runner`** once: it replaces the old `so-viec-runner` with `catask-runner` (backup kept); then quit (⌘Q) and reopen the Claude app. `so-viec#<id>` references still work. · **Đổi tên từ Sổ việc (`so-viec`)** ở bản 1.0.0: cài `catask`, gỡ `so-viec`; dữ liệu và trang giữ nguyên. Dùng AI code thì nói **`cài runner catask`** một lần để thay runner cũ, rồi ⌘Q và mở lại app.
 
+### 🤖 Install with Claude · Cài bằng Claude
+
+Copy this into Claude Code (or the Code tab of the Claude desktop app) · Dán đoạn này vào Claude Code (hoặc tab Code của app Claude desktop):
+
+```text
+Install the catask plugin for me: run `claude plugin marketplace add hothienlong/catask`, then `claude plugin install catask@catask` (if my organization has catask in its plugin library, use `claude plugin install catask@claudeai-organization-library` instead). Then run /catask:setup to set it up. If the new commands don't load in this session, tell me to open a new session and type /catask:setup.
+```
+
 [English](#english) · [Tiếng Việt](#tiếng-việt)
 
 ![catask — Today board (demo data)](docs/screenshots/hom-nay.png)
