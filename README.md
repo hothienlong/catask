@@ -52,6 +52,12 @@
 - 🧭 Optional: **communication signals** (false urgency, scope creep, kudos…). **Off by default.**
 - 🤖 Optional: **Hand to AI** (beta). Click a button on a task and Claude drafts a reply, a summary or a Jira description / estimate for you to review; it never sends anything, and a Jira field changes only when you approve it on the page. **Off by default** (⚙ Settings).
 
+> **🔒 Your data stays yours**
+> - No catask server, no telemetry, no analytics. Nothing is sent to the plugin author or any third party.
+> - Everything lives in your own claude.ai Artifact (an owner-only database) and in `~/Documents/daily-digest/` on your machine.
+> - Teams, Outlook and Jira are read through **your own** Claude connectors, in your own Claude session. That content is processed by Claude under your account, like any other Claude chat.
+> - Nothing is sent or posted on your behalf, except one link message to your own Teams notes chat. Code is pushed to **your** git remote only after you click approve.
+
 ### Requirements
 
 | What | Required? | Notes |
@@ -194,6 +200,10 @@ After you change the config, the next run updates the page (name, language, proj
   - At most 200 docs are removed per run; the rest go on the next run. The coverage notes say what was cleaned.
   - The per-day JSON files in `~/Documents/daily-digest/` stay on your disk; the skill never deletes them.
 - 🔒 The "work with AI" timeline reads only **session titles + times** from local Claude Code transcripts, never content. The Cost tab reads **token counts** only.
+- 🔒 **Sharing**: the page link may be visible to your organization, but the database rules are owner-only (read and write), so others only see demo data. Never give anyone edit rights to the page.
+- 🔒 **Runner** (developers only): `catask-runner` is a local MCP server on your machine. It accepts only a task id and a task snapshot, never free-text commands. It runs `claude -p` locally, only in repos you enabled in Settings; it refuses repos with uncommitted changes, never stashes, never merges or force-pushes, and never commits to main/sprint branches. It writes logs and task files only under `~/Documents/daily-digest/runner/`.
+- 🔒 **Page permissions** (`mcp`): Atlassian `getJiraIssue` / `editJiraIssue`, and the `catask-runner` tools on your machine. claude.ai asks you before each grant, and you can revoke them in the artifact's Permissions menu.
+- 🔒 The dispatcher heartbeat (`meta/dispatcher`) stores only an opaque instance id and timestamps.
 - 🔒 State files live in `~/Documents/daily-digest/` on your machine. `config.json` holds no passwords or tokens. Don't commit that folder.
 
 ### Layout
@@ -258,6 +268,12 @@ MIT — see [`LICENSE`](LICENSE). © 2026 Hồ Thiên Long.
 - 🌐 **Tiếng Việt hoặc English**: chọn ở lần chạy đầu; giao diện trang theo cùng lựa chọn.
 - 🧭 Tuỳ chọn: **tín hiệu giao tiếp** (gấp ảo, scope creep, được ghi nhận…). **Mặc định tắt.**
 - 🤖 Tuỳ chọn: **Giao AI** (thử nghiệm). Bấm nút trên một việc, Claude soạn nháp trả lời, tóm tắt hoặc description / ước lượng cho ticket Jira để bạn xem lại; không bao giờ tự gửi, và ticket Jira chỉ đổi khi bạn duyệt trên trang. **Mặc định tắt** (⚙ Cài đặt).
+
+> **🔒 Dữ liệu là của bạn**
+> - Không có máy chủ catask, không telemetry, không thống kê. Không gì được gửi cho tác giả plugin hay bên thứ ba nào.
+> - Mọi thứ nằm trong Artifact claude.ai của chính bạn (kho dữ liệu chỉ chủ trang truy cập) và trong `~/Documents/daily-digest/` trên máy bạn.
+> - Teams, Outlook và Jira được đọc qua connector Claude **của chính bạn**, trong phiên Claude của bạn. Nội dung đó được Claude xử lý dưới tài khoản của bạn, như mọi cuộc chat Claude khác.
+> - Không gửi hay đăng gì thay bạn, trừ một tin chứa link vào chat ghi chú Teams của chính bạn. Code chỉ được push lên git remote **của bạn** sau khi bạn bấm duyệt.
 
 ### Cần có
 
@@ -401,6 +417,10 @@ Mẫu: [`config.example.json`](config.example.json).
   - Mỗi lần chạy xoá tối đa 200 mục; phần còn lại để lần sau. Phần độ phủ của bản tin ghi rõ đã dọn gì.
   - File JSON từng ngày trong `~/Documents/daily-digest/` vẫn nằm trên máy bạn; skill không bao giờ xoá chúng.
 - 🔒 Dòng thời gian "làm với AI" chỉ lấy **tên session + giờ** từ transcript Claude Code trên máy, không lấy nội dung. Tab Chi phí chỉ đọc **số token**.
+- 🔒 **Chia sẻ**: link trang có thể hiện với người trong tổ chức, nhưng quy tắc kho dữ liệu là chỉ chủ trang (đọc và ghi), nên người khác chỉ thấy dữ liệu demo. Đừng bao giờ cấp quyền sửa trang cho ai.
+- 🔒 **Runner** (chỉ cho dev): `catask-runner` là MCP server chạy trên máy bạn. Nó chỉ nhận mã việc và ảnh chụp của việc, không bao giờ nhận lệnh dạng chữ tự do. Nó chạy `claude -p` trên máy, chỉ trong các repo bạn đã bật trong Cài đặt; từ chối repo đang có thay đổi chưa commit, không stash, không merge, không force-push, không commit vào nhánh main/sprint. Log và file việc chỉ ghi trong `~/Documents/daily-digest/runner/`.
+- 🔒 **Quyền của trang** (`mcp`): Atlassian `getJiraIssue` / `editJiraIssue`, và các tool `catask-runner` trên máy bạn. claude.ai hỏi bạn trước mỗi lần cấp, và bạn thu hồi được trong menu Permissions của artifact.
+- 🔒 Nhịp báo hiệu của dispatcher (`meta/dispatcher`) chỉ lưu một mã phiên vô danh và mốc thời gian.
 - 🔒 File trạng thái nằm ở `~/Documents/daily-digest/` trên máy bạn. `config.json` không chứa mật khẩu hay token. Đừng commit thư mục này.
 
 ### Cấu trúc
