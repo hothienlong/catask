@@ -78,7 +78,7 @@
 /plugin install catask@catask
 ```
 
-Update later with `/plugin marketplace update catask`.
+Update later with `/plugin marketplace update catask`, then `/reload-plugins`. To get new versions automatically: `/plugin` → **Marketplaces** → **catask** → **Enable auto-update** (off by default for GitHub marketplaces). Installs from your organization library update by themselves when you restart Claude Code.
 
 After installing, run **`/catask:setup`**: the setup interview, your digest schedule and (for developers) the runner, without running a digest yet. Or just say "evening digest" to set up and run the first one right away.
 
@@ -304,7 +304,7 @@ MIT — see [`LICENSE`](LICENSE). © 2026 Hồ Thiên Long.
 /plugin install catask@catask
 ```
 
-Cập nhật bản mới bằng `/plugin marketplace update catask`.
+Cập nhật bản mới bằng `/plugin marketplace update catask`, rồi `/reload-plugins`. Muốn tự nhận bản mới: `/plugin` → **Marketplaces** → **catask** → **Enable auto-update** (marketplace GitHub mặc định tắt). Cài từ thư viện plugin của công ty thì tự cập nhật khi mở lại Claude Code.
 
 Cài xong, gõ **`/catask:setup`**: phỏng vấn thiết lập, đặt lịch bản tin và (với dev) cài runner, chưa chạy bản tin. Hoặc nói luôn "bản tin tối" để vừa thiết lập vừa chạy bản tin đầu tiên.
 
