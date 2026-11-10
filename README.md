@@ -6,8 +6,6 @@
 
 <sub>catask = **cat** + **task** + **ask**: a cat that keeps watch over every task and every ask. · catask = **cat** (mèo) + **task** (việc) + **ask** (nhờ): chú mèo canh mọi việc, mọi lời nhờ.</sub>
 
-> **Renamed from Sổ việc (`so-viec`)** in 1.0.0. Install `catask` (below) and uninstall `so-viec`; your data in `~/Documents/daily-digest/` and your page stay as they are. If you use AI code tasks, say **`cài runner catask`** / **`install catask runner`** once: it replaces the old `so-viec-runner` with `catask-runner` (backup kept); then quit (⌘Q) and reopen the Claude app. `so-viec#<id>` references still work. · **Đổi tên từ Sổ việc (`so-viec`)** ở bản 1.0.0: cài `catask`, gỡ `so-viec`; dữ liệu và trang giữ nguyên. Dùng AI code thì nói **`cài runner catask`** một lần để thay runner cũ, rồi ⌘Q và mở lại app.
-
 ### 🤖 Install with Claude · Cài bằng Claude
 
 Copy this into Claude Code (or the Code tab of the Claude desktop app) · Dán đoạn này vào Claude Code (hoặc tab Code của app Claude desktop):
@@ -116,6 +114,12 @@ After installing, run **`/catask:setup`**: the setup interview, your digest sche
 mkdir -p ~/.claude/skills
 cp -R skills/daily-digest-todo ~/.claude/skills/
 ```
+
+<details>
+<summary>Upgrading from the old "Sổ việc" (<code>so-viec</code>) plugin</summary>
+
+Install `catask` as above and uninstall `so-viec`. Your data in `~/Documents/daily-digest/` and your page stay as they are. If you use AI code tasks, say **`install catask runner`** once (it replaces `so-viec-runner`, backup kept), then quit (⌘Q) and reopen the Claude app. Old `so-viec#<id>` references still work.
+</details>
 
 ### First run (about 5 minutes)
 
@@ -369,6 +373,12 @@ Cài xong, gõ **`/catask:setup`**: phỏng vấn thiết lập, đặt lịch b
 mkdir -p ~/.claude/skills
 cp -R skills/daily-digest-todo ~/.claude/skills/
 ```
+
+<details>
+<summary>Nâng cấp từ plugin cũ "Sổ việc" (<code>so-viec</code>)</summary>
+
+Cài `catask` như trên rồi gỡ `so-viec`. Dữ liệu trong `~/Documents/daily-digest/` và trang của bạn giữ nguyên. Dùng AI code thì nói **`cài runner catask`** một lần (thay runner cũ, có bản sao lưu), rồi ⌘Q và mở lại app Claude. Mã cũ `so-viec#<id>` vẫn dùng được.
+</details>
 
 ### Chạy lần đầu (khoảng 5 phút)
 
