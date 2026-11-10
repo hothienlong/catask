@@ -1,0 +1,35 @@
+# catask
+
+> Claude Code plugin. Every evening it reads your Microsoft Teams chats and Outlook mail/calendar (read-only) and turns every ask, unanswered question and promise into a prioritized TODO list on a private claude.ai Artifact page. Vietnamese or English. "Nothing slips through." / "Không sót việc nào."
+
+## Install (for an AI agent doing it for the user)
+
+1. Add the marketplace and install:
+   - `claude plugin marketplace add hothienlong/catask`
+   - `claude plugin install catask@catask`
+   - If the user's organization has catask in its claude.ai plugin library, use `claude plugin install catask@claudeai-organization-library` instead (it then updates by itself).
+2. Run `/catask:setup` (setup interview, digest schedule, optional auto-update; no digest yet). If the new commands don't load in the current session, ask the user to open a new session and type `/catask:setup`.
+3. The first digest runs at the scheduled time, or the user can say "evening digest" / "bản tin tối" to run one now. The first run publishes the user's private catask page and gives its link.
+
+## Requirements
+
+- Claude Code or the Claude desktop app (the desktop app runs the scheduled digest).
+- The Microsoft 365 connector enabled in the user's claude.ai account (Teams + Outlook).
+- Python 3 (stdlib only) for the helper scripts.
+
+## Commands
+
+- `/catask:setup`: set up or change settings, create the schedule.
+- `/catask:update`: update the plugin to the newest version.
+- `/catask:ai-worker`: process tasks the user handed to AI on the page (drafts, summaries, Jira proposals; optional code tasks for developers).
+
+## Rules the plugin follows
+
+- Read-only on Teams, Outlook and Jira; never sends, replies or posts for the user. Only writes to the user's own catask page and their own Teams notes chat.
+- Data lives in the user's private Artifact database and in `~/Documents/daily-digest/` on their machine.
+
+## Docs
+
+- [README](README.md): full English and Vietnamese guide, configuration, privacy.
+- [Skill: daily-digest-todo](skills/daily-digest-todo/SKILL.md)
+- [Skill: ai-worker](skills/ai-worker/SKILL.md)

@@ -2,6 +2,8 @@
 
 **Nothing slips through.** · **Không sót việc nào.**
 
+[![Install with Claude](https://img.shields.io/badge/🤖_Install_with_Claude-copy_the_prompt-2a80d2?style=for-the-badge)](#-install-with-claude--cài-bằng-claude) [![llms.txt](https://img.shields.io/badge/llms.txt-for_AI_agents-13305a?style=for-the-badge)](llms.txt)
+
 <sub>catask = **cat** + **task** + **ask**: a cat that keeps watch over every task and every ask. · catask = **cat** (mèo) + **task** (việc) + **ask** (nhờ): chú mèo canh mọi việc, mọi lời nhờ.</sub>
 
 > **Renamed from Sổ việc (`so-viec`)** in 1.0.0. Install `catask` (below) and uninstall `so-viec`; your data in `~/Documents/daily-digest/` and your page stay as they are. If you use AI code tasks, say **`cài runner catask`** / **`install catask runner`** once: it replaces the old `so-viec-runner` with `catask-runner` (backup kept); then quit (⌘Q) and reopen the Claude app. `so-viec#<id>` references still work. · **Đổi tên từ Sổ việc (`so-viec`)** ở bản 1.0.0: cài `catask`, gỡ `so-viec`; dữ liệu và trang giữ nguyên. Dùng AI code thì nói **`cài runner catask`** một lần để thay runner cũ, rồi ⌘Q và mở lại app.
