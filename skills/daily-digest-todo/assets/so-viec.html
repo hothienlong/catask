@@ -54,7 +54,7 @@ button { font: inherit; color: inherit }
 .wm { display: inline-flex; align-items: baseline; font-family: var(--display); font-weight: 800; letter-spacing: -.01em; line-height: 1 }
 .wm-lg { font-size: 26px; text-shadow: 0 2px 0 rgba(0, 40, 90, .2) }
 .wm-cat { position: relative; color: #ffd36b }
-.wm-cat::before, .wm-cat::after { content: ""; position: absolute; top: -.32em; width: 0; height: 0; border-left: .14em solid transparent; border-right: .14em solid transparent; border-bottom: .24em solid currentColor }
+.wm-cat::before, .wm-cat::after { content: ""; position: absolute; top: -.1em; width: 0; height: 0; border-left: .14em solid transparent; border-right: .14em solid transparent; border-bottom: .24em solid currentColor }
 .wm-cat::before { left: .06em; transform: rotate(-14deg) } .wm-cat::after { right: .04em; transform: rotate(14deg) }
 .wm-ask { color: var(--on-sky) }
 .wm-line { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; margin: 6px 0 4px }
@@ -66,7 +66,8 @@ button { font: inherit; color: inherit }
 .tally { margin-left: auto; display: flex; flex-wrap: wrap; gap: 22px; font-variant-numeric: tabular-nums }
 .tally div { display: flex; flex-direction: column; align-items: flex-end }
 .tally b { font-family: var(--display); font-weight: 800; font-size: 28px; line-height: 1; text-shadow: 0 2px 0 rgba(0, 40, 90, .2) }
-.tally span { font-size: 11.5px; opacity: .9 }
+.tally span { font-size: 11.5px; opacity: .9; text-shadow: 0 1px 2px rgba(0, 30, 70, .45) }
+.mast > .brand, .mast > .tally { position: relative; z-index: 1 }
 .tally .is-over b { background: #ffffff; color: #c4321b; padding: 1px 9px 3px; border-radius: 999px; text-shadow: none }
 nav.tabs { display: flex; align-items: center; gap: 6px; padding: 8px 0 6px; margin-top: 4px; overflow-x: auto; scrollbar-width: none }
 nav.tabs a { padding: 6px 15px; border-radius: 999px; color: var(--soft); text-decoration: none; font-weight: 700; font-family: var(--display); white-space: nowrap; transition: background .18s, color .18s }
@@ -3996,7 +3997,7 @@ html.ai-fold { --aibar-h: 41px }
       c.globalAlpha = 1;
     }
     var x = -40; while (x < w + 60) { cloud(x, h * (0.9 + R() * 0.12), 0.75 + R() * 0.55); x += 150 + R() * 110 }
-    if (w > 700) { cloud(w * (.62 + R() * .08), h * .34, .32); cloud(w * (.8 + R() * .06), h * .5, .4); cloud(w * .48, h * .58, .26) }
+    /* No mid-air clouds: they drifted under the title/stats text. Clouds stay in the bottom row, below the text. */
   }
   var t; function soon() { clearTimeout(t); t = setTimeout(paint, 80) }
   paint();
