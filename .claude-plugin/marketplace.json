@@ -1,16 +1,20 @@
 {
-  "name": "so-viec",
-  "owner": { "name": "Hồ Thiên Long" },
+  "name": "catask",
+  "owner": {
+    "name": "Hồ Thiên Long"
+  },
   "metadata": {
-    "description": "Sổ việc: evening Microsoft Teams and Outlook digest turned into a prioritized TODO ledger page."
+    "description": "catask — Nothing slips through. Evening Microsoft Teams and Outlook digest turned into a prioritized TODO page, with AI drafts and AI code tasks."
   },
   "plugins": [
     {
-      "name": "so-viec",
+      "name": "catask",
       "source": "./",
-      "description": "Evening digest of your Microsoft Teams chats and Outlook mail/calendar: every ask, unanswered question and promise you made becomes a prioritized TODO list on a private Artifact page. Writes in Vietnamese or English.",
-      "version": "0.7.0",
-      "author": { "name": "Hồ Thiên Long" },
+      "description": "catask (cat + task + ask) — Nothing slips through. / Không sót việc nào. Evening digest of your Microsoft Teams chats and Outlook mail/calendar: every ask, unanswered question and promise you made becomes a prioritized TODO list on a private Artifact page, with optional AI drafts and AI code tasks. Writes in Vietnamese or English.",
+      "version": "1.0.0",
+      "author": {
+        "name": "Hồ Thiên Long"
+      },
       "license": "MIT"
     }
   ]

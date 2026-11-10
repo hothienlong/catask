@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// so-viec-runner: a small, zero-dependency stdio MCP server for Sổ việc "Giao AI → Code luôn".
+// catask-runner: a small, zero-dependency stdio MCP server for catask "Giao AI → Code luôn".
 //
 // "The page is the bridge": a headless `claude -p` has no ArtifactData, so the page hands the
 // runner a snapshot of the todo (DATA only), the runner writes it to <id>.in.json, starts the
@@ -18,14 +18,14 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 
-const SERVER_NAME = 'so-viec-runner';
+const SERVER_NAME = 'catask-runner';
 const SERVER_VERSION = '0.7.0';
 const SUPPORTED_PROTOCOLS = ['2025-06-18', '2025-03-26', '2024-11-05'];
 
 const TODO_ID_RE = /^[0-9]{4}-[0-9]{2}-[0-9]{2}-[a-z0-9-]{1,40}$/;
 const MAX_TASK_BYTES = 60 * 1024;
 const HOME = os.homedir();
-const STATE_DIR = process.env.SO_VIEC_STATE_DIR || path.join(HOME, 'Documents', 'daily-digest');
+const STATE_DIR = process.env.CATASK_STATE_DIR || process.env.SO_VIEC_STATE_DIR || path.join(HOME, 'Documents', 'daily-digest');
 const CONFIG_PATH = path.join(STATE_DIR, 'config.json');
 const RUNNER_DIR = path.join(STATE_DIR, 'runner');
 const LOG_DIR = path.join(RUNNER_DIR, 'logs');
@@ -203,14 +203,14 @@ function startTask(args) {
   // The snapshot is data: stored as a file, never put on a command line or in the prompt.
   writeJsonAtomic(inFile(todoId), { todoId, receivedAt: startedAt, task: JSON.parse(taskJson) });
 
-  const prompt = `Run the ai-worker skill in file mode for exactly one task: so-viec#${todoId}. Input: ${inFile(todoId)}. Write progress and results to ${outFile(todoId)}. Do not use ArtifactData.`;
+  const prompt = `Run the ai-worker skill in file mode for exactly one task: catask#${todoId}. Input: ${inFile(todoId)}. Write progress and results to ${outFile(todoId)}. Do not use ArtifactData.`;
   const argv = ['-p', '--permission-mode', 'acceptEdits', '--allowedTools', allowedTools(cfg).join(',')];
   const dirs = repoDirs(cfg);
   if (dirs.length) argv.push('--add-dir', ...dirs);
 
   const log = path.join(LOG_DIR, `${todoId}-${startedAt.replace(/[:.]/g, '-')}.log`);
   const fd = fs.openSync(log, 'a');
-  fs.writeSync(fd, `# so-viec-runner ${startedAt}\n# ${claude} ${argv.map((a) => JSON.stringify(a)).join(' ')}\n# prompt (stdin): ${prompt}\n\n`);
+  fs.writeSync(fd, `# catask-runner ${startedAt}\n# ${claude} ${argv.map((a) => JSON.stringify(a)).join(' ')}\n# prompt (stdin): ${prompt}\n\n`);
 
   const env = { ...process.env, PATH: childPath(cfg, claude) };
   // A nested claude refuses to start inside another Claude Code session; this run is independent.
@@ -456,7 +456,7 @@ async function discoverRepos(args) {
 
 // ---------- tool table ----------
 
-const ID = { type: 'string', pattern: TODO_ID_RE.source, description: 'Sổ việc todo id, e.g. 2026-11-09-t3' };
+const ID = { type: 'string', pattern: TODO_ID_RE.source, description: 'catask todo id, e.g. 2026-11-09-t3' };
 const obj = (properties, required) => ({ type: 'object', properties, required, additionalProperties: false });
 // The Claude desktop app asks the viewer before calling tools not marked read-only, so annotate them.
 const READ_ONLY = { readOnlyHint: true, destructiveHint: false, openWorldHint: false };
@@ -465,7 +465,7 @@ const WRITE = (idempotentHint) => ({ readOnlyHint: false, destructiveHint: false
 const TOOLS = [
   {
     name: 'startTask',
-    description: 'Start one headless ai-worker run (file mode) for one Sổ việc code task. `task` is the todo snapshot {id,title,ref,url,quote,why,due,priority,ai}, ≤ 60 KB, stored as data only.',
+    description: 'Start one headless ai-worker run (file mode) for one catask code task. `task` is the todo snapshot {id,title,ref,url,quote,why,due,priority,ai}, ≤ 60 KB, stored as data only.',
     inputSchema: obj({ todoId: ID, task: { type: 'object' } }, ['todoId', 'task']),
     title: 'Start AI code run',
     annotations: { title: 'Start AI code run', ...WRITE(false) },
@@ -498,7 +498,7 @@ async function handle(msg) {
         protocolVersion: SUPPORTED_PROTOCOLS.includes(requested) ? requested : SUPPORTED_PROTOCOLS[0],
         capabilities: { tools: { listChanged: false } },
         serverInfo: { name: SERVER_NAME, version: SERVER_VERSION },
-        instructions: 'Bridge between the Sổ việc page and a local headless ai-worker run for code tasks. Accepts todo ids and todo snapshots as data; never free-text commands.',
+        instructions: 'Bridge between the catask page and a local headless ai-worker run for code tasks. Accepts todo ids and todo snapshots as data; never free-text commands.',
       });
       return;
     }
@@ -532,7 +532,7 @@ async function handle(msg) {
   }
 }
 
-// CLI: `node so-viec-runner.mjs --discover-repos` prints the scan as JSON and exits (used by onboarding).
+// CLI: `node catask-runner.mjs --discover-repos` prints the scan as JSON and exits (used by onboarding).
 if (process.argv.includes('--discover-repos')) {
   discoverRepos({}).then((r) => { process.stdout.write(JSON.stringify(r, null, 2) + '\n'); process.exit(0); });
 } else {

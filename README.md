@@ -1,8 +1,14 @@
-# Sổ việc (plugin `so-viec`)
+# catask
+
+**Nothing slips through.** · **Không sót việc nào.**
+
+<sub>catask = **cat** + **task** + **ask**: a cat that keeps watch over every task and every ask. · catask = **cat** (mèo) + **task** (việc) + **ask** (nhờ): chú mèo canh mọi việc, mọi lời nhờ.</sub>
+
+> **Renamed from Sổ việc (`so-viec`)** in 1.0.0. Install `catask` (below) and uninstall `so-viec`; your data in `~/Documents/daily-digest/` and your page stay as they are. If you use AI code tasks, say **`cài runner catask`** / **`install catask runner`** once: it replaces the old `so-viec-runner` with `catask-runner` (backup kept); then quit (⌘Q) and reopen the Claude app. `so-viec#<id>` references still work. · **Đổi tên từ Sổ việc (`so-viec`)** ở bản 1.0.0: cài `catask`, gỡ `so-viec`; dữ liệu và trang giữ nguyên. Dùng AI code thì nói **`cài runner catask`** một lần để thay runner cũ, rồi ⌘Q và mở lại app.
 
 [English](#english) · [Tiếng Việt](#tiếng-việt)
 
-![Sổ việc — Today board (demo data)](docs/screenshots/hom-nay.png)
+![catask — Today board (demo data)](docs/screenshots/hom-nay.png)
 
 <table>
   <tr>
@@ -23,7 +29,7 @@
 
 ## English
 
-> **In one line:** every working day at your digest time (default: end of working hours + 1 h), Claude reads your Microsoft Teams and Outlook, collects every ask, every question waiting on you and every promise you made, and puts them on **one private "Sổ việc" (work ledger) page** so tomorrow morning you know what to do first. Output in **Vietnamese or English**.
+> **In one line:** every working day at your digest time (default: end of working hours + 1 h), Claude reads your Microsoft Teams and Outlook, collects every ask, every question waiting on you and every promise you made, and puts them on **one private catask page** so tomorrow morning you know what to do first. Output in **Vietnamese or English**.
 
 ### What it does
 
@@ -56,16 +62,16 @@
 **From GitHub** (anyone, in Claude Code or the Claude desktop app's Code tab):
 
 ```
-/plugin marketplace add hothienlong/so-viec
-/plugin install so-viec@so-viec
+/plugin marketplace add hothienlong/catask
+/plugin install catask@catask
 ```
 
-Update later with `/plugin marketplace update so-viec`.
+Update later with `/plugin marketplace update catask`.
 
 **From your organization's plugin library** (when published there):
 
 ```
-/plugin install so-viec@claudeai-organization-library
+/plugin install catask@claudeai-organization-library
 ```
 
 **From the public plugin directory**: the install line will be added here once the plugin is approved and listed.
@@ -82,7 +88,7 @@ cp -R skills/daily-digest-todo ~/.claude/skills/
 1. Connect the **Microsoft 365 connector** in the Claude app.
 2. Type in Claude: `evening digest` (or `did anyone ask me for anything today?`).
 3. Claude runs a short **setup interview** (2–3 rounds of multiple-choice questions, each with a free-text "Other", about 2 minutes) to create `~/Documents/daily-digest/config.json`: **"Tiếng Việt hay English?"** first, then which channels to watch, your **key chats** (picked from your ~15 most recent chats), your **important people** (boss, PO, lead…), your working hours, your role and what you're working on now, keywords/ticket prefixes (e.g. `MOB-`), communication signals on/off, and whether to store message quotes. Your name and email come from Microsoft 365. Claude then suggests a schedule time (end of your working hours + ~1h, default 19:00).
-4. Claude publishes your **Sổ việc** page (private, yours) and saves the link to `~/Documents/daily-digest/artifact-url.txt`.
+4. Claude publishes your **catask** page (private, yours) and saves the link to `~/Documents/daily-digest/artifact-url.txt`.
 5. Open the link and pin it. Done.
 
 To change your answers later, say **`update my profile`** (or `cập nhật hồ sơ`). Claude asks the same questions with your current values preselected and merges the answers into your config (other fields are kept).
@@ -106,7 +112,7 @@ Let Claude draft a reply or a nudge, summarize a thread or ticket, prepare a mee
    - **Extra context** (≤2000): paste the partner's request, SDK doc links, the scope of the change…
    - **Output**: *Draft only* (default), or — for the three Jira chips on a task with a Jira key — *Draft for a Jira update*.
    - Optional: tick *Re-read the source message* when the ledger isn't enough (costs more tokens). Click *Hand over*. The bar at the bottom offers **Undo**.
-3. **Run the worker**: say **`process AI queue`** / **`xử lý việc giao AI`** in Claude, or run **`/so-viec:ai-worker`**. It processes up to 5 queued tasks per run, oldest first. The worker runs even while the button is hidden on the page.
+3. **Run the worker**: say **`process AI queue`** / **`xử lý việc giao AI`** in Claude, or run **`/catask:ai-worker`**. It processes up to 5 queued tasks per run, oldest first. The worker runs even while the button is hidden on the page.
 4. **Review**: the card's chip turns **✨ AI done — view** and the masthead shows **✨ N AI ready**. Open it to see the steps, the draft or summary (**📋 Copy**), and the sources; then *Looks good*, *Redo* (with a new instruction) or *Cancel*. An error offers *Try again*.
    - **Jira update** (*Draft for a Jira update*): the panel shows **Current in Jira** (re-read when you open it) and the **New content**, which you can edit. *Approve & update Jira* → a confirm inside the panel → the page re-reads the issue; if someone edited it since AI read it, you get a second confirm → the page writes **only** that field (description or Story Points) and the chip turns **🔗 Updated in Jira** with a link. There is no Undo for a Jira write. *Use it, update by hand* marks it used without writing. If the description has images or special formatting, the page offers Copy only (a markdown write would drop them).
    - This uses the page's `mcp` permission: the first update asks you to allow the page to use Atlassian, and it only works if you have connected **Atlassian on claude.ai** (Settings → Connectors). Without it you get *Copy*. Claude itself (the worker) never writes to Jira; only your click on the page does. Other people who open the link only see the demo.
@@ -122,10 +128,10 @@ For developers with `devMode: true` (asked in onboarding when your role is a dev
 
 1. **Map repos**: in onboarding (or ⚙ Settings → *Repos*), Claude **finds your repos** (read-only scan of `~/Developer`, `~/Projects`, `~/code`… and your Claude Code project folders, ranked by your commits in the last 30 days, with the Jira keys seen in branch names) and pre-checks the top ones; uncheck, edit (Jira key, base branch), add or delete. Each is `{project, name, path, base, enabled}` in config and `meta/settings`.
 2. **Pick how code runs start** (⚙ Settings → *AI run mode*, `aiRunMode`):
-   - **runner** (default): answer **yes** when onboarding offers to install the runner, or later say **`install so-viec runner`** / **`cài runner sổ việc`** (also "sửa runner" to repair it). Claude backs up and updates the Claude desktop app config, registers it for Claude Code, checks that the `claude` CLI is logged in (if not, run `claude` → `/login` in Terminal yourself), runs the selftest, then asks you to quit (⌘Q) and reopen the app. Manual steps: [`runner/README.md`](runner/README.md#manual-install-fallback). Open the page **in the Claude desktop app**. The page hands the task to the runner, which starts a headless Claude run; progress and results come back through the page (the headless run has no ledger access, so the page is the bridge). Details: [`runner/README.md`](runner/README.md).
+   - **runner** (default): answer **yes** when onboarding offers to install the runner, or later say **`install catask runner`** / **`cài runner catask`** (also "sửa runner" to repair it). Claude backs up and updates the Claude desktop app config, registers it for Claude Code, checks that the `claude` CLI is logged in (if not, run `claude` → `/login` in Terminal yourself), runs the selftest, then asks you to quit (⌘Q) and reopen the app. Manual steps: [`runner/README.md`](runner/README.md#manual-install-fallback). Open the page **in the Claude desktop app**. The page hands the task to the runner, which starts a headless Claude run; progress and results come back through the page (the headless run has no ledger access, so the page is the bridge). Details: [`runner/README.md`](runner/README.md).
    - Handing a code task over from a **browser** opens the page in the Claude desktop app automatically, and it starts the run from there. Open the page in the app at least once first.
    - **desktop**: say "enable desktop mode" / "bật chế độ desktop cho AI code" and Claude creates a desktop scheduled task (after you confirm) that checks the queue every ~2 minutes during working hours (cron from your working hours, e.g. 09:00–18:00 Mon–Fri → `*/2 9-17 * * 1-5`; the app can't go below 1 minute and adds a few minutes of jitter). Every run costs some tokens even when idle.
-   - Either way you can also paste `so-viec#<id>` into Claude (or say "làm task SF-3102").
+   - Either way you can also paste `catask#<id>` into Claude (or say "làm task SF-3102").
 3. **Flow**: plan (shown for approval unless it is small: ≤3 files, low risk, no questions) → code on `feature/<KEY>-<title>` (or the existing branch for that key; base = your hint, else the matching `sprint/*`/`release/*`, else the default branch) → checks (`flutter analyze`/tests, `yarn typecheck`/`lint`…) → commit `<KEY>: <summary>` → **review the diff** → *Approve push* (draft MR/PR) or *Request changes* (a new round, new commit). When the MR is merged, the evening digest marks the task done.
 - **Safety**: the repo must be clean (it never stashes); it never commits to main/master/develop/sprint/release, never force-pushes, never merges, never writes to Jira; at most 10 files per round; one code run at a time; your checkout is switched back to the branch you were on.
 
@@ -148,8 +154,8 @@ Example: [`config.example.json`](config.example.json).
 | `aiAgent` | `false` | Show the page's "🤖 Hand to AI" button, AI chips and "✨ AI ready" count. Off only hides them; stored requests are kept. Also in ⚙ Settings |
 | `devMode` | `false` | You write code: enables *Hand to AI → Write code* on Jira-backed tasks. Asked in onboarding for developer roles; also in ⚙ Settings |
 | `repos` | `[]` | `[{project, name, path, base, enabled}]`: Jira project key → local repo (absolute `path`, optional base branch, `enabled` default `true`). Found for you in onboarding. Used by code tasks and the runner |
-| `aiRunMode` | `"runner"` | How code tasks start: `"runner"` (local `so-viec-runner` MCP, via the page) or `"desktop"` (Claude desktop scheduled task every ~2 min) |
-| `runner` | absent | Optional `{claudePath, allowedTools, extraPath}` for the local `so-viec-runner` MCP ([`runner/README.md`](runner/README.md)) |
+| `aiRunMode` | `"runner"` | How code tasks start: `"runner"` (local `catask-runner` MCP, via the page) or `"desktop"` (Claude desktop scheduled task every ~2 min) |
+| `runner` | absent | Optional `{claudePath, allowedTools, extraPath}` for the local `catask-runner` MCP ([`runner/README.md`](runner/README.md)) |
 | `subagentChatsPerAgent` | `5` | Chats read per subagent |
 | `maxChats` | `40` | Max chats scanned per run |
 | `skipChatsOverMembers` | `40` | Skip chats bigger than this (unless you're tagged) |
@@ -204,9 +210,9 @@ skills/daily-digest-todo/
 skills/ai-worker/
   SKILL.md                 # "Hand to AI" worker: drafts, summaries, Jira proposals (read-only); code tasks
   schedule-prompt.md       # optional prompt for a scheduled worker
-commands/ai-worker.md      # /so-viec:ai-worker
+commands/ai-worker.md      # /catask:ai-worker
 runner/
-  so-viec-runner.mjs       # local stdio MCP: page↔headless bridge for code runs, repo discovery
+  catask-runner.mjs       # local stdio MCP: page↔headless bridge for code runs, repo discovery
   selftest.mjs             # node runner/selftest.mjs
 ```
 
@@ -215,7 +221,7 @@ runner/
 GitHub is the source of truth; the copy in the company's **Organization library** does not update by itself. Every release:
 
 1. Bump `version` in **both** `.claude-plugin/plugin.json` and `.claude-plugin/marketplace.json` (keep them equal), commit and push to `main`.
-2. Republish to the Organization library: ask Claude Code *"đẩy so-viec lên thư viện công ty"* (or republish it from the Plugins page). It replaces the existing entry, so colleagues who click **+** get the new version.
+2. Republish to the Organization library: ask Claude Code *"đẩy catask lên thư viện công ty"* (or republish it from the Plugins page). It replaces the existing entry, so colleagues who click **+** get the new version.
 3. Check: the Organization library entry shows the same version as `plugin.json`.
 
 ### Credits
@@ -230,7 +236,7 @@ MIT — see [`LICENSE`](LICENSE). © 2026 Hồ Thiên Long.
 
 ## Tiếng Việt
 
-> **Một câu:** Mỗi tối các ngày làm việc, vào giờ bản tin của bạn (mặc định: hết giờ làm + 1 tiếng), Claude đọc Teams + Outlook của bạn, gom mọi việc người khác nhờ, câu hỏi đang chờ bạn và lời bạn đã hứa, rồi đổ vào **một trang Sổ việc riêng tư** để sáng mai bạn biết làm gì trước. Viết bằng **tiếng Việt hoặc tiếng Anh**.
+> **Một câu:** Mỗi tối các ngày làm việc, vào giờ bản tin của bạn (mặc định: hết giờ làm + 1 tiếng), Claude đọc Teams + Outlook của bạn, gom mọi việc người khác nhờ, câu hỏi đang chờ bạn và lời bạn đã hứa, rồi đổ vào **một trang catask riêng tư** để sáng mai bạn biết làm gì trước. Viết bằng **tiếng Việt hoặc tiếng Anh**.
 
 ### Làm gì?
 
@@ -239,7 +245,7 @@ MIT — see [`LICENSE`](LICENSE). © 2026 Hồ Thiên Long.
 - ↕️ **Thứ tự sắp xếp**: quá hạn / hạn hôm nay → việc có hạn cụ thể (hạn sớm trước, nên P2 hạn mai đứng trước P1 không có hạn) → P0→P3 → việc cũ hơn trước. Top 3 dùng cùng thứ tự này.
 - 🔁 **Carry-over**: việc chưa xong hôm qua tự ở lại, việc đã xong (có bằng chứng) tự được đánh dấu.
 - 🏆 **Đã xong hôm nay**: chỉ ghi khi có bằng chứng thật trong tin nhắn/mail.
-- 🗂 **Trang Sổ việc** (Artifact riêng tư): bảng Hôm nay / Mai / Đang chờ / Xong (kéo thả được), tab Theo người, Tuần, Ngày (dòng thời gian), Chi phí. **Đánh dấu xong ở mọi nơi**: tab nào cũng được, kể cả mục trên dòng thời gian tab Ngày; mỗi lần đổi trạng thái hay mức ưu tiên đều hiện thanh nhỏ có nút **Hoàn tác** (hoặc Ctrl/Cmd+Z) trong khoảng 6 giây.
+- 🗂 **Trang catask** (Artifact riêng tư): bảng Hôm nay / Mai / Đang chờ / Xong (kéo thả được), tab Theo người, Tuần, Ngày (dòng thời gian), Chi phí. **Đánh dấu xong ở mọi nơi**: tab nào cũng được, kể cả mục trên dòng thời gian tab Ngày; mỗi lần đổi trạng thái hay mức ưu tiên đều hiện thanh nhỏ có nút **Hoàn tác** (hoặc Ctrl/Cmd+Z) trong khoảng 6 giây.
 - ⚙ **Cài đặt ngay trên trang**: đổi ngôn ngữ, kênh theo dõi, giờ làm, người quan trọng, chat theo dõi (bỏ bớt), từ khoá, vai trò/việc đang làm và hai công tắc riêng tư bằng nút ⚙ Cài đặt, khỏi sửa `config.json`. Thay đổi trên trang áp dụng từ bản tin tới; ngôn ngữ và tín hiệu đổi trên trang ngay.
 - 💬 **Xem tin**: mở ngay trên trang một đoạn trích ngắn (≤500 ký tự) của tin nhắn sinh ra việc, kèm link tới tin gốc. Tắt bằng `storeQuotes: false`.
 - ⭐ **Chat quan trọng và người quan trọng**: chat bạn chọn luôn được đọc trước; việc sếp/PO/lead nhờ được nâng lên ít nhất P1.
@@ -254,7 +260,7 @@ MIT — see [`LICENSE`](LICENSE). © 2026 Hồ Thiên Long.
 |---|---|---|
 | App Claude desktop | Có | Để chạy Scheduled task bản tin tối theo giờ của bạn |
 | Microsoft 365 connector | Có | Settings → Connectors → Microsoft 365. Chỉ cần quyền đọc; quyền gửi chat là tuỳ chọn |
-| Artifact có `db` | Có | Trang Sổ việc lưu dữ liệu trong kho riêng của chính trang |
+| Artifact có `db` | Có | Trang catask lưu dữ liệu trong kho riêng của chính trang |
 | Python 3 (3.9+) | Có | Script chỉ dùng thư viện chuẩn, chạy bằng `python3 -I` |
 | `get_usage` (session management) | Không | Có thì tab Chi phí ghi thêm % quota tuần; không có thì bỏ qua |
 
@@ -263,16 +269,16 @@ MIT — see [`LICENSE`](LICENSE). © 2026 Hồ Thiên Long.
 **Từ GitHub** (ai cũng cài được, trong Claude Code hoặc tab Code của app Claude desktop):
 
 ```
-/plugin marketplace add hothienlong/so-viec
-/plugin install so-viec@so-viec
+/plugin marketplace add hothienlong/catask
+/plugin install catask@catask
 ```
 
-Cập nhật bản mới bằng `/plugin marketplace update so-viec`.
+Cập nhật bản mới bằng `/plugin marketplace update catask`.
 
 **Từ thư viện plugin của tổ chức** (khi đã được publish):
 
 ```
-/plugin install so-viec@claudeai-organization-library
+/plugin install catask@claudeai-organization-library
 ```
 
 **Từ thư mục plugin công khai**: lệnh cài sẽ được thêm vào đây sau khi plugin được duyệt và lên danh sách.
@@ -289,7 +295,7 @@ cp -R skills/daily-digest-todo ~/.claude/skills/
 1. Kết nối **Microsoft 365 connector** trong app Claude.
 2. Gõ trong Claude: `bản tin tối` (hoặc `hôm nay có ai nhờ gì tôi không`).
 3. Claude **phỏng vấn nhanh** (2–3 lượt câu hỏi trắc nghiệm, câu nào cũng có ô "Khác" để tự gõ, khoảng 2 phút) để tạo `~/Documents/daily-digest/config.json`: hỏi **"Tiếng Việt hay English?"** trước, rồi tới kênh cần theo dõi, **chat quan trọng** (chọn từ ~15 chat gần nhất), **người quan trọng** (sếp, PO, lead…), giờ làm việc, vai trò và việc đang làm, từ khoá/tiền tố ticket (ví dụ `MOB-`), có bật tín hiệu giao tiếp không, có lưu trích dẫn tin nhắn không. Tên và email lấy từ Microsoft 365. Xong Claude gợi ý giờ chạy lịch (hết giờ làm + ~1 tiếng, mặc định 19:00).
-4. Claude publish trang **Sổ việc** (riêng tư, của bạn) và lưu link vào `~/Documents/daily-digest/artifact-url.txt`.
+4. Claude publish trang **catask** (riêng tư, của bạn) và lưu link vào `~/Documents/daily-digest/artifact-url.txt`.
 5. Mở link, ghim lại. Xong.
 
 Muốn đổi câu trả lời sau này, gõ **`cập nhật hồ sơ`** (hoặc `update my profile`). Claude hỏi lại các câu đó, chọn sẵn giá trị hiện tại, rồi gộp câu trả lời mới vào config (các trường khác giữ nguyên).
@@ -305,7 +311,7 @@ Lưu ý: task chỉ chạy khi app Claude đang mở; tắt máy đúng giờ đ
 
 ### Giao AI (tuỳ chọn, thử nghiệm — mặc định tắt)
 
-Nhờ Claude soạn trả lời hoặc tin nhắc, tóm tắt thread hay ticket, chuẩn bị nội dung họp, hoặc đề xuất description, acceptance criteria, story point cho ticket Jira. **AI chỉ soạn nháp: không gửi, không đăng, không trả lời, không đổi gì ngoài Sổ việc.** Bạn đọc kết quả trên trang rồi chép — riêng đề xuất Jira thì bạn duyệt ngay trên trang và chính trang sẽ cập nhật đúng một trường bằng kết nối Atlassian của bạn.
+Nhờ Claude soạn trả lời hoặc tin nhắc, tóm tắt thread hay ticket, chuẩn bị nội dung họp, hoặc đề xuất description, acceptance criteria, story point cho ticket Jira. **AI chỉ soạn nháp: không gửi, không đăng, không trả lời, không đổi gì ngoài catask.** Bạn đọc kết quả trên trang rồi chép — riêng đề xuất Jira thì bạn duyệt ngay trên trang và chính trang sẽ cập nhật đúng một trường bằng kết nối Atlassian của bạn.
 
 1. **Bật**: trang → ⚙ Cài đặt → *Trợ lý AI (thử nghiệm)* → *Cho phép giao việc cho AI* → Lưu. Tắt đi chỉ ẩn nút; yêu cầu và kết quả đã lưu vẫn giữ nguyên.
 2. **Giao việc**: bấm **🤖 Giao AI** trên một việc đang mở (thẻ trên bảng, top 3, dòng ở tab Theo người, hoặc hộp Xem tin). Form hiện tên việc và khối **AI đã biết** (bấm để mở: lý do, trích tin, nguồn, ticket/link, ưu tiên, hạn) để bạn khỏi gõ lại. Rồi:
@@ -313,7 +319,7 @@ Nhờ Claude soạn trả lời hoặc tin nhắc, tóm tắt thread hay ticket,
    - **Ngữ cảnh thêm** (≤2000): dán yêu cầu của đối tác, link tài liệu SDK, phạm vi thay đổi…
    - **Kết quả**: *Chỉ soạn nháp* (mặc định), hoặc — với ba gợi ý Jira trên việc có mã ticket — *Soạn để cập nhật lên Jira*.
    - Tuỳ chọn: tick *Đọc lại tin gốc* khi dữ liệu trong sổ chưa đủ (tốn token hơn). Bấm *Giao*. Thanh dưới cùng có nút **Hoàn tác**.
-3. **Chạy worker**: gõ **`xử lý việc giao AI`** / **`process AI queue`** với Claude, hoặc chạy **`/so-viec:ai-worker`**. Mỗi lần xử lý tối đa 5 việc đang chờ, việc giao trước làm trước. Worker vẫn chạy kể cả khi nút đang ẩn trên trang.
+3. **Chạy worker**: gõ **`xử lý việc giao AI`** / **`process AI queue`** với Claude, hoặc chạy **`/catask:ai-worker`**. Mỗi lần xử lý tối đa 5 việc đang chờ, việc giao trước làm trước. Worker vẫn chạy kể cả khi nút đang ẩn trên trang.
 4. **Xem lại**: chip trên thẻ đổi thành **✨ AI xong — xem**, đầu trang hiện **✨ N AI xong**. Mở ra để xem các bước, bản nháp hoặc tóm tắt (**📋 Chép**) và nguồn; rồi chọn *Dùng được*, *Làm lại* (kèm hướng dẫn mới) hoặc *Huỷ*. Nếu lỗi thì có *Thử lại*.
    - **Cập nhật Jira** (*Soạn để cập nhật lên Jira*): bảng hiện **Hiện tại trên Jira** (đọc lại khi mở) và **Nội dung mới** (sửa được). *Duyệt & cập nhật Jira* → xác nhận ngay trong bảng → trang đọc lại ticket; nếu ai đó đã sửa ticket từ lúc AI đọc thì phải xác nhận thêm lần nữa → trang ghi **đúng một** trường (description hoặc Story Points), chip đổi thành **🔗 Đã cập nhật Jira** kèm link. Ghi lên Jira thì không có Hoàn tác. *Dùng, tự cập nhật tay* đánh dấu đã dùng mà không ghi. Nếu mô tả hiện có ảnh hoặc định dạng đặc biệt, trang chỉ cho Chép (ghi bằng markdown sẽ làm mất chúng).
    - Tính năng này dùng quyền `mcp` của trang: lần cập nhật đầu tiên claude.ai sẽ hỏi bạn có cho trang dùng Atlassian không, và chỉ chạy khi bạn đã kết nối **Atlassian trên claude.ai** (Settings → Connectors). Chưa kết nối thì chỉ có nút *Chép*. Bản thân Claude (worker) không bao giờ ghi lên Jira; chỉ cú bấm của bạn trên trang mới ghi. Người khác mở link chỉ thấy bản demo.
@@ -329,10 +335,10 @@ Dành cho dev có `devMode: true` (hỏi lúc thiết lập khi vai trò là dev
 
 1. **Khai báo repo**: lúc thiết lập (hoặc ⚙ Cài đặt → *Repo*), Claude **tự tìm repo trên máy** (chỉ đọc: `~/Developer`, `~/Projects`, `~/code`… và các thư mục dự án Claude Code, xếp theo số commit của bạn 30 ngày qua, kèm mã Jira thấy trong tên nhánh) và tick sẵn các repo đầu; bạn bỏ tick, sửa (mã Jira, nhánh gốc), thêm hoặc xoá. Mỗi repo là `{project, name, path, base, enabled}` trong config và `meta/settings`.
 2. **Chọn cách chạy** (⚙ Cài đặt → *Chế độ chạy AI*, `aiRunMode`):
-   - **runner** (mặc định): trả lời **có** khi lúc thiết lập Claude hỏi cài runner, hoặc sau này nói **`cài runner sổ việc`** (hay "sửa runner" để sửa). Claude tự sao lưu và cập nhật cấu hình app Claude desktop, đăng ký cho Claude Code, kiểm tra `claude` CLI đã đăng nhập chưa (chưa thì bạn tự mở Terminal, chạy `claude` → `/login`), chạy selftest, rồi nhắc bạn thoát hẳn (⌘Q) và mở lại app. Làm tay: [`runner/README.md`](runner/README.md#cài-tay-dự-phòng). Mở trang **trong app Claude desktop**. Trang giao việc cho runner, runner chạy Claude nền; tiến độ và kết quả đi qua trang (Claude chạy nền không đọc/ghi sổ được, nên trang là cầu nối). Chi tiết: [`runner/README.md`](runner/README.md).
+   - **runner** (mặc định): trả lời **có** khi lúc thiết lập Claude hỏi cài runner, hoặc sau này nói **`cài runner catask`** (hay "sửa runner" để sửa). Claude tự sao lưu và cập nhật cấu hình app Claude desktop, đăng ký cho Claude Code, kiểm tra `claude` CLI đã đăng nhập chưa (chưa thì bạn tự mở Terminal, chạy `claude` → `/login`), chạy selftest, rồi nhắc bạn thoát hẳn (⌘Q) và mở lại app. Làm tay: [`runner/README.md`](runner/README.md#cài-tay-dự-phòng). Mở trang **trong app Claude desktop**. Trang giao việc cho runner, runner chạy Claude nền; tiến độ và kết quả đi qua trang (Claude chạy nền không đọc/ghi sổ được, nên trang là cầu nối). Chi tiết: [`runner/README.md`](runner/README.md).
    - Giao việc code từ **trình duyệt** thì trang tự mở trong app Claude desktop và gửi việc cho runner từ đó. Cần mở trang trong app ít nhất một lần trước.
    - **desktop**: nói "bật chế độ desktop cho AI code", Claude tạo scheduled task trên app desktop (sau khi bạn xác nhận), kiểm hàng đợi mỗi ~2 phút trong giờ làm (cron theo giờ làm, vd 09:00–18:00 T2–T6 → `*/2 9-17 * * 1-5`; app không cho dưới 1 phút và tự lệch vài phút). Mỗi lần chạy đều tốn chút token kể cả khi không có việc.
-   - Cách nào cũng có thể dán `so-viec#<id>` vào Claude (hoặc nói "làm task SF-3102").
+   - Cách nào cũng có thể dán `catask#<id>` vào Claude (hoặc nói "làm task SF-3102").
 3. **Luồng**: kế hoạch (hiện để duyệt, trừ khi việc nhỏ: ≤3 file, rủi ro thấp, không có câu hỏi) → code trên `feature/<KEY>-<tiêu-đề>` (hoặc nhánh sẵn có của mã đó; nhánh gốc = gợi ý của bạn, không thì `sprint/*`/`release/*` khớp, không thì nhánh mặc định) → kiểm tra (`flutter analyze`/test, `yarn typecheck`/`lint`…) → commit `<KEY>: <tóm tắt>` → **bạn xem diff** → *Duyệt push* (MR/PR nháp) hoặc *Yêu cầu sửa* (vòng mới, commit mới). Khi MR được merge, bản tin tối đánh dấu việc xong.
 - **An toàn**: repo phải sạch (không bao giờ stash); không commit vào main/master/develop/sprint/release, không force-push, không merge, không ghi Jira; tối đa 10 file mỗi vòng; mỗi lúc chỉ một lần chạy code; nhánh bạn đang đứng được trả lại như cũ.
 
@@ -355,8 +361,8 @@ Mẫu: [`config.example.json`](config.example.json).
 | `aiAgent` | `false` | Hiện nút "🤖 Giao AI", chip trạng thái AI và số "✨ AI xong" trên trang. Tắt chỉ ẩn đi; yêu cầu đã lưu vẫn giữ. Đổi được trong ⚙ Cài đặt |
 | `devMode` | `false` | Bạn có code: bật *Giao AI → Code luôn* cho việc có ticket Jira. Hỏi lúc thiết lập nếu vai trò là dev; đổi được trong ⚙ Cài đặt |
 | `repos` | `[]` | `[{project, name, path, base, enabled}]`: mã dự án Jira → repo trên máy (`path` tuyệt đối, nhánh gốc tuỳ chọn, `enabled` mặc định `true`). Được tự tìm lúc thiết lập. Dùng cho việc code và runner |
-| `aiRunMode` | `"runner"` | Cách chạy việc code: `"runner"` (MCP `so-viec-runner` trên máy, qua trang) hoặc `"desktop"` (scheduled task của app desktop, ~2 phút/lần) |
-| `runner` | không có | Tuỳ chọn `{claudePath, allowedTools, extraPath}` cho MCP `so-viec-runner` trên máy ([`runner/README.md`](runner/README.md)) |
+| `aiRunMode` | `"runner"` | Cách chạy việc code: `"runner"` (MCP `catask-runner` trên máy, qua trang) hoặc `"desktop"` (scheduled task của app desktop, ~2 phút/lần) |
+| `runner` | không có | Tuỳ chọn `{claudePath, allowedTools, extraPath}` cho MCP `catask-runner` trên máy ([`runner/README.md`](runner/README.md)) |
 | `subagentChatsPerAgent` | `5` | Số chat mỗi subagent đọc |
 | `maxChats` | `40` | Số chat tối đa quét mỗi lần |
 | `skipChatsOverMembers` | `40` | Bỏ qua chat đông hơn mức này (trừ khi bạn bị tag) |
@@ -368,7 +374,7 @@ Mẫu: [`config.example.json`](config.example.json).
 | `role`, `currentWork` | `""` | Vai trò và việc bạn đang làm; giúp đoán câu hỏi chung trong nhóm có phải việc của bạn không |
 | `keywords` | `[]` | Tiền tố ticket, tên dự án/tính năng (ví dụ `MOB-`); dùng khi dò mail có hạn chót, và câu hỏi chung nhắc tới chúng được giữ ở "Theo dõi" |
 | `storeQuotes` | `true` | Lưu đoạn trích ≤500 ký tự của tin gốc trên mỗi việc cho nút "Xem tin". `false` = không lưu nội dung tin nào; trang mở thẳng link gốc |
-| `retention` | `{archiveDoneAfterDays: 90, pruneDaysAfterDays: 120, quoteDaysAfterDone: 30}` | Sổ việc giữ dữ liệu bao lâu (xem phần Riêng tư). Việc xong quá `archiveDoneAfterDays` ngày được chuyển vào kho lưu trữ theo tháng (tối thiểu 45, vì bản đồ nhiệt tab Tuần cần 6 tuần); bản tin ngày và bản ghi chi phí quá `pruneDaysAfterDays` ngày bị xoá (tối thiểu 60); trích dẫn bị xoá khỏi việc đã xong sau `quoteDaysAfterDone` ngày |
+| `retention` | `{archiveDoneAfterDays: 90, pruneDaysAfterDays: 120, quoteDaysAfterDone: 30}` | catask giữ dữ liệu bao lâu (xem phần Riêng tư). Việc xong quá `archiveDoneAfterDays` ngày được chuyển vào kho lưu trữ theo tháng (tối thiểu 45, vì bản đồ nhiệt tab Tuần cần 6 tuần); bản tin ngày và bản ghi chi phí quá `pruneDaysAfterDays` ngày bị xoá (tối thiểu 60); trích dẫn bị xoá khỏi việc đã xong sau `quoteDaysAfterDone` ngày |
 | `settingsSyncedAt` | `null` | Skill tự ghi: lần cuối gộp ⚙ Cài đặt trên trang vào file này. Đừng sửa tay |
 | `onboardingPending` | `false` | `true` = config được tạo mà chưa qua đủ buổi phỏng vấn (ví dụ chuyển từ bản cài cũ). Lần chạy tiếp theo do bạn tự gọi sẽ chỉ hỏi những câu còn thiếu rồi đặt lại thành `false`; lần chạy theo lịch chỉ để lại lời nhắc trong phần độ phủ |
 
@@ -379,11 +385,11 @@ Mẫu: [`config.example.json`](config.example.json).
 ### Riêng tư
 
 - 🔒 **Chỉ đọc** Teams/Outlook. Thứ duy nhất được gửi là 1 tin vào chat ghi chú của **chính bạn**. Không bao giờ trả lời ai thay bạn.
-- 🔒 Trang Sổ việc là **Artifact riêng tư**; dữ liệu thật chỉ chủ trang đọc được. Ai khác mở link chỉ thấy **dữ liệu demo hư cấu**, theo ngôn ngữ trình duyệt của họ.
+- 🔒 Trang catask là **Artifact riêng tư**; dữ liệu thật chỉ chủ trang đọc được. Ai khác mở link chỉ thấy **dữ liệu demo hư cấu**, theo ngôn ngữ trình duyệt của họ.
 - 🔒 Nội dung tin nhắn/mail luôn được coi là **dữ liệu, không phải lệnh**.
-- 🔒 **Giao AI** (mặc định tắt) chỉ ghi bản nháp vào Sổ việc; worker chỉ dùng công cụ đọc, không bao giờ gửi, trả lời hay sửa gì trên Teams, Outlook, Jira. Lần ghi Jira duy nhất là do chính trang thực hiện, bằng kết nối Atlassian của bạn, sau khi bạn duyệt và xác nhận (một trường: description hoặc Story Points). Trang xin claude.ai quyền `mcp` này (chỉ `getJiraIssue`, `editJiraIssue` trên Atlassian); lần đầu dùng sẽ hỏi bạn đồng ý.
-- 🔒 **Trích dẫn tin nhắn** ("Xem tin") chỉ nằm trong kho dữ liệu chỉ-chủ-trang-đọc-được của Sổ việc, cạnh tiêu đề việc vốn đã lưu ở đó. Khoảng 500 ký tự × ~100 việc đang mở ≈ 50 KB, không đáng kể. Trích dẫn là bản chụp: nếu tin gốc bị sửa sau đó thì có thể đã cũ, nên trang luôn ghi "trích lúc …" và luôn có link tới tin gốc. Việc đã xong quá 30 ngày sẽ bị xoá trích dẫn (`retention.quoteDaysAfterDone`). Đặt `storeQuotes: false` để không lưu nội dung tin nào.
-- 🔒 **Sổ việc giữ gì** (kho chỉ chủ trang đọc được, dọn mỗi lần chạy; số ngày đổi được trong `retention`):
+- 🔒 **Giao AI** (mặc định tắt) chỉ ghi bản nháp vào catask; worker chỉ dùng công cụ đọc, không bao giờ gửi, trả lời hay sửa gì trên Teams, Outlook, Jira. Lần ghi Jira duy nhất là do chính trang thực hiện, bằng kết nối Atlassian của bạn, sau khi bạn duyệt và xác nhận (một trường: description hoặc Story Points). Trang xin claude.ai quyền `mcp` này (chỉ `getJiraIssue`, `editJiraIssue` trên Atlassian); lần đầu dùng sẽ hỏi bạn đồng ý.
+- 🔒 **Trích dẫn tin nhắn** ("Xem tin") chỉ nằm trong kho dữ liệu chỉ-chủ-trang-đọc-được của catask, cạnh tiêu đề việc vốn đã lưu ở đó. Khoảng 500 ký tự × ~100 việc đang mở ≈ 50 KB, không đáng kể. Trích dẫn là bản chụp: nếu tin gốc bị sửa sau đó thì có thể đã cũ, nên trang luôn ghi "trích lúc …" và luôn có link tới tin gốc. Việc đã xong quá 30 ngày sẽ bị xoá trích dẫn (`retention.quoteDaysAfterDone`). Đặt `storeQuotes: false` để không lưu nội dung tin nào.
+- 🔒 **catask giữ gì** (kho chỉ chủ trang đọc được, dọn mỗi lần chạy; số ngày đổi được trong `retention`):
   - Việc đang mở và đang chờ: giữ nguyên chừng nào còn mở, dù cũ bao lâu. Mỗi việc có thể có `ref` chỉ chứa mã nguồn (mã chat/tin Teams, mã mail Outlook, mã ticket Jira, mã sự kiện lịch), không chứa nội dung tin, và nếu bạn dùng Giao AI thì có trường `ai` chứa yêu cầu và bản nháp (≤2000 ký tự).
   - Việc đã xong: giữ đầy đủ 90 ngày sau ngày xong để tab Tuần và bản đồ nhiệt chạy đúng. Sau đó được chuyển vào kho lưu trữ theo tháng (`archive/<YYYY-MM>`), chỉ còn id, tiêu đề, ngày xong, người, project, mức ưu tiên, loại việc và nguồn; bản đầy đủ (lý do, link, trích dẫn) bị xoá. Việc bạn vừa sửa trên trang trong 7 ngày qua thì lần chạy đó không đụng tới.
   - Bản tin ngày (`days/…`) và bản ghi chi phí (`runs/…`) quá 120 ngày bị xoá. Cài đặt, hồ sơ (`meta/…`) và kho lưu trữ không bao giờ bị xoá.
@@ -404,16 +410,16 @@ skills/daily-digest-todo/
   scripts/render.py        # kiểm schema JSON + bản HTML dự phòng
   scripts/ai_milestones.py # block làm việc Claude Code (tên + giờ)
   scripts/run_tokens.py    # token của các lần chạy theo lịch
-  assets/so-viec.html      # trang Sổ việc (Artifact), giao diện vi + en
+  assets/so-viec.html      # trang catask (Artifact), giao diện vi + en
   assets/digest-template.html
   assets/mascot/*.svg
   assets/peeps/*.svg       # Open Peeps, CC0 (xem LICENSE.txt)
 skills/ai-worker/
   SKILL.md                 # worker "Giao AI": soạn nháp, tóm tắt, đề xuất Jira (chỉ đọc); việc code
   schedule-prompt.md       # prompt tuỳ chọn cho worker chạy theo lịch
-commands/ai-worker.md      # /so-viec:ai-worker
+commands/ai-worker.md      # /catask:ai-worker
 runner/
-  so-viec-runner.mjs       # MCP stdio trên máy: cầu nối trang↔Claude chạy nền cho việc code, tìm repo
+  catask-runner.mjs       # MCP stdio trên máy: cầu nối trang↔Claude chạy nền cho việc code, tìm repo
   selftest.mjs             # node runner/selftest.mjs
 ```
 
@@ -422,7 +428,7 @@ runner/
 GitHub là nơi duy nhất sửa code. Bản trong **Organization library** của công ty không tự cập nhật. Mỗi lần ra bản mới:
 
 1. Tăng `version` ở **cả hai** file `.claude-plugin/plugin.json` và `.claude-plugin/marketplace.json` (hai số phải giống nhau), commit rồi push lên `main`.
-2. Đẩy lên thư viện công ty: nhắn Claude Code *"đẩy so-viec lên thư viện công ty"* (hoặc đăng lại từ trang Plugins). Bản mới đè lên mục cũ, đồng nghiệp bấm **+** là có bản mới.
+2. Đẩy lên thư viện công ty: nhắn Claude Code *"đẩy catask lên thư viện công ty"* (hoặc đăng lại từ trang Plugins). Bản mới đè lên mục cũ, đồng nghiệp bấm **+** là có bản mới.
 3. Kiểm tra: mục trong Organization library hiện đúng số phiên bản như `plugin.json`.
 
 ### Ghi công

@@ -1,4 +1,4 @@
-<title>Sổ việc</title>
+<title>catask</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -51,6 +51,15 @@ button { font: inherit; color: inherit }
 .mast canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; display: block }
 .brand { display: flex; align-items: center; gap: 14px; min-width: 0 }
 .mascot { width: 76px; height: 76px; margin: -6px 0 -10px; flex: none; background: var(--cat-idle) no-repeat center / contain; filter: drop-shadow(0 4px 6px rgba(0, 40, 90, .28)) }
+.wm { display: inline-flex; align-items: baseline; font-family: var(--display); font-weight: 800; letter-spacing: -.01em; line-height: 1 }
+.wm-lg { font-size: 26px; text-shadow: 0 2px 0 rgba(0, 40, 90, .2) }
+.wm-cat { position: relative; color: #ffd36b }
+.wm-cat::before, .wm-cat::after { content: ""; position: absolute; top: -.32em; width: 0; height: 0; border-left: .14em solid transparent; border-right: .14em solid transparent; border-bottom: .24em solid currentColor }
+.wm-cat::before { left: .06em; transform: rotate(-14deg) } .wm-cat::after { right: .04em; transform: rotate(14deg) }
+.wm-ask { color: var(--on-sky) }
+.wm-line { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; margin: 6px 0 4px }
+.slogan { font-size: 12.5px; font-weight: 600; opacity: .8 }
+.mc-home .wm { font-size: 19px }
 .brand .kicker { font-size: 11.5px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; opacity: .88 }
 .brand h1 { margin: 2px 0 0; font-family: var(--display); font-weight: 800; font-size: clamp(28px, 3.2vw, 44px); line-height: 1.05; letter-spacing: -.01em; text-shadow: 0 2px 0 rgba(0, 40, 90, .2) }
 .brand h1 em { font-style: normal; opacity: .9 }
@@ -626,7 +635,7 @@ select.set-in { appearance: auto }
 .mc-in { position: relative; height: 100%; display: flex; align-items: center; gap: 12px; padding: 0 18px; color: var(--on-sky); opacity: 0 }
 .mc-home { display: flex; align-items: center; gap: 10px; min-width: 0; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; cursor: pointer }
 .mc-logo { flex: none; width: 30px; height: 30px; border-radius: 50%; background: rgba(255, 255, 255, .18) var(--cat-idle) no-repeat center / 26px }
-.mc-home b { font-family: var(--display); font-weight: 800; font-size: 17px; white-space: nowrap }
+.mc-home b { white-space: nowrap; padding-top: 4px }
 .mc-date { font-size: 12.5px; opacity: .8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
 .mc-chips { margin-left: auto; display: flex; gap: 6px; min-width: 0; overflow: hidden }
 .mc-chip { flex: none; padding: 1px 10px; border: 0; border-radius: 999px; background: rgba(255, 255, 255, .16); color: var(--on-sky); font: 600 12px/20px var(--text); white-space: nowrap }
@@ -698,7 +707,7 @@ html.ai-fold { --aibar-h: 41px }
 
 <i class="page-top" id="pageTop" aria-hidden="true"></i>
 <div class="app">
-  <header class="mast" id="mast"><canvas id="sky" aria-hidden="true"></canvas><div class="mast-c" id="mastC"><span class="mc-bg" aria-hidden="true"></span><div class="mc-in"><button type="button" class="mc-home" id="mastHome" tabindex="-1"><span class="mc-logo" aria-hidden="true"></span><b id="mastCT"></b><span class="mc-date" id="mastCD"></span></button><span class="mc-chips" id="mastChips"></span></div></div><div class="brand"><span class="mascot" aria-hidden="true"></span><div><div class="kicker" id="kicker"></div><h1 id="title"></h1></div></div><div class="tally" id="tally"></div></header>
+  <header class="mast" id="mast"><canvas id="sky" aria-hidden="true"></canvas><div class="mast-c" id="mastC"><span class="mc-bg" aria-hidden="true"></span><div class="mc-in"><button type="button" class="mc-home" id="mastHome" tabindex="-1"><span class="mc-logo" aria-hidden="true"></span><b id="mastCT"></b><span class="mc-date" id="mastCD"></span></button><span class="mc-chips" id="mastChips"></span></div></div><div class="brand"><span class="mascot" aria-hidden="true"></span><div><div class="wm-line"><span class="wm wm-lg" id="wm" aria-label="catask"></span><span class="slogan" id="slogan"></span></div><div class="kicker" id="kicker"></div><h1 id="title"></h1></div></div><div class="tally" id="tally"></div></header>
   <nav class="tabs" data-i18n-aria="tabsAria" aria-label="">
     <a href="#hom-nay" data-tab="hom-nay" data-i18n="tabToday"></a>
     <a href="#theo-nguoi" data-tab="theo-nguoi" data-i18n="tabPeople"></a>
@@ -741,13 +750,13 @@ html.ai-fold { --aibar-h: 41px }
   function plural(n, one, many) { return n + ' ' + (n === 1 ? one : many) }
   var I18N = {
     vi: {
-      brand: 'Sổ việc', mastTop: 'Về đầu trang',
-      kickerOwner: function (n) { return n ? 'Sổ việc của ' + n : 'Sổ việc' },
+      brand: 'catask', slogan: 'Không sót việc nào.', mastTop: 'Về đầu trang',
+      kickerOwner: function (n) { return n || '' },
       kickerDigest: 'bản tin {0} lúc {1}', kickerNone: 'chưa có bản tin',
       tabsAria: 'Các mục', tabToday: 'Hôm nay', tabPeople: 'Theo người', tabWeek: 'Tuần', tabDay: 'Ngày', tabCost: 'Chi phí',
-      projAria: 'Lọc theo dự án', infoBtn: 'ⓘ Cách hoạt động', demoBtn: 'Xem bản demo', demoBack: '\u2190 Về sổ của tôi',
+      projAria: 'Lọc theo dự án', infoBtn: 'ⓘ Cách hoạt động', demoBtn: 'Xem bản demo', demoBack: '\u2190 Về catask của tôi',
       demoHint: 'Dữ liệu mẫu, đúng như người khác thấy khi mở link này. Thử tick, kéo thả, hoàn tác thoải mái — không lưu gì.',
-      howtoAria: 'Cách sổ việc hoạt động', howtoClose: 'Đóng', loading: 'Đang mở sổ việc…',
+      howtoAria: 'Cách catask hoạt động', howtoClose: 'Đóng', loading: 'Đang mở catask…',
       howto: [
         ['Khi nào chạy', [
           '<b>{T}, {D}</b> (lệch vài phút để chia tải). Đổi giờ ở ⚙ Cài đặt.',
@@ -841,8 +850,8 @@ html.ai-fold { --aibar-h: 41px }
       saveFail: 'Chưa lưu được thay đổi ({0}). Tải lại trang để thấy trạng thái thật.',
       noConn: 'Chưa kết nối được dữ liệu. Kiểm tra mạng hoặc đăng nhập claude.ai.',
       demoDefault: 'Bản demo: dữ liệu mẫu để xem giao diện. Kéo thả và tick thử được, nhưng không lưu.',
-      demoNoClaude: 'Bản demo: mở trên claude.ai để xem sổ việc thật.',
-      demoSelf: 'Bạn đang xem thử bản demo, đúng như người khác thấy. Bấm "\u2190 Về sổ của tôi" hoặc tải lại trang để quay về.',
+      demoNoClaude: 'Bản demo: mở trên claude.ai để xem catask thật của bạn.',
+      demoSelf: 'Bạn đang xem thử bản demo, đúng như người khác thấy. Bấm "\u2190 Về catask của tôi" hoặc tải lại trang để quay về.',
       lostTodos: 'Mất kết nối danh sách việc ({0}).', lostRuns: 'Mất kết nối dữ liệu chi phí ({0}).', lostDays: 'Mất kết nối bản tin ngày ({0}).',
       /* settings drawer */
       setBtn: '⚙ Cài đặt', setTitle: 'Cài đặt bản tin', setClose: 'Đóng cài đặt',
@@ -894,7 +903,7 @@ html.ai-fold { --aibar-h: 41px }
         draft_nudge: 'Tin nhắc', meeting_prep: 'Nội dung họp', custom: 'Kết quả', draft: 'Bản nháp', code: 'Kết quả code' },
       AIF: { description: 'mô tả', ac: 'acceptance criteria', storyPoints: 'story point' },
       aiReqTitle: '🤖 Giao AI', aiKindLegend: 'AI làm gì?', aiSumTicket: 'Tóm tắt ticket', aiSumThread: 'Tóm tắt thread',
-      aiKnown: 'AI đã biết', aiKnownN: '{0} mục', aiKnownHint: 'Lấy từ Sổ việc, không cần gõ lại.',
+      aiKnown: 'AI đã biết', aiKnownN: '{0} mục', aiKnownHint: 'Lấy từ catask, không cần gõ lại.',
       akWhy: 'Vì sao', akQuote: 'Trích tin', akSrc: 'Nguồn', akRef: 'Ticket / link', akPri: 'Ưu tiên', akDue: 'Hạn',
       aiNote: 'Hướng dẫn', aiNoteReq: 'Hướng dẫn (bắt buộc với "Khác…")',
       aiNotePh: 'VD: trả lời ngắn, hẹn gửi trước thứ Sáu', aiNoteErr: 'Chọn "Khác…" thì cần ghi rõ yêu cầu.',
@@ -969,7 +978,7 @@ html.ai-fold { --aibar-h: 41px }
       repoSum: 'Repo cho AI code', repoSumN: '{0} đang bật / {1}', repoManage: 'Quản lý repo ›', repoTitle: 'Quản lý repo', repoBack: 'Về cài đặt',
       repoIntro: 'Tick những repo AI được code. Thay đổi lưu cùng cài đặt (nút Lưu bên dưới).', repoTabsAria: 'Lọc repo theo dự án', repoAllOn: 'Bật hết', repoAllOff: 'Tắt hết', repoGroup: 'Dự án',
       rnRetry2: 'Thử lại', rnGrant: 'Cấp quyền',
-      rnClaimed: 'AI đã nhận việc. Tiến độ hiện ở đây.', rnQueuedWait: 'Đã xếp hàng — trang Sổ việc đang mở trong app Claude desktop sẽ tự chạy.',
+      rnClaimed: 'AI đã nhận việc. Tiến độ hiện ở đây.', rnQueuedWait: 'Đã xếp hàng — trang catask đang mở trong app Claude desktop sẽ tự chạy.',
       rnAppIdle: 'App Claude đang mở nhưng chưa nhận việc — mở trang trong app và bấm Thử lại.',
       rnNoDisp: 'Không thấy app Claude desktop nào đang mở trang này. Mở trang trong app (để nó tự chạy), hoặc dán lệnh vào Claude Code:', rnCopied: 'Đã chép lệnh',
       dispChip: '⚡ Đang trực', dispChipTip: 'Trang này đang mở trong app Claude desktop và tự chạy việc code được giao (cả từ trình duyệt). Không tốn token khi không có việc.',
@@ -977,23 +986,23 @@ html.ai-fold { --aibar-h: 41px }
       dispNeed: 'Bấm để cho phép AI tự chạy việc từ trình duyệt',
       rnMore: 'Chi tiết',
       rnHintOutside: 'Bạn đang mở trang ngoài app Claude desktop. Giao code vẫn vào hàng đợi; mở trang trong app để AI chạy ngay, hoặc dán lệnh vào Claude Code.',
-      instPhrase: 'cài runner sổ việc',
-      instManual: 'Cài tay (nếu cần)', instStep1: '1. App Claude desktop: thêm so-viec-runner vào mcpServers trong ~/Library/Application Support/Claude/claude_desktop_config.json, rồi thoát hẳn app (⌘Q) và mở lại.',
+      instPhrase: 'cài runner catask',
+      instManual: 'Cài tay (nếu cần)', instStep1: '1. App Claude desktop: thêm catask-runner vào mcpServers trong ~/Library/Application Support/Claude/claude_desktop_config.json, rồi thoát hẳn app (⌘Q) và mở lại.',
       instNode: 'command là đường dẫn node — xem bằng which node.', instStep2: '2. Mở terminal, chạy claude rồi gõ /login (một lần).', instOpt: 'Tuỳ chọn: cho phiên Claude Code thấy runner',
       pillReady: 'Runner: đã kết nối · đang trực', pillOk: 'Runner: đã kết nối', pillOkTip: 'Khi giao việc, trang sẽ tự mở app Claude để AI chạy.', pillNone: 'Runner: chưa cài', pillErr: 'Runner: lỗi', instTell: 'Nói với Claude Code:',
       rdTip: 'Mẹo: để trang mở sẵn trong app (khung artifact) thì không phải mở app mỗi lần.',
-      rnConnWait: 'Runner: chờ bạn cho phép', rnConnect: 'Kết nối runner', rnHintWait: 'App Claude sẽ hỏi cho phép trang dùng so-viec-runner — chọn Cho phép.',
-      rnHintGrant: 'Trang chưa được phép gọi runner trên máy. Bấm "Cấp quyền".', rnHintManifest: 'Trang này chưa khai báo runner. Nhờ Claude cập nhật lại trang sổ việc.',
+      rnConnWait: 'Runner: chờ bạn cho phép', rnConnect: 'Kết nối runner', rnHintWait: 'App Claude sẽ hỏi cho phép trang dùng catask-runner — chọn Cho phép.',
+      rnHintGrant: 'Trang chưa được phép gọi runner trên máy. Bấm "Cấp quyền".', rnHintManifest: 'Trang này chưa khai báo runner. Nhờ Claude cập nhật lại trang catask.',
       repoCommits: '{0} commit/30 ngày', repoUse: 'Dùng repo {0}', repoEdit: 'Sửa', repoEditAria: 'Sửa repo {0}', repoKeyAria: 'Dùng mã {0}'
     },
     en: {
-      brand: 'Work ledger', mastTop: 'Back to top',
-      kickerOwner: function (n) { return n ? n + '’s work ledger' : 'Work ledger' },
+      brand: 'catask', slogan: 'Nothing slips through.', mastTop: 'Back to top',
+      kickerOwner: function (n) { return n || '' },
       kickerDigest: 'digest {0} at {1}', kickerNone: 'no digest yet',
       tabsAria: 'Sections', tabToday: 'Today', tabPeople: 'People', tabWeek: 'Week', tabDay: 'Day', tabCost: 'Cost',
-      projAria: 'Filter by project', infoBtn: 'ⓘ How it works', demoBtn: 'View demo', demoBack: '\u2190 Back to my ledger',
+      projAria: 'Filter by project', infoBtn: 'ⓘ How it works', demoBtn: 'View demo', demoBack: '\u2190 Back to my catask',
       demoHint: 'Sample data, exactly what others see when they open this link. Tick, drag and undo freely — nothing is saved.',
-      howtoAria: 'How the ledger works', howtoClose: 'Close', loading: 'Opening your ledger…',
+      howtoAria: 'How catask works', howtoClose: 'Close', loading: 'Opening catask…',
       howto: [
         ['When it runs', [
           '<b>{T}, {D}</b> (offset by a few minutes to spread the load). Change it in ⚙ Settings.',
@@ -1084,14 +1093,14 @@ html.ai-fold { --aibar-h: 41px }
       detail: 'Details · latest run {0}',
       costCols: ['Run', 'Min', 'Model', 'Calls', 'Subagents', 'Cache read', 'Cache write', 'Input', 'Output', 'Equiv.', 'Weekly quota'],
       quotaNote: '"Weekly quota" is the Weekly · all models figure read at the start and the end of the run. If you used Claude at the same time, the difference includes your usage too.',
-      emptyLedger: 'The ledger is empty. The digest at {0}, {1}, will fill it automatically.',
+      emptyLedger: 'Nothing here yet. The digest at {0}, {1}, will fill it automatically.',
       demoMoved: 'Demo: moved, but nothing is saved.', ownerOnly: 'Only the owner can change tasks.',
       markedDone: 'Marked done.', movedTo: 'Moved to {0}.', err: 'error',
       saveFail: 'Couldn’t save the change ({0}). Reload the page to see the real state.',
       noConn: 'Couldn’t connect to the data. Check your network or sign in to claude.ai.',
       demoDefault: 'Demo: sample data to show the layout. You can drag and tick, but nothing is saved.',
-      demoNoClaude: 'Demo: open this page on claude.ai to see the real ledger.',
-      demoSelf: 'You are viewing the demo exactly as others see it. Click "\u2190 Back to my ledger" or reload the page to return.',
+      demoNoClaude: 'Demo: open this page on claude.ai to see your real catask.',
+      demoSelf: 'You are viewing the demo exactly as others see it. Click "\u2190 Back to my catask" or reload the page to return.',
       lostTodos: 'Lost connection to the task list ({0}).', lostRuns: 'Lost connection to cost data ({0}).', lostDays: 'Lost connection to daily digests ({0}).',
       /* settings drawer */
       setBtn: '⚙ Settings', setTitle: 'Digest settings', setClose: 'Close settings',
@@ -1109,7 +1118,7 @@ html.ai-fold { --aibar-h: 41px }
       secChat: 'Key chats', chatEmpty: 'No chats yet.', chatHint: 'Add a chat by saying "update my profile" to Claude (the page can’t look up chat ids).',
       secKw: 'Keywords', kwLabel: 'New keyword', kwPh: 'e.g. MOB-, a project name', kwEmpty: 'No keywords yet.', kwHint: 'Ticket prefixes, project or feature names. Separate several with commas.',
       secRole: 'Role and current work', role: 'Role', currentWork: 'Current work',
-      secAi: 'AI assistant (beta)', aiAgent: 'Allow handing tasks to AI', aiAgentHint: 'Shows a "🤖 Hand to AI" button on tasks. AI only drafts or summarizes from ledger data and never sends anything for you. Needs "process AI queue" to run (by hand or on a schedule) and uses extra tokens. Applies right away; existing data is kept.',
+      secAi: 'AI assistant (beta)', aiAgent: 'Allow handing tasks to AI', aiAgentHint: 'Shows a "🤖 Hand to AI" button on tasks. AI only drafts or summarizes from catask data and never sends anything for you. Needs "process AI queue" to run (by hand or on a schedule) and uses extra tokens. Applies right away; existing data is kept.',
       secPriv: 'Privacy', sq: 'Store message snippets', sqHint: 'For "View message". Only you can read them, about 50 KB, a snapshot taken at scan time, so the original may have changed.',
       sig: 'Communication signals', sigHint: 'Badges like "False urgency" or "After hours" on tasks and highlights. Shows or hides on the page right away.',
       add: 'Add', rm: 'Remove {0}', save: 'Save', cancel: 'Cancel', saving: 'Saving…', dirty: 'Unsaved changes', clean: 'No changes',
@@ -1143,14 +1152,14 @@ html.ai-fold { --aibar-h: 41px }
         draft_nudge: 'Nudge', meeting_prep: 'Meeting notes', custom: 'Result', draft: 'Draft', code: 'Code result' },
       AIF: { description: 'description', ac: 'acceptance criteria', storyPoints: 'story points' },
       aiReqTitle: '🤖 Hand to AI', aiKindLegend: 'What should AI do?', aiSumTicket: 'Summarize the ticket', aiSumThread: 'Summarize the thread',
-      aiKnown: 'AI already knows', aiKnownN: '{0} items', aiKnownHint: 'From your ledger; no need to type it again.',
+      aiKnown: 'AI already knows', aiKnownN: '{0} items', aiKnownHint: 'From catask; no need to type it again.',
       akWhy: 'Why', akQuote: 'Quote', akSrc: 'Source', akRef: 'Ticket / link', akPri: 'Priority', akDue: 'Due',
       aiNote: 'Instruction', aiNoteReq: 'Instruction (required for "Other…")',
       aiNotePh: 'e.g. keep it short, promise it by Friday', aiNoteErr: 'Pick "Other…" only with an instruction saying what you want.',
       aiCtx: 'Extra context (optional)', aiCtxPh: 'Paste the partner’s request, SDK doc links, the scope of the change…', aiCtxShow: 'Extra context ({0} characters)',
       aiOut: 'Output', aiModeDraft: 'Draft only', aiModeApply: 'Draft for a Jira update ({0} · {1})',
       aiModeApplySub: 'AI drafts → you review it on the page → click “Approve & update Jira” and confirm, and only then the page writes to Jira.',
-      aiSubmitDraft: 'Hand over: draft', aiSubmitApply: 'Hand over: draft for Jira', aiCancelForm: 'Cancel', aiRead: 'Re-read the source message for more context (uses more tokens)', aiReadHint: 'By default AI uses what is already in the ledger: faster and cheaper.', aiReadOn: 'Re-reads the source', aiSafe: 'AI only drafts — you send it yourself.',
+      aiSubmitDraft: 'Hand over: draft', aiSubmitApply: 'Hand over: draft for Jira', aiCancelForm: 'Cancel', aiRead: 'Re-read the source message for more context (uses more tokens)', aiReadHint: 'By default AI uses what is already in catask: faster and cheaper.', aiReadOn: 'Re-reads the source', aiSafe: 'AI only drafts — you send it yourself.',
       aiSafeApply: 'AI never writes to Jira itself. Only when you click “Approve & update Jira” and confirm does the page update that one field, with your own Atlassian account.',
       aiWhen: 'AI picks it up on the next "process AI queue" run (by hand or on a schedule).',
       aiAsk: 'Request', aiProgress: 'Progress', aiSources: 'Sources', aiAttempt: 'Attempt {0}', aiStepQueued: 'Handed to AI', aiStepDone: 'AI finished', aiStepApplied: 'Updated in Jira',
@@ -1207,7 +1216,7 @@ html.ai-fold { --aibar-h: 41px }
       rnDesktop: 'Waiting for the desktop app’s next scheduled run (usually 2–5 minutes).',
       modeLegend: 'How AI runs code tasks', modeRunner: '⚡ Instant — runner on this machine (recommended)', modeDesktop: '🖥 Desktop — scheduled run in the Claude app', helpAria: 'Explain: {0}',
       helpRunner: ['A small process on your machine picks the task up as soon as you click "Hand over: code", usually within 5–15 seconds.',
-        'Needs the Claude desktop app open on this page. Results sync into the ledger while the page is open. Handing over from a browser: to have AI start by itself, keep this page open in the Claude desktop app (pin it in the artifact pane; it runs in the background).'],
+        'Needs the Claude desktop app open on this page. Results sync into catask while the page is open. Handing over from a browser: to have AI start by itself, keep this page open in the Claude desktop app (pin it in the artifact pane; it runs in the background).'],
       helpDesktop: ['No runner needed: a scheduled task in the Claude desktop app picks up queued code tasks.',
         'The schedule can’t run more often than every minute and the app adds a few minutes, so expect 2–5 minutes before it starts.',
         'Every run costs tokens, even when there is nothing to do.', 'Setup: say the line below to Claude in the desktop app.'],
@@ -1218,7 +1227,7 @@ html.ai-fold { --aibar-h: 41px }
       repoSum: 'Repos for AI code', repoSumN: '{0} on / {1}', repoManage: 'Manage repos ›', repoTitle: 'Manage repos', repoBack: 'Back to settings',
       repoIntro: 'Tick the repos AI may code in. Changes save with the settings (Save below).', repoTabsAria: 'Filter repos by project', repoAllOn: 'Turn all on', repoAllOff: 'Turn all off', repoGroup: 'Project',
       rnRetry2: 'Try again', rnGrant: 'Grant access',
-      rnClaimed: 'AI picked up the task. Progress shows here.', rnQueuedWait: 'Queued — a ledger page open in the Claude desktop app will start it.',
+      rnClaimed: 'AI picked up the task. Progress shows here.', rnQueuedWait: 'Queued — a catask page open in the Claude desktop app will start it.',
       rnAppIdle: 'The Claude app is open but hasn’t picked the task up — open the page in the app and click Try again.',
       rnNoDisp: 'No Claude desktop app has this page open. Open the page in the app (it starts tasks by itself), or paste this into Claude Code:', rnCopied: 'Command copied',
       dispChip: '⚡ On duty', dispChipTip: 'This page is open in the Claude desktop app and starts handed-over code tasks by itself (also ones handed from a browser). No tokens while idle.',
@@ -1226,13 +1235,13 @@ html.ai-fold { --aibar-h: 41px }
       dispNeed: 'Click to let AI start tasks handed from the browser',
       rnMore: 'Details',
       rnHintOutside: 'You opened this page outside the Claude desktop app. Code tasks still go into the queue; open the page in the app to run them right away, or paste the command into Claude Code.',
-      instPhrase: 'install the so-viec runner',
-      instManual: 'Install by hand (if needed)', instStep1: '1. Claude desktop app: add so-viec-runner under mcpServers in ~/Library/Application Support/Claude/claude_desktop_config.json, then quit the app fully (⌘Q) and reopen it.',
+      instPhrase: 'install catask runner',
+      instManual: 'Install by hand (if needed)', instStep1: '1. Claude desktop app: add catask-runner under mcpServers in ~/Library/Application Support/Claude/claude_desktop_config.json, then quit the app fully (⌘Q) and reopen it.',
       instNode: 'command is the path to node — see which node.', instStep2: '2. Open a terminal, run claude and type /login (once).', instOpt: 'Optional: let Claude Code sessions see the runner',
       pillReady: 'Runner: connected · on duty', pillOk: 'Runner: connected', pillOkTip: 'When you hand over a task, the page opens the Claude app so AI can run.', pillNone: 'Runner: not installed', pillErr: 'Runner: error', instTell: 'Tell Claude Code:',
       rdTip: 'Tip: keep the page open in the app (artifact pane) so it doesn’t have to open the app each time.',
-      rnConnWait: 'Runner: waiting for your permission', rnConnect: 'Connect runner', rnHintWait: 'The Claude app will ask whether this page may use so-viec-runner — choose Allow.',
-      rnHintGrant: 'This page isn’t allowed to call the runner yet. Click "Grant access".', rnHintManifest: 'This page doesn’t declare the runner yet. Ask Claude to update the ledger page.',
+      rnConnWait: 'Runner: waiting for your permission', rnConnect: 'Connect runner', rnHintWait: 'The Claude app will ask whether this page may use catask-runner — choose Allow.',
+      rnHintGrant: 'This page isn’t allowed to call the runner yet. Click "Grant access".', rnHintManifest: 'This page doesn’t declare the runner yet. Ask Claude to update the catask page.',
       repoCommits: function (n) { return plural(n, 'commit', 'commits') + '/30 days' }, repoUse: 'Use repo {0}', repoEdit: 'Edit', repoEditAria: 'Edit repo {0}', repoKeyAria: 'Use key {0}'
     }
   };
@@ -1377,12 +1386,12 @@ html.ai-fold { --aibar-h: 41px }
     return canView(td) ? '<span class="tt-link" data-view="' + esc(td.id) + '">' + esc(td.title) + '</span>' : esc(td.title);
   }
   /* ---------- copy task id ----------
-     "⧉" next to the done control everywhere a task shows: copies "so-viec#<id> · <title>[ · KEY]"
+     "⧉" next to the done control everywhere a task shows: copies "catask#<id> · <title>[ · KEY]"
      (the handle the ai-worker / Claude Code understands). Shift+click copies a link to the task instead. */
   function taskRef(td) {
     var title = String(td.title || '').trim(), k = jiraKey(td);
     if (title.length > 80) title = title.slice(0, 79).replace(/\s+$/, '') + '…';
-    return 'so-viec#' + td.id + ' · ' + title + (k && String(td.title || '').indexOf(k) < 0 ? ' · ' + k : '');
+    return 'catask#' + td.id + ' · ' + title + (k && String(td.title || '').indexOf(k) < 0 ? ' · ' + k : '');
   }
   function copyBtn(td) {
     return '<button type="button" class="cp-id" data-cp-id="' + esc(td.id) + '" title="' + esc(t('cpTitle')) + '" aria-label="' + esc(t('cpAria', td.title)) + '">&#x29C9;</button>';
@@ -1404,12 +1413,12 @@ html.ai-fold { --aibar-h: 41px }
   }
   function copyTask(id, link) {
     var td = findTodo(id); if (!td) return;
-    var ref = taskRef(td), txt = link ? pageUrl() + '#so-viec-' + encodeURIComponent(td.id) : ref;
+    var ref = taskRef(td), txt = link ? pageUrl() + '#catask-' + encodeURIComponent(td.id) : ref;
     copyText(txt, function (ok) { snackShow(ok ? { kind: 'copy', verb: t(link ? 'cpLink' : 'cpDone'), title: link ? txt : ref } : { verb: t('cpFail') }, null) });
   }
-  /* Opened with #so-viec-<id>: scroll to that task once and flash it. */
+  /* Opened with #catask-<id> (or the old #so-viec-<id>): scroll to that task once and flash it. */
   function flashHash() {
-    var m = /^#so-viec-(.+)$/.exec(location.hash || ''), id; if (!m) return;
+    var m = /^#(?:catask|so-viec)-(.+)$/.exec(location.hash || ''), id; if (!m) return;
     try { id = decodeURIComponent(m[1]) } catch (e) { id = m[1] }
     if (S.flashed === id) return; S.flashed = id;
     setTimeout(function () {
@@ -1552,11 +1561,14 @@ html.ai-fold { --aibar-h: 41px }
   function doneOn(date) { return S.todos.filter(function (td) { return td.status === 'done' && td.doneAt === date }) }
 
   /* ---------- masthead ---------- */
+  /* catask wordmark: "cat" in the accent with two small ears over the c…t, then "ask" in the title colour. */
+  var WORDMARK = '<span class="wm-cat" aria-hidden="true">cat</span><span class="wm-ask" aria-hidden="true">ask</span>';
   function renderMast() {
     var ld = latestDay();
-    document.getElementById('kicker').textContent = t('kickerOwner', PROFILE.displayName) + ' · ' + (ld ? t('kickerDigest', dm(ld.date), (ld.generatedAt || '').slice(11, 16)) : t('kickerNone'));
+    document.getElementById('kicker').textContent = [t('kickerOwner', PROFILE.displayName), ld ? t('kickerDigest', dm(ld.date), (ld.generatedAt || '').slice(11, 16)) : t('kickerNone')].filter(Boolean).join(' · ');
+    document.getElementById('wm').innerHTML = WORDMARK; document.getElementById('slogan').textContent = t('slogan');
     document.getElementById('title').innerHTML = esc(wd(TODAY)) + ', <em>' + esc(dm(TODAY)) + '</em>';
-    document.getElementById('mastCT').textContent = t('brand'); document.getElementById('mastCD').textContent = wd(TODAY) + ', ' + dm(TODAY);
+    document.getElementById('mastCT').innerHTML = WORDMARK; document.getElementById('mastCD').textContent = wd(TODAY) + ', ' + dm(TODAY);
     var mh = document.getElementById('mastHome'); if (mh.setAttribute) mh.setAttribute('aria-label', t('mastTop'));
     var openT = S.todos.filter(function (td) { return td.status !== 'done' });
     var over = openT.filter(function (td) { var w = warn(td); return w && w.lvl === 'over' }).length;
@@ -2518,9 +2530,9 @@ html.ai-fold { --aibar-h: 41px }
   }
   /* ---------- code tasks: runner on this machine + review panel ----------
      The page never runs code. It writes the request / decisions to `todo.ai` and asks the local runner
-     (host MCP server "so-viec-runner", reached through the Claude desktop app) to start; the runner and
+     (host MCP server "catask-runner", reached through the Claude desktop app) to start; the runner and
      the ai-worker write status, steps, plan and result back. No runner? The user pastes one line into Claude Code. */
-  var RUNNER = 'host:so-viec-runner', RESTING = ['plan_review', 'needs_review', 'mr_open', 'applied', 'cancelled', 'error'];
+  var RUNNER = 'host:catask-runner', RESTING = ['plan_review', 'needs_review', 'mr_open', 'applied', 'cancelled', 'error'];
   function needsRunner(a) { return isCode(a) && (a.status === 'queued' || a.status === 'push_approved') }
   function syncable(a) { return isCode(a) && (a.status === 'queued' || a.status === 'running' || a.status === 'push_approved') }
   /* "runner" (default): the page starts tasks on the local runner and bridges results into the ledger.
@@ -3249,10 +3261,10 @@ html.ai-fold { --aibar-h: 41px }
   }
   function closeRepos() { S.setView = null; renderSettings('[data-repo-open]') }
   /* "How AI runs code tasks": two modes, each with an inline "!" explainer. */
-  function runnerPath() { return ((S.settings && S.settings.pluginDir) || '<plugin>') + '/runner/so-viec-runner.mjs' }
+  function runnerPath() { return ((S.settings && S.settings.pluginDir) || '<plugin>') + '/runner/catask-runner.mjs' }
   function nodePath() { return (S.settings && S.settings.nodePath) || '' }
-  function desktopCfg() { return '"mcpServers": {\n  "so-viec-runner": {\n    "command": "' + (nodePath() || '/absolute/path/to/node') + '",\n    "args": ["' + runnerPath() + '"]\n  }\n}' }
-  function runnerCmd() { return 'claude mcp add -s user so-viec-runner -- ' + (nodePath() || 'node') + ' ' + runnerPath() }
+  function desktopCfg() { return '"mcpServers": {\n  "catask-runner": {\n    "command": "' + (nodePath() || '/absolute/path/to/node') + '",\n    "args": ["' + runnerPath() + '"]\n  }\n}' }
+  function runnerCmd() { return 'claude mcp add -s user catask-runner -- ' + (nodePath() || 'node') + ' ' + runnerPath() }
   /* Primary path: ask Claude Code to install the runner. `full` adds the collapsed manual steps. */
   function installShort() {
     return '<div class="inst"><p>' + esc(t('instTell')) + ' <b>' + esc(t('instPhrase')) + '</b> <button type="button" class="btn-sec ai-copy" data-set-copy="install">' + esc(t('dgCopy')) + '</button></p></div>';
@@ -3349,7 +3361,7 @@ html.ai-fold { --aibar-h: 41px }
     S.rnConn = 'chk';
     rcall('listPending', {}).then(function () { S.rnConn = 'ok'; S.rnErr = null; setDispatcher(true) }, function (e) {
       var c = (e && e.code) || 'error'; S.rnConn = connOf(c); S.rnErr = c; if (c !== 'cancelled') setDispatcher(false);
-      S.rnWarned = S.rnWarned || {}; if (!S.rnWarned[c]) { S.rnWarned[c] = 1; try { console.warn('[so-viec] runner', c, e) } catch (x) {} }
+      S.rnWarned = S.rnWarned || {}; if (!S.rnWarned[c]) { S.rnWarned[c] = 1; try { console.warn('[catask] runner', c, e) } catch (x) {} }
     }).then(function () { if (S.setOpen) renderSettings() });
   }
   function retryRunner() { S.mcpP = null; S.mcp = undefined; checkRunner(); renderSettings('[data-rn-retry]') }
@@ -3770,7 +3782,7 @@ html.ai-fold { --aibar-h: 41px }
       q4: 'Everyone, please update estimates for the 3 new tickets before sprint planning. I need the numbers for leadership.',
       q5: 'Let me take another look at the error message copy and get back to you.',
       setVipWhy: 'Project manager', setKw: ['MOB-', 'wallet'], setRole: 'Mobile developer', setWork: 'Wallet screen, sprint 12',
-      aiNote3: 'Tell Pat I’ll finish the review Thursday afternoon', aiS1: 'Used what’s already in the ledger', aiS2: 'Reading the source message', aiS3: 'Writing the draft',
+      aiNote3: 'Tell Pat I’ll finish the review Thursday afternoon', aiS1: 'Used what’s already in catask', aiS2: 'Reading the source message', aiS3: 'Writing the draft',
       aiS4: 'Reading more from the source (Jira)', aiS5: 'Collecting estimates for the 3 tickets',
       aiDraft2: 'Hi Sam, sorry for the slow reply. I’m looking into the Android 12 login bug and will tell you the cause and the fix plan before 15:00 today.\nIn the meantime, could QA test the checkout flow on Android 13 first?',
       aiSrc2: 'Mobile team · message at 16:48',

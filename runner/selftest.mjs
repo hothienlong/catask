@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Self-test for so-viec-runner. Never starts a real claude run: it only sends
+// Self-test for catask-runner. Never starts a real claude run: it only sends
 // initialize, tools/list, ping, calls that must be refused, fake in/out files and the read-only repo scan.
 import { spawn } from 'node:child_process';
 import fs from 'node:fs';
@@ -8,9 +8,9 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), 'so-viec-runner-test-'));
-const server = spawn(process.execPath, [path.join(here, 'so-viec-runner.mjs')], {
-  env: { ...process.env, SO_VIEC_STATE_DIR: stateDir },
+const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), 'catask-runner-test-'));
+const server = spawn(process.execPath, [path.join(here, 'catask-runner.mjs')], {
+  env: { ...process.env, CATASK_STATE_DIR: stateDir },
   stdio: ['pipe', 'pipe', 'inherit'],
 });
 
@@ -42,7 +42,7 @@ const check = (label, ok, detail = '') => {
 
 try {
   const init = await rpc('initialize', { protocolVersion: '2025-06-18', capabilities: {}, clientInfo: { name: 'selftest', version: '0' } });
-  check('initialize', init.result?.serverInfo?.name === 'so-viec-runner', `protocol=${init.result?.protocolVersion}`);
+  check('initialize', init.result?.serverInfo?.name === 'catask-runner', `protocol=${init.result?.protocolVersion}`);
   server.stdin.write(JSON.stringify({ jsonrpc: '2.0', method: 'notifications/initialized' }) + '\n');
 
   const ping = await rpc('ping');

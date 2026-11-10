@@ -1,13 +1,14 @@
 {
-  "name": "so-viec",
-  "displayName": "Sổ việc",
-  "version": "0.7.0",
-  "description": "Evening digest of your Microsoft Teams chats and Outlook mail/calendar: every ask, unanswered question and promise you made becomes a prioritized TODO list on a private Artifact page. Writes in Vietnamese or English.",
+  "name": "catask",
+  "displayName": "catask",
+  "version": "1.0.0",
+  "description": "catask (cat + task + ask) — Nothing slips through. / Không sót việc nào. Evening digest of your Microsoft Teams chats and Outlook mail/calendar: every ask, unanswered question and promise you made becomes a prioritized TODO list on a private Artifact page, with optional AI drafts and AI code tasks. Writes in Vietnamese or English.",
   "author": {
     "name": "Hồ Thiên Long"
   },
   "license": "MIT",
   "keywords": [
+    "catask",
     "teams",
     "outlook",
     "todo",
@@ -16,6 +17,6 @@
     "vietnamese",
     "english"
   ],
-  "homepage": "https://github.com/hothienlong/so-viec",
-  "repository": "https://github.com/hothienlong/so-viec"
+  "homepage": "https://github.com/hothienlong/catask",
+  "repository": "https://github.com/hothienlong/catask"
 }
