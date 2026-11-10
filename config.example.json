@@ -21,6 +21,9 @@
   "keyChats": [
     { "id": "19:example-chat-id@thread.v2", "topic": "Nhóm Mobile" }
   ],
+  "excludeChats": [
+    { "id": "19:example-social-chat@thread.v2", "topic": "Hội ăn trưa" }
+  ],
   "vipPeople": [
     { "name": "Trần Thị B", "email": "truong.nhom@congty.com", "why": "Trưởng nhóm" }
   ],

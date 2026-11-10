@@ -45,7 +45,7 @@
 - 🧩 **Done somewhere else? Claude asks.** After each digest, catask saves a short list of your open tasks (titles and Jira keys) on your Mac. When you work with Claude Code in any other project and finish something that clearly matches one (same Jira key, or the request is plainly that task), Claude asks **Mark catask#ID · title done?** before ending its turn. Only a **Yes** closes it. Turn off with `crossSessionDone: false` or in ⚙ Settings.
 - 🏆 **Done today**: only recorded when there's real evidence in messages or mail.
 - 🗂 **The ledger page** (a private Artifact): Today / Tomorrow / Waiting / Done board (drag and drop), plus People, Week, Day (timeline) and Cost tabs. **Mark done from anywhere**: any tab, including Day timeline items. Every status or priority change shows a small bar with **Undo** (or Ctrl/Cmd+Z) for about 6 seconds.
-- ⚙ **Settings on the page**: change language, channels, working hours, important people, key chats (remove), keywords, role/current work, and the privacy switches from the ⚙ Settings button instead of editing `config.json`. Page edits take effect on the next digest run; language and signals change on the page right away.
+- ⚙ **Settings on the page**: change language, channels, working hours, important people, key chats and skipped chats (remove), keywords, role/current work, and the privacy switches from the ⚙ Settings button instead of editing `config.json`. Page edits take effect on the next digest run; language and signals change on the page right away.
 - 💬 **View message**: open a short snapshot (≤500 characters) of the message that created a todo, right on the page, with a link to the original. Turn off with `storeQuotes: false`.
 - ⭐ **Key chats and important people**: chats you pick are always read first; asks from your boss/PO/lead are bumped to at least P1.
 - 📨 **Sends the link** to your own Teams notes chat (only to you, never to anyone else).
@@ -101,16 +101,18 @@ cp -R skills/daily-digest-todo ~/.claude/skills/
 
 1. Connect the **Microsoft 365 connector** in the Claude app.
 2. Type in Claude: `evening digest` (or `did anyone ask me for anything today?`).
-3. Claude runs a short **setup interview** (2–3 rounds of multiple-choice questions, each with a free-text "Other", about 2 minutes) to create `~/Documents/daily-digest/config.json`: **"Tiếng Việt hay English?"** first, then which channels to watch, your **key chats** (picked from your ~15 most recent chats), your **important people** (boss, PO, lead…), your working hours, your role and what you're working on now, keywords/ticket prefixes (e.g. `MOB-`), communication signals on/off, and whether to store message quotes. Your name and email come from Microsoft 365. Claude then suggests a schedule time (end of your working hours + ~1h, default 19:00).
-4. Claude publishes your **catask** page (private, yours) and saves the link to `~/Documents/daily-digest/artifact-url.txt`.
-5. Open the link and pin it. Done.
+3. Claude runs a short **setup interview** (3–4 rounds of multiple-choice questions, each with a free-text "Other", about 2 minutes) to create `~/Documents/daily-digest/config.json`: **"Tiếng Việt hay English?"** first, then which channels to watch, your **key chats** (picked from your ~15 most recent chats), chats to **skip** (e.g. social or team-bonding groups, optional), your **important people** (boss, PO, lead…), your working hours, your role and what you're working on now, keywords/ticket prefixes (e.g. `MOB-`), communication signals on/off, and whether to store message quotes. Your name and email come from Microsoft 365. Last, Claude offers to **create the evening schedule** right away (end of your working hours + ~1h, default 19:00, your working days): answer *Yes*, pick another time, or *Not now*. Nothing is scheduled without your Yes.
+4. Claude publishes your **catask** page (private, yours), opens it for you, saves the link to `~/Documents/daily-digest/artifact-url.txt` and puts it at the top of its final message. The first run always ends with the page published; if publishing fails, Claude says why — just say `evening digest` again.
+5. Pin the page. Done.
 
 To change your answers later, say **`update my profile`** (or `cập nhật hồ sơ`). Claude asks the same questions with your current values preselected and merges the answers into your config (other fields are kept).
 
 ### Schedule it at your digest time
 
+Claude offers to create this task for you in the setup interview (or say `update digest schedule` later). To do it by hand:
+
 1. Claude app → **Scheduled → New task**.
-2. Name: start with **`Evening digest`** (e.g. `Evening digest`, or with your time: `Evening digest 18:30`) — or `Bản tin tối` if you prefer. The Cost tab uses these prefixes to find the runs.
+2. Name: start with **`Evening digest`** (e.g. `Evening digest · catask`, or with your time: `Evening digest 18:30`) — or `Bản tin tối` if you prefer. The Cost tab uses these prefixes to find the runs.
 3. Schedule: **your digest time, on your working days**. Default: end of working hours + 1 h, rounded to :00/:30, on your `workHours.days` (09:00–18:00 Mon–Fri → 19:00 Mon–Fri, cron `0 19 * * 1-5`). Pick your own time with `digestTime` (⚙ Settings). The first run suggests the time for you.
 4. Prompt: paste the block from [`skills/daily-digest-todo/schedule-prompt.md`](skills/daily-digest-todo/schedule-prompt.md).
 
@@ -175,6 +177,7 @@ Example: [`config.example.json`](config.example.json).
 | `skipChatsOverMembers` | `40` | Skip chats bigger than this (unless you're tagged) |
 | `channels` | all five | Sources to read: `teamsChats`, `teamsChannelMentions`, `outlookMail`, `jiraMail`, `calendar`. Skipped sources are listed in the coverage notes |
 | `keyChats` | `[]` | `[{id, topic}]`: chats always read first every run (outside `maxChats`); asks there go up one priority level |
+| `excludeChats` | `[]` | `[{id, topic}]`: chats never read (e.g. social or team-bonding groups); dropped before the busiest `maxChats` are picked. A chat that is also a key chat is still read. Remove in ⚙ Settings; add via `update my profile` |
 | `vipPeople` | `[]` | `[{name, email?, why?}]`: boss, PO, lead…; their asks are at least P1. Names and "why" also show in the page's ⚙ Settings (owner-only store); emails stay in your local config only |
 | `workHours` | `{start:"09:00", end:"18:00", days:[1,2,3,4,5]}` | Working hours (ISO weekdays, Mon = 1). Used for the "after hours" signal and the suggested schedule time |
 | `digestTime` | `null` | Your evening digest time `"HH:MM"`; `null` = end of working hours + 1 h (rounded to :00/:30), on your working days. Also in ⚙ Settings; say "update digest schedule" to apply it to the scheduled task |
@@ -223,7 +226,7 @@ skills/daily-digest-todo/
   scripts/render.py        # JSON schema check + offline HTML backup
   scripts/ai_milestones.py # Claude Code work blocks (titles + times)
   scripts/run_tokens.py    # token usage of the scheduled runs
-  assets/so-viec.html      # the ledger page (Artifact), vi + en UI
+  assets/so-viec.html      # the ledger page (Artifact), vi + en UI — GENERATED, see Develop
   assets/digest-template.html
   assets/mascot/*.svg
   assets/peeps/*.svg       # Open Peeps, CC0 (see LICENSE.txt)
@@ -231,6 +234,9 @@ skills/ai-worker/
   SKILL.md                 # "Hand to AI" worker: drafts, summaries, Jira proposals (read-only); code tasks
   schedule-prompt.md       # optional prompt for a scheduled worker
 commands/ai-worker.md      # /catask:ai-worker
+page-src/so-viec.src.html  # readable source of the page (edit this)
+scripts/build-page.mjs     # builds assets/so-viec.html from it
+tests/smoke.js             # page smoke test (fake DOM)
 runner/
   catask-runner.mjs       # local stdio MCP: page↔headless bridge for code runs, repo discovery
   selftest.mjs             # node runner/selftest.mjs
@@ -239,6 +245,15 @@ hooks/
   catask-context.mjs       # reads ~/Documents/daily-digest/open-todos.json
   selftest.mjs             # node hooks/selftest.mjs
 ```
+
+### Develop
+
+The shipped page `skills/daily-digest-todo/assets/so-viec.html` is generated (minified, so it is cheap for Claude to read before publishing). Don't edit it by hand:
+
+1. Edit `page-src/so-viec.src.html`.
+2. Run `node scripts/build-page.mjs` (Node 22; downloads the pinned `esbuild` via `npx` the first time). It minifies the inline `<style>`/`<script>`, strips HTML comments, keeps lines short, and checks ids, `data-*` attributes, the `<title>` and `node --check`. `node scripts/build-page.mjs --check` fails if the built file is stale.
+3. Test both: `for f in page-src/so-viec.src.html skills/daily-digest-todo/assets/so-viec.html; do for l in vi en; do for m in demo owner; do FAKE=2026-11-11 node tests/smoke.js $f $l $m | tail -1; done; done; done` → `ALL PASS` ×8.
+4. Commit both files. SVGs in `assets/peeps/` and `assets/mascot/` are already optimized (`npx -y svgo@4.0.0 --multipass -p 0` for peeps, `-p 1` for mascots); the page loads them as published supporting files.
 
 ### Releasing a new version
 
@@ -271,7 +286,7 @@ MIT — see [`LICENSE`](LICENSE). © 2026 Hồ Thiên Long.
 - 🧩 **Làm xong ở chỗ khác? Claude hỏi.** Sau mỗi bản tin, catask lưu trên máy bạn một danh sách ngắn các việc đang mở (tiêu đề và mã Jira). Khi bạn làm việc với Claude Code ở bất kỳ project nào và làm xong việc khớp rõ (cùng mã Jira, hoặc yêu cầu chính là việc đó), Claude hỏi **Đánh dấu xong catask#ID · tiêu đề?** trước khi kết thúc lượt. Chỉ khi bạn chọn **Có** mới đóng. Tắt bằng `crossSessionDone: false` hoặc trong ⚙ Cài đặt.
 - 🏆 **Đã xong hôm nay**: chỉ ghi khi có bằng chứng thật trong tin nhắn/mail.
 - 🗂 **Trang catask** (Artifact riêng tư): bảng Hôm nay / Mai / Đang chờ / Xong (kéo thả được), tab Theo người, Tuần, Ngày (dòng thời gian), Chi phí. **Đánh dấu xong ở mọi nơi**: tab nào cũng được, kể cả mục trên dòng thời gian tab Ngày; mỗi lần đổi trạng thái hay mức ưu tiên đều hiện thanh nhỏ có nút **Hoàn tác** (hoặc Ctrl/Cmd+Z) trong khoảng 6 giây.
-- ⚙ **Cài đặt ngay trên trang**: đổi ngôn ngữ, kênh theo dõi, giờ làm, người quan trọng, chat theo dõi (bỏ bớt), từ khoá, vai trò/việc đang làm và hai công tắc riêng tư bằng nút ⚙ Cài đặt, khỏi sửa `config.json`. Thay đổi trên trang áp dụng từ bản tin tới; ngôn ngữ và tín hiệu đổi trên trang ngay.
+- ⚙ **Cài đặt ngay trên trang**: đổi ngôn ngữ, kênh theo dõi, giờ làm, người quan trọng, chat theo dõi và chat bỏ qua (bỏ bớt), từ khoá, vai trò/việc đang làm và hai công tắc riêng tư bằng nút ⚙ Cài đặt, khỏi sửa `config.json`. Thay đổi trên trang áp dụng từ bản tin tới; ngôn ngữ và tín hiệu đổi trên trang ngay.
 - 💬 **Xem tin**: mở ngay trên trang một đoạn trích ngắn (≤500 ký tự) của tin nhắn sinh ra việc, kèm link tới tin gốc. Tắt bằng `storeQuotes: false`.
 - ⭐ **Chat quan trọng và người quan trọng**: chat bạn chọn luôn được đọc trước; việc sếp/PO/lead nhờ được nâng lên ít nhất P1.
 - 📨 **Báo link** vào chat "ghi chú" của chính bạn trên Teams (chỉ gửi cho bạn, không bao giờ gửi cho người khác).
@@ -327,16 +342,18 @@ cp -R skills/daily-digest-todo ~/.claude/skills/
 
 1. Kết nối **Microsoft 365 connector** trong app Claude.
 2. Gõ trong Claude: `bản tin tối` (hoặc `hôm nay có ai nhờ gì tôi không`).
-3. Claude **phỏng vấn nhanh** (2–3 lượt câu hỏi trắc nghiệm, câu nào cũng có ô "Khác" để tự gõ, khoảng 2 phút) để tạo `~/Documents/daily-digest/config.json`: hỏi **"Tiếng Việt hay English?"** trước, rồi tới kênh cần theo dõi, **chat quan trọng** (chọn từ ~15 chat gần nhất), **người quan trọng** (sếp, PO, lead…), giờ làm việc, vai trò và việc đang làm, từ khoá/tiền tố ticket (ví dụ `MOB-`), có bật tín hiệu giao tiếp không, có lưu trích dẫn tin nhắn không. Tên và email lấy từ Microsoft 365. Xong Claude gợi ý giờ chạy lịch (hết giờ làm + ~1 tiếng, mặc định 19:00).
-4. Claude publish trang **catask** (riêng tư, của bạn) và lưu link vào `~/Documents/daily-digest/artifact-url.txt`.
-5. Mở link, ghim lại. Xong.
+3. Claude **phỏng vấn nhanh** (3–4 lượt câu hỏi trắc nghiệm, câu nào cũng có ô "Khác" để tự gõ, khoảng 2 phút) để tạo `~/Documents/daily-digest/config.json`: hỏi **"Tiếng Việt hay English?"** trước, rồi tới kênh cần theo dõi, **chat quan trọng** (chọn từ ~15 chat gần nhất), chat muốn **bỏ qua** (vd nhóm tán gẫu, gắn kết; tuỳ chọn), **người quan trọng** (sếp, PO, lead…), giờ làm việc, vai trò và việc đang làm, từ khoá/tiền tố ticket (ví dụ `MOB-`), có bật tín hiệu giao tiếp không, có lưu trích dẫn tin nhắn không. Tên và email lấy từ Microsoft 365. Cuối cùng Claude hỏi có **tạo lịch chạy bản tin** luôn không (hết giờ làm + ~1 tiếng, mặc định 19:00, vào ngày làm việc): chọn *Có*, chọn giờ khác, hoặc *Để sau*. Không có câu *Có* của bạn thì không tạo lịch.
+4. Claude publish trang **catask** (riêng tư, của bạn), mở trang cho bạn, lưu link vào `~/Documents/daily-digest/artifact-url.txt` và để link ở đầu tin nhắn cuối. Lần chạy đầu luôn kết thúc với trang đã được publish; nếu publish lỗi, Claude nói rõ lý do — chỉ cần nói `bản tin tối` lại.
+5. Ghim trang lại. Xong.
 
 Muốn đổi câu trả lời sau này, gõ **`cập nhật hồ sơ`** (hoặc `update my profile`). Claude hỏi lại các câu đó, chọn sẵn giá trị hiện tại, rồi gộp câu trả lời mới vào config (các trường khác giữ nguyên).
 
 ### Đặt lịch theo giờ bản tin của bạn
 
+Claude sẽ đề nghị tạo task này giúp bạn trong lúc phỏng vấn thiết lập (hoặc nói `đổi giờ bản tin theo cài đặt` sau). Muốn tự làm:
+
 1. App Claude → **Scheduled → New task**.
-2. Tên: bắt đầu bằng **`Bản tin tối`** (ví dụ `Bản tin tối`, hoặc kèm giờ: `Bản tin tối 18:30`) hoặc `Evening digest`. Tab Chi phí dựa vào hai tiền tố này để nhận ra các lần chạy.
+2. Tên: bắt đầu bằng **`Bản tin tối`** (ví dụ `Bản tin tối · catask`, hoặc kèm giờ: `Bản tin tối 18:30`) hoặc `Evening digest`. Tab Chi phí dựa vào hai tiền tố này để nhận ra các lần chạy.
 3. Lịch: **giờ bản tin của bạn, vào các ngày làm việc**. Mặc định: hết giờ làm + 1 tiếng, làm tròn :00/:30, theo `workHours.days` (09:00–18:00 T2–T6 → 19:00 T2–T6, cron `0 19 * * 1-5`). Muốn giờ khác thì đặt `digestTime` (⚙ Cài đặt). Lần chạy đầu sẽ gợi ý giờ cho bạn.
 4. Prompt: dán khối trong [`skills/daily-digest-todo/schedule-prompt.md`](skills/daily-digest-todo/schedule-prompt.md).
 
@@ -401,6 +418,7 @@ Mẫu: [`config.example.json`](config.example.json).
 | `skipChatsOverMembers` | `40` | Bỏ qua chat đông hơn mức này (trừ khi bạn bị tag) |
 | `channels` | đủ cả năm | Nguồn cần đọc: `teamsChats`, `teamsChannelMentions`, `outlookMail`, `jiraMail`, `calendar`. Nguồn bị bỏ qua được ghi trong phần độ phủ |
 | `keyChats` | `[]` | `[{id, topic}]`: chat luôn được đọc trước mỗi lần chạy (không tính vào `maxChats`); việc nhờ trong đó được nâng một bậc ưu tiên |
+| `excludeChats` | `[]` | `[{id, topic}]`: chat không bao giờ đọc (vd nhóm tán gẫu, gắn kết); bị loại trước khi chọn `maxChats` chat sôi nổi nhất. Chat vừa là chat quan trọng thì vẫn đọc. Xoá được trong ⚙ Cài đặt; thêm bằng `cập nhật hồ sơ` |
 | `vipPeople` | `[]` | `[{name, email?, why?}]`: sếp, PO, lead…; việc họ nhờ ít nhất là P1. Tên và "vì sao" cũng hiện trong ⚙ Cài đặt của trang (kho chỉ chủ trang đọc được); email chỉ nằm trong config trên máy |
 | `workHours` | `{start:"09:00", end:"18:00", days:[1,2,3,4,5]}` | Giờ làm việc (thứ theo ISO, thứ Hai = 1). Dùng cho tín hiệu "ngoài giờ" và giờ chạy lịch gợi ý |
 | `digestTime` | `null` | Giờ bản tin tối `"HH:MM"`; `null` = hết giờ làm + 1 tiếng (làm tròn :00/:30), vào các ngày làm việc. Đổi được trong ⚙ Cài đặt; nói "đổi giờ bản tin theo cài đặt" để áp vào lịch |
@@ -449,7 +467,7 @@ skills/daily-digest-todo/
   scripts/render.py        # kiểm schema JSON + bản HTML dự phòng
   scripts/ai_milestones.py # block làm việc Claude Code (tên + giờ)
   scripts/run_tokens.py    # token của các lần chạy theo lịch
-  assets/so-viec.html      # trang catask (Artifact), giao diện vi + en
+  assets/so-viec.html      # trang catask (Artifact), giao diện vi + en — FILE SINH RA, xem Phát triển
   assets/digest-template.html
   assets/mascot/*.svg
   assets/peeps/*.svg       # Open Peeps, CC0 (xem LICENSE.txt)
@@ -457,6 +475,9 @@ skills/ai-worker/
   SKILL.md                 # worker "Giao AI": soạn nháp, tóm tắt, đề xuất Jira (chỉ đọc); việc code
   schedule-prompt.md       # prompt tuỳ chọn cho worker chạy theo lịch
 commands/ai-worker.md      # /catask:ai-worker
+page-src/so-viec.src.html  # mã nguồn dễ đọc của trang (sửa ở đây)
+scripts/build-page.mjs     # build assets/so-viec.html từ file đó
+tests/smoke.js             # smoke test trang (DOM giả)
 runner/
   catask-runner.mjs       # MCP stdio trên máy: cầu nối trang↔Claude chạy nền cho việc code, tìm repo
   selftest.mjs             # node runner/selftest.mjs
@@ -465,6 +486,15 @@ hooks/
   catask-context.mjs       # reads ~/Documents/daily-digest/open-todos.json
   selftest.mjs             # node hooks/selftest.mjs
 ```
+
+### Phát triển
+
+Trang phát hành `skills/daily-digest-todo/assets/so-viec.html` là file sinh ra (đã minify cho Claude đọc rẻ trước khi publish). Đừng sửa tay:
+
+1. Sửa `page-src/so-viec.src.html`.
+2. Chạy `node scripts/build-page.mjs` (Node 22; lần đầu `npx` tải `esbuild` đã ghim phiên bản). Script minify `<style>`/`<script>`, bỏ comment HTML, giữ dòng ngắn, và kiểm id, thuộc tính `data-*`, `<title>`, `node --check`. `node scripts/build-page.mjs --check` báo lỗi nếu file build đã cũ.
+3. Test cả hai: chạy `tests/smoke.js` như phần Develop (tiếng Anh) → `ALL PASS` ×8.
+4. Commit cả hai file. SVG trong `assets/peeps/` và `assets/mascot/` đã được tối ưu sẵn.
 
 ### Phát hành bản mới
 
