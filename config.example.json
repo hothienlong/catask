@@ -13,6 +13,7 @@
   "focusAreas": [],
   "notifyChat": "48:notes",
   "signals": false,
+  "aiAgent": false,
   "subagentChatsPerAgent": 5,
   "maxChats": 40,
   "skipChatsOverMembers": 40,
@@ -24,11 +25,18 @@
     { "name": "Trần Thị B", "email": "truong.nhom@congty.com", "why": "Trưởng nhóm" }
   ],
   "workHours": { "start": "09:00", "end": "18:00", "days": [1, 2, 3, 4, 5] },
+  "digestTime": null,
   "role": "Mobile developer",
   "currentWork": "Màn hình ví điện tử, sprint 12",
   "keywords": ["MOB-", "ví điện tử"],
   "storeQuotes": true,
+  "devMode": false,
+  "aiRunMode": "runner",
+  "repos": [
+    { "project": "MOB", "name": "mobile-app", "path": "/Users/ten.ban/Developer/mobile-app", "base": "", "enabled": true }
+  ],
   "retention": { "archiveDoneAfterDays": 90, "pruneDaysAfterDays": 120, "quoteDaysAfterDone": 30 },
+  "artifactUrl": null,
   "settingsSyncedAt": null,
   "onboardingPending": false
 }

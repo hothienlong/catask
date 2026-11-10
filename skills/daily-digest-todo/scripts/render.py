@@ -48,6 +48,42 @@ def check_quote(where, t, errs):
             errs.append(f"{where}.quote.{k} must be a string")
 
 
+# Structured pointer to the source item (ids only, never content). Required id key(s) per source.
+REF_KEYS = {
+    "teams": (("chatId", "messageId"), ("replyToId",)),
+    "outlook": (("mailId",), ("conversationId",)),
+    "jira": (("issueKey",), ("commentId",)),
+    "calendar": (("eventId",), ()),
+}
+REF_ID_MAX = 512
+
+
+def check_ref(where, t, errs):
+    if "ref" not in t or t["ref"] is None:
+        return
+    r = t["ref"]
+    if not isinstance(r, dict):
+        errs.append(f"{where}.ref must be an object like {{source, ...ids}}")
+        return
+    src = r.get("source")
+    if src not in REF_KEYS:
+        errs.append(f"{where}.ref.source must be one of {sorted(REF_KEYS)}")
+        return
+    need, opt = REF_KEYS[src]
+    for k in need:
+        if not isinstance(r.get(k), str) or not r[k].strip():
+            errs.append(f"{where}.ref.{k} must be a non-empty string for source {src}")
+    for k in opt:
+        if k in r and r[k] is not None and not isinstance(r[k], str):
+            errs.append(f"{where}.ref.{k} must be a string")
+    extra = set(r) - {"source", *need, *opt}
+    if extra:
+        errs.append(f"{where}.ref has unknown keys {sorted(extra)} (ids only, no content)")
+    for k, v in r.items():
+        if isinstance(v, str) and len(v) > REF_ID_MAX:
+            errs.append(f"{where}.ref.{k} is too long ({len(v)} chars); ids only")
+
+
 def validate(d):
     errs = []
     for k in ("date", "dateLabel", "weekday", "todos"):
@@ -72,6 +108,7 @@ def validate(d):
             if flag in t and not isinstance(t[flag], bool):
                 errs.append(f"todos[{i}].{flag} must be true or false")
         check_quote(f"todos[{i}]", t, errs)
+        check_ref(f"todos[{i}]", t, errs)
         check_signals(f"todos[{i}]", t.get("signals"), errs)
         if t.get("id") in ids:
             errs.append(f"duplicate todo id {t.get('id')}")

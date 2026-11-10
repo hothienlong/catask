@@ -23,7 +23,7 @@
 
 ## English
 
-> **In one line:** every weekday at 19:00, Claude reads your Microsoft Teams and Outlook, collects every ask, every question waiting on you and every promise you made, and puts them on **one private "Sổ việc" (work ledger) page** so tomorrow morning you know what to do first. Output in **Vietnamese or English**.
+> **In one line:** every working day at your digest time (default: end of working hours + 1 h), Claude reads your Microsoft Teams and Outlook, collects every ask, every question waiting on you and every promise you made, and puts them on **one private "Sổ việc" (work ledger) page** so tomorrow morning you know what to do first. Output in **Vietnamese or English**.
 
 ### What it does
 
@@ -39,12 +39,13 @@
 - 📨 **Sends the link** to your own Teams notes chat (only to you, never to anyone else).
 - 🌐 **Vietnamese or English**: chosen on first run; the page UI follows the same setting.
 - 🧭 Optional: **communication signals** (false urgency, scope creep, kudos…). **Off by default.**
+- 🤖 Optional: **Hand to AI** (beta). Click a button on a task and Claude drafts a reply, a summary or a Jira description / estimate for you to review; it never sends anything, and a Jira field changes only when you approve it on the page. **Off by default** (⚙ Settings).
 
 ### Requirements
 
 | What | Required? | Notes |
 |---|---|---|
-| Claude desktop app | Yes | Runs the 19:00 scheduled task |
+| Claude desktop app | Yes | Runs the evening scheduled task at your digest time |
 | Microsoft 365 connector | Yes | Settings → Connectors → Microsoft 365. Read access is enough; chat-send permission is optional |
 | Artifacts with `db` | Yes | The ledger page stores its data in its own private store |
 | Python 3 (3.9+) | Yes | Scripts use the standard library only and run with `python3 -I` |
@@ -86,14 +87,47 @@ cp -R skills/daily-digest-todo ~/.claude/skills/
 
 To change your answers later, say **`update my profile`** (or `cập nhật hồ sơ`). Claude asks the same questions with your current values preselected and merges the answers into your config (other fields are kept).
 
-### Schedule it for 19:00 (Mon–Fri)
+### Schedule it at your digest time
 
 1. Claude app → **Scheduled → New task**.
-2. Name: start with **`Evening digest`** (e.g. `Evening digest 19:00 (Mon–Fri)`) — or `Bản tin tối` if you prefer. The Cost tab uses these prefixes to find the runs.
-3. Schedule: **19:00, Monday → Friday**.
+2. Name: start with **`Evening digest`** (e.g. `Evening digest`, or with your time: `Evening digest 18:30`) — or `Bản tin tối` if you prefer. The Cost tab uses these prefixes to find the runs.
+3. Schedule: **your digest time, on your working days**. Default: end of working hours + 1 h, rounded to :00/:30, on your `workHours.days` (09:00–18:00 Mon–Fri → 19:00 Mon–Fri, cron `0 19 * * 1-5`). Pick your own time with `digestTime` (⚙ Settings). The first run suggests the time for you.
 4. Prompt: paste the block from [`skills/daily-digest-todo/schedule-prompt.md`](skills/daily-digest-todo/schedule-prompt.md).
 
-Note: the task only runs while the Claude app is open; if your computer is off at 19:00, it catches up when you open the app. If the scheduled run finds no config, it never stops to ask: it creates one with defaults (`"language": "en"`, all channels, 09:00–18:00 Mon–Fri) and leaves a warning suggesting `update my profile`.
+Note: the task only runs while the Claude app is open; if your computer is off at that time, it catches up when you open the app. After changing working hours or the digest time, say **`update digest schedule`** (or `đổi giờ bản tin theo cài đặt`) and Claude updates the task (after you confirm); the digest also reminds you when the schedule no longer matches your settings. If the scheduled run finds no config, it never stops to ask: it creates one with defaults (`"language": "en"`, all channels, 09:00–18:00 Mon–Fri) and leaves a warning suggesting `update my profile`.
+
+### Hand to AI (optional, beta — off by default)
+
+Let Claude draft a reply or a nudge, summarize a thread or ticket, prepare a meeting, or propose a Jira description, acceptance criteria or story-point estimate. **AI only drafts: it never sends, posts, replies or changes anything outside the ledger.** You read the result on the page and copy it — or, for a Jira proposal, approve it on the page and the page itself updates that one field with your own Atlassian connection.
+
+1. **Turn it on**: page → ⚙ Settings → *AI assistant (beta)* → *Allow handing tasks to AI* → Save. Turning it off only hides the buttons; requests and results already stored are kept.
+2. **Hand a task over**: click **🤖 Hand to AI** on an open task (board card, top 3, People row, or the View message dialog). The form shows the task and a collapsible **AI already knows** block (why, quote, source, ticket/link, priority, due), so you don't retype any of it. Then:
+   - **What should AI do?** Chips depend on the task: Jira → *Write the description*, *Write acceptance criteria*, *Estimate story points*, *Summarize the ticket*; Teams/Outlook → *Draft a reply*, *Summarize the thread*, *Draft a nudge*; Calendar → *Prepare for the meeting*; always *Other…*. A chip prefills a short **Instruction** (≤300, editable; required for *Other…*).
+   - **Extra context** (≤2000): paste the partner's request, SDK doc links, the scope of the change…
+   - **Output**: *Draft only* (default), or — for the three Jira chips on a task with a Jira key — *Draft for a Jira update*.
+   - Optional: tick *Re-read the source message* when the ledger isn't enough (costs more tokens). Click *Hand over*. The bar at the bottom offers **Undo**.
+3. **Run the worker**: say **`process AI queue`** / **`xử lý việc giao AI`** in Claude, or run **`/so-viec:ai-worker`**. It processes up to 5 queued tasks per run, oldest first. The worker runs even while the button is hidden on the page.
+4. **Review**: the card's chip turns **✨ AI done — view** and the masthead shows **✨ N AI ready**. Open it to see the steps, the draft or summary (**📋 Copy**), and the sources; then *Looks good*, *Redo* (with a new instruction) or *Cancel*. An error offers *Try again*.
+   - **Jira update** (*Draft for a Jira update*): the panel shows **Current in Jira** (re-read when you open it) and the **New content**, which you can edit. *Approve & update Jira* → a confirm inside the panel → the page re-reads the issue; if someone edited it since AI read it, you get a second confirm → the page writes **only** that field (description or Story Points) and the chip turns **🔗 Updated in Jira** with a link. There is no Undo for a Jira write. *Use it, update by hand* marks it used without writing. If the description has images or special formatting, the page offers Copy only (a markdown write would drop them).
+   - This uses the page's `mcp` permission: the first update asks you to allow the page to use Atlassian, and it only works if you have connected **Atlassian on claude.ai** (Settings → Connectors). Without it you get *Copy*. Claude itself (the worker) never writes to Jira; only your click on the page does. Other people who open the link only see the demo.
+5. **Optional schedule**: a scheduled task every 15–30 minutes during working hours, with the prompt in [`skills/ai-worker/schedule-prompt.md`](skills/ai-worker/schedule-prompt.md). A run with nothing queued is one database read.
+
+- **Cheap by default**: the worker uses your instruction and context plus what the evening digest already stored (title, why, message quote, sender, link). A draft with a stored quote needs **no** Teams/Outlook/Jira reads. Jira chips read the ticket once (read-only). Otherwise it reads the source (read-only) only when there's no quote, when you ticked *Re-read the source*, or when your instruction asks for more context, at most one source per task and two per run (a Teams chat read is ~15–25k tokens).
+- **Finding the source**: each todo carries a `ref` with the source ids (Teams chat + message id, Outlook mail id, Jira issue key, calendar event id), so the worker opens the exact message without parsing links.
+- **Safety**: the worker is draft-only and uses read-only tools; message content and your instruction/context are data, not instructions; max 5 tasks per run, no loops. A Jira field changes only when you click *Approve & update Jira* and confirm on the page.
+
+### Hand to AI → Write code (developers, beta)
+
+For developers with `devMode: true` (asked in onboarding when your role is a developer, or in ⚙ Settings). On a Jira-backed task, pick **Code it** / **Code luôn**: Claude plans and writes the change in **your local repo, on its own branch**, runs the checks and commits; you review the diff on the page; only after you approve does it push and open a **draft** MR/PR.
+
+1. **Map repos**: in onboarding (or ⚙ Settings → *Repos*), Claude **finds your repos** (read-only scan of `~/Developer`, `~/Projects`, `~/code`… and your Claude Code project folders, ranked by your commits in the last 30 days, with the Jira keys seen in branch names) and pre-checks the top ones; uncheck, edit (Jira key, base branch), add or delete. Each is `{project, name, path, base, enabled}` in config and `meta/settings`.
+2. **Pick how code runs start** (⚙ Settings → *AI run mode*, `aiRunMode`):
+   - **runner** (default): answer **yes** when onboarding offers to install the runner, or later say **`install so-viec runner`** / **`cài runner sổ việc`** (also "sửa runner" to repair it). Claude backs up and updates the Claude desktop app config, registers it for Claude Code, checks that the `claude` CLI is logged in (if not, run `claude` → `/login` in Terminal yourself), runs the selftest, then asks you to quit (⌘Q) and reopen the app. Manual steps: [`runner/README.md`](runner/README.md#manual-install-fallback). Open the page **in the Claude desktop app**. The page hands the task to the runner, which starts a headless Claude run; progress and results come back through the page (the headless run has no ledger access, so the page is the bridge). Details: [`runner/README.md`](runner/README.md).
+   - Handing a code task over from a **browser** opens the page in the Claude desktop app automatically, and it starts the run from there. Open the page in the app at least once first.
+   - **desktop**: say "enable desktop mode" / "bật chế độ desktop cho AI code" and Claude creates a desktop scheduled task (after you confirm) that checks the queue every ~2 minutes during working hours (cron from your working hours, e.g. 09:00–18:00 Mon–Fri → `*/2 9-17 * * 1-5`; the app can't go below 1 minute and adds a few minutes of jitter). Every run costs some tokens even when idle.
+   - Either way you can also paste `so-viec#<id>` into Claude (or say "làm task SF-3102").
+3. **Flow**: plan (shown for approval unless it is small: ≤3 files, low risk, no questions) → code on `feature/<KEY>-<title>` (or the existing branch for that key; base = your hint, else the matching `sprint/*`/`release/*`, else the default branch) → checks (`flutter analyze`/tests, `yarn typecheck`/`lint`…) → commit `<KEY>: <summary>` → **review the diff** → *Approve push* (draft MR/PR) or *Request changes* (a new round, new commit). When the MR is merged, the evening digest marks the task done.
+- **Safety**: the repo must be clean (it never stashes); it never commits to main/master/develop/sprint/release, never force-pushes, never merges, never writes to Jira; at most 10 files per round; one code run at a time; your checkout is switched back to the branch you were on.
 
 ### Configuration (`~/Documents/daily-digest/config.json`)
 
@@ -111,6 +145,11 @@ Example: [`config.example.json`](config.example.json).
 | `focusAreas` | `[]` | Areas you own; group questions touching them go to "watch" |
 | `notifyChat` | `48:notes` | Your own Teams notes chat |
 | `signals` | `false` | Turn communication-signal badges on/off |
+| `aiAgent` | `false` | Show the page's "🤖 Hand to AI" button, AI chips and "✨ AI ready" count. Off only hides them; stored requests are kept. Also in ⚙ Settings |
+| `devMode` | `false` | You write code: enables *Hand to AI → Write code* on Jira-backed tasks. Asked in onboarding for developer roles; also in ⚙ Settings |
+| `repos` | `[]` | `[{project, name, path, base, enabled}]`: Jira project key → local repo (absolute `path`, optional base branch, `enabled` default `true`). Found for you in onboarding. Used by code tasks and the runner |
+| `aiRunMode` | `"runner"` | How code tasks start: `"runner"` (local `so-viec-runner` MCP, via the page) or `"desktop"` (Claude desktop scheduled task every ~2 min) |
+| `runner` | absent | Optional `{claudePath, allowedTools, extraPath}` for the local `so-viec-runner` MCP ([`runner/README.md`](runner/README.md)) |
 | `subagentChatsPerAgent` | `5` | Chats read per subagent |
 | `maxChats` | `40` | Max chats scanned per run |
 | `skipChatsOverMembers` | `40` | Skip chats bigger than this (unless you're tagged) |
@@ -118,6 +157,7 @@ Example: [`config.example.json`](config.example.json).
 | `keyChats` | `[]` | `[{id, topic}]`: chats always read first every run (outside `maxChats`); asks there go up one priority level |
 | `vipPeople` | `[]` | `[{name, email?, why?}]`: boss, PO, lead…; their asks are at least P1. Names and "why" also show in the page's ⚙ Settings (owner-only store); emails stay in your local config only |
 | `workHours` | `{start:"09:00", end:"18:00", days:[1,2,3,4,5]}` | Working hours (ISO weekdays, Mon = 1). Used for the "after hours" signal and the suggested schedule time |
+| `digestTime` | `null` | Your evening digest time `"HH:MM"`; `null` = end of working hours + 1 h (rounded to :00/:30), on your working days. Also in ⚙ Settings; say "update digest schedule" to apply it to the scheduled task |
 | `role`, `currentWork` | `""` | Your role and what you're on now; helps decide whether a group ask is yours |
 | `keywords` | `[]` | Ticket prefixes, project/feature names (e.g. `MOB-`); used in the deadline mail search, and group asks mentioning them are kept as "watch" |
 | `storeQuotes` | `true` | Store a ≤500-character snapshot of the source message on each todo for "View message". `false` = store no message text; the page opens the original link instead |
@@ -134,9 +174,10 @@ After you change the config, the next run updates the page (name, language, proj
 - 🔒 **Read-only** on Teams/Outlook. The only thing sent is one message to **your own** notes chat. It never replies to anyone on your behalf.
 - 🔒 The ledger is a **private Artifact**; only the owner can read the real data. Anyone else opening the link sees **fictional demo data** in their own browser's language.
 - 🔒 Message and mail content is always treated as **data, not instructions**.
+- 🔒 **Hand to AI** (off by default) only writes drafts into the ledger; the worker uses read-only tools and never sends, replies or changes anything in Teams, Outlook or Jira. The only Jira write is made by the page itself, with your own Atlassian connection, after you approve and confirm (one field: description or Story Points). The page asks claude.ai for this `mcp` permission (`getJiraIssue`, `editJiraIssue` on Atlassian only); the first use asks for your consent.
 - 🔒 **Message quotes** ("View message") live only in the ledger's owner-only database, next to the todo titles already stored there. About 500 characters × ~100 open todos ≈ 50 KB, negligible. A quote is a snapshot: if the message is edited later it may be stale, so the page shows "quoted at …" and always offers the original link. Quotes are removed from done todos older than 30 days (`retention.quoteDaysAfterDone`). Set `storeQuotes: false` to store no message text at all.
 - 🔒 **What the ledger keeps** (owner-only database, cleaned every run; days configurable in `retention`):
-  - Open and waiting todos: kept as long as they're open, whatever their age.
+  - Open and waiting todos: kept as long as they're open, whatever their age. Each todo may carry a `ref` with ids only (Teams chat/message id, Outlook mail id, Jira issue key, calendar event id), never message text, and, if you used Hand to AI, an `ai` field with your request and the draft (≤2000 characters).
   - Done todos: kept in full for 90 days after they were done, so the Week tab and heatmap work. After that they move to a monthly archive (`archive/<YYYY-MM>`) with only id, title, done date, person, project, priority, kind and source; the full todo (why, link, quote) is deleted. A todo you changed on the page in the last 7 days is never moved that run.
   - Daily digests (`days/…`) and cost records (`runs/…`) older than 120 days are deleted. Your settings and profile (`meta/…`) and the archive are never deleted.
   - At most 200 docs are removed per run; the rest go on the next run. The coverage notes say what was cleaned.
@@ -160,6 +201,13 @@ skills/daily-digest-todo/
   assets/digest-template.html
   assets/mascot/*.svg
   assets/peeps/*.svg       # Open Peeps, CC0 (see LICENSE.txt)
+skills/ai-worker/
+  SKILL.md                 # "Hand to AI" worker: drafts, summaries, Jira proposals (read-only); code tasks
+  schedule-prompt.md       # optional prompt for a scheduled worker
+commands/ai-worker.md      # /so-viec:ai-worker
+runner/
+  so-viec-runner.mjs       # local stdio MCP: page↔headless bridge for code runs, repo discovery
+  selftest.mjs             # node runner/selftest.mjs
 ```
 
 ### Releasing a new version
@@ -182,7 +230,7 @@ MIT — see [`LICENSE`](LICENSE). © 2026 Hồ Thiên Long.
 
 ## Tiếng Việt
 
-> **Một câu:** Mỗi tối 19h các ngày làm việc, Claude đọc Teams + Outlook của bạn, gom mọi việc người khác nhờ, câu hỏi đang chờ bạn và lời bạn đã hứa, rồi đổ vào **một trang Sổ việc riêng tư** để sáng mai bạn biết làm gì trước. Viết bằng **tiếng Việt hoặc tiếng Anh**.
+> **Một câu:** Mỗi tối các ngày làm việc, vào giờ bản tin của bạn (mặc định: hết giờ làm + 1 tiếng), Claude đọc Teams + Outlook của bạn, gom mọi việc người khác nhờ, câu hỏi đang chờ bạn và lời bạn đã hứa, rồi đổ vào **một trang Sổ việc riêng tư** để sáng mai bạn biết làm gì trước. Viết bằng **tiếng Việt hoặc tiếng Anh**.
 
 ### Làm gì?
 
@@ -198,12 +246,13 @@ MIT — see [`LICENSE`](LICENSE). © 2026 Hồ Thiên Long.
 - 📨 **Báo link** vào chat "ghi chú" của chính bạn trên Teams (chỉ gửi cho bạn, không bao giờ gửi cho người khác).
 - 🌐 **Tiếng Việt hoặc English**: chọn ở lần chạy đầu; giao diện trang theo cùng lựa chọn.
 - 🧭 Tuỳ chọn: **tín hiệu giao tiếp** (gấp ảo, scope creep, được ghi nhận…). **Mặc định tắt.**
+- 🤖 Tuỳ chọn: **Giao AI** (thử nghiệm). Bấm nút trên một việc, Claude soạn nháp trả lời, tóm tắt hoặc description / ước lượng cho ticket Jira để bạn xem lại; không bao giờ tự gửi, và ticket Jira chỉ đổi khi bạn duyệt trên trang. **Mặc định tắt** (⚙ Cài đặt).
 
 ### Cần có
 
 | Thứ | Bắt buộc? | Ghi chú |
 |---|---|---|
-| App Claude desktop | Có | Để chạy Scheduled task 19h |
+| App Claude desktop | Có | Để chạy Scheduled task bản tin tối theo giờ của bạn |
 | Microsoft 365 connector | Có | Settings → Connectors → Microsoft 365. Chỉ cần quyền đọc; quyền gửi chat là tuỳ chọn |
 | Artifact có `db` | Có | Trang Sổ việc lưu dữ liệu trong kho riêng của chính trang |
 | Python 3 (3.9+) | Có | Script chỉ dùng thư viện chuẩn, chạy bằng `python3 -I` |
@@ -245,14 +294,47 @@ cp -R skills/daily-digest-todo ~/.claude/skills/
 
 Muốn đổi câu trả lời sau này, gõ **`cập nhật hồ sơ`** (hoặc `update my profile`). Claude hỏi lại các câu đó, chọn sẵn giá trị hiện tại, rồi gộp câu trả lời mới vào config (các trường khác giữ nguyên).
 
-### Đặt lịch 19h (T2–T6)
+### Đặt lịch theo giờ bản tin của bạn
 
 1. App Claude → **Scheduled → New task**.
-2. Tên: bắt đầu bằng **`Bản tin tối`** (ví dụ `Bản tin tối 19h (T2–T6)`) hoặc `Evening digest`. Tab Chi phí dựa vào hai tiền tố này để nhận ra các lần chạy.
-3. Lịch: **19:00, thứ Hai → thứ Sáu**.
+2. Tên: bắt đầu bằng **`Bản tin tối`** (ví dụ `Bản tin tối`, hoặc kèm giờ: `Bản tin tối 18:30`) hoặc `Evening digest`. Tab Chi phí dựa vào hai tiền tố này để nhận ra các lần chạy.
+3. Lịch: **giờ bản tin của bạn, vào các ngày làm việc**. Mặc định: hết giờ làm + 1 tiếng, làm tròn :00/:30, theo `workHours.days` (09:00–18:00 T2–T6 → 19:00 T2–T6, cron `0 19 * * 1-5`). Muốn giờ khác thì đặt `digestTime` (⚙ Cài đặt). Lần chạy đầu sẽ gợi ý giờ cho bạn.
 4. Prompt: dán khối trong [`skills/daily-digest-todo/schedule-prompt.md`](skills/daily-digest-todo/schedule-prompt.md).
 
-Lưu ý: task chỉ chạy khi app Claude đang mở; tắt máy lúc 19h thì mở app lên sẽ chạy bù. Nếu lần chạy theo lịch không thấy config, nó không dừng lại hỏi: tự tạo config mặc định (`"language": "en"`, đủ mọi kênh, 09:00–18:00 T2–T6) và để lại cảnh báo gợi ý gõ `cập nhật hồ sơ`.
+Lưu ý: task chỉ chạy khi app Claude đang mở; tắt máy đúng giờ đó thì mở app lên sẽ chạy bù. Đổi giờ làm hoặc giờ bản tin xong, nói **`đổi giờ bản tin theo cài đặt`** (hoặc `update digest schedule`) để Claude cập nhật lịch (sau khi bạn xác nhận); bản tin cũng nhắc khi lịch không còn khớp cài đặt. Nếu lần chạy theo lịch không thấy config, nó không dừng lại hỏi: tự tạo config mặc định (`"language": "en"`, đủ mọi kênh, 09:00–18:00 T2–T6) và để lại cảnh báo gợi ý gõ `cập nhật hồ sơ`.
+
+### Giao AI (tuỳ chọn, thử nghiệm — mặc định tắt)
+
+Nhờ Claude soạn trả lời hoặc tin nhắc, tóm tắt thread hay ticket, chuẩn bị nội dung họp, hoặc đề xuất description, acceptance criteria, story point cho ticket Jira. **AI chỉ soạn nháp: không gửi, không đăng, không trả lời, không đổi gì ngoài Sổ việc.** Bạn đọc kết quả trên trang rồi chép — riêng đề xuất Jira thì bạn duyệt ngay trên trang và chính trang sẽ cập nhật đúng một trường bằng kết nối Atlassian của bạn.
+
+1. **Bật**: trang → ⚙ Cài đặt → *Trợ lý AI (thử nghiệm)* → *Cho phép giao việc cho AI* → Lưu. Tắt đi chỉ ẩn nút; yêu cầu và kết quả đã lưu vẫn giữ nguyên.
+2. **Giao việc**: bấm **🤖 Giao AI** trên một việc đang mở (thẻ trên bảng, top 3, dòng ở tab Theo người, hoặc hộp Xem tin). Form hiện tên việc và khối **AI đã biết** (bấm để mở: lý do, trích tin, nguồn, ticket/link, ưu tiên, hạn) để bạn khỏi gõ lại. Rồi:
+   - **AI làm gì?** Gợi ý theo nguồn: Jira → *Viết description*, *Viết acceptance criteria*, *Ước lượng story point*, *Tóm tắt ticket*; Teams/Outlook → *Soạn trả lời*, *Tóm tắt thread*, *Soạn tin nhắc*; Lịch → *Chuẩn bị nội dung họp*; luôn có *Khác…*. Chọn một gợi ý sẽ điền sẵn **Hướng dẫn** ngắn (≤300, sửa được; bắt buộc với *Khác…*).
+   - **Ngữ cảnh thêm** (≤2000): dán yêu cầu của đối tác, link tài liệu SDK, phạm vi thay đổi…
+   - **Kết quả**: *Chỉ soạn nháp* (mặc định), hoặc — với ba gợi ý Jira trên việc có mã ticket — *Soạn để cập nhật lên Jira*.
+   - Tuỳ chọn: tick *Đọc lại tin gốc* khi dữ liệu trong sổ chưa đủ (tốn token hơn). Bấm *Giao*. Thanh dưới cùng có nút **Hoàn tác**.
+3. **Chạy worker**: gõ **`xử lý việc giao AI`** / **`process AI queue`** với Claude, hoặc chạy **`/so-viec:ai-worker`**. Mỗi lần xử lý tối đa 5 việc đang chờ, việc giao trước làm trước. Worker vẫn chạy kể cả khi nút đang ẩn trên trang.
+4. **Xem lại**: chip trên thẻ đổi thành **✨ AI xong — xem**, đầu trang hiện **✨ N AI xong**. Mở ra để xem các bước, bản nháp hoặc tóm tắt (**📋 Chép**) và nguồn; rồi chọn *Dùng được*, *Làm lại* (kèm hướng dẫn mới) hoặc *Huỷ*. Nếu lỗi thì có *Thử lại*.
+   - **Cập nhật Jira** (*Soạn để cập nhật lên Jira*): bảng hiện **Hiện tại trên Jira** (đọc lại khi mở) và **Nội dung mới** (sửa được). *Duyệt & cập nhật Jira* → xác nhận ngay trong bảng → trang đọc lại ticket; nếu ai đó đã sửa ticket từ lúc AI đọc thì phải xác nhận thêm lần nữa → trang ghi **đúng một** trường (description hoặc Story Points), chip đổi thành **🔗 Đã cập nhật Jira** kèm link. Ghi lên Jira thì không có Hoàn tác. *Dùng, tự cập nhật tay* đánh dấu đã dùng mà không ghi. Nếu mô tả hiện có ảnh hoặc định dạng đặc biệt, trang chỉ cho Chép (ghi bằng markdown sẽ làm mất chúng).
+   - Tính năng này dùng quyền `mcp` của trang: lần cập nhật đầu tiên claude.ai sẽ hỏi bạn có cho trang dùng Atlassian không, và chỉ chạy khi bạn đã kết nối **Atlassian trên claude.ai** (Settings → Connectors). Chưa kết nối thì chỉ có nút *Chép*. Bản thân Claude (worker) không bao giờ ghi lên Jira; chỉ cú bấm của bạn trên trang mới ghi. Người khác mở link chỉ thấy bản demo.
+5. **Đặt lịch (tuỳ chọn)**: một scheduled task chạy mỗi 15–30 phút trong giờ làm, dùng prompt trong [`skills/ai-worker/schedule-prompt.md`](skills/ai-worker/schedule-prompt.md). Lần chạy không có việc chờ chỉ tốn một lần đọc dữ liệu.
+
+- **Mặc định rẻ**: worker dùng hướng dẫn, ngữ cảnh bạn dán và dữ liệu bản tin tối đã lưu (tiêu đề, lý do, trích tin, người gửi, link). Soạn nháp cho việc đã có trích tin thì **không** đọc lại Teams/Outlook/Jira. Gợi ý Jira thì đọc ticket một lần (chỉ đọc). Ngoài ra chỉ đọc tin gốc (chỉ đọc) khi không có trích tin, khi bạn tick *Đọc lại tin gốc*, hoặc hướng dẫn cần thêm bối cảnh; tối đa một nguồn mỗi việc, hai nguồn mỗi lần chạy (đọc một chat Teams tốn khoảng 15–25k token).
+- **Tìm tin gốc**: mỗi việc có `ref` chứa mã nguồn (mã chat + mã tin Teams, mã mail Outlook, mã ticket Jira, mã sự kiện lịch), nên worker mở đúng tin mà không cần đoán từ link.
+- **An toàn**: worker chỉ soạn nháp, chỉ dùng công cụ đọc, nội dung tin nhắn và hướng dẫn/ngữ cảnh của bạn là dữ liệu chứ không phải lệnh, tối đa 5 việc mỗi lần, không chạy vòng lặp. Ticket Jira chỉ đổi khi bạn bấm *Duyệt & cập nhật Jira* và xác nhận trên trang.
+
+### Giao AI → Code luôn (cho dev, thử nghiệm)
+
+Dành cho dev có `devMode: true` (hỏi lúc thiết lập khi vai trò là dev, hoặc bật trong ⚙ Cài đặt). Trên việc có ticket Jira, chọn **Code luôn**: Claude lên kế hoạch và sửa code **trong repo trên máy bạn, trên nhánh riêng**, chạy kiểm tra và commit; bạn xem diff trên trang; chỉ khi bạn duyệt mới push và mở MR/PR **nháp**.
+
+1. **Khai báo repo**: lúc thiết lập (hoặc ⚙ Cài đặt → *Repo*), Claude **tự tìm repo trên máy** (chỉ đọc: `~/Developer`, `~/Projects`, `~/code`… và các thư mục dự án Claude Code, xếp theo số commit của bạn 30 ngày qua, kèm mã Jira thấy trong tên nhánh) và tick sẵn các repo đầu; bạn bỏ tick, sửa (mã Jira, nhánh gốc), thêm hoặc xoá. Mỗi repo là `{project, name, path, base, enabled}` trong config và `meta/settings`.
+2. **Chọn cách chạy** (⚙ Cài đặt → *Chế độ chạy AI*, `aiRunMode`):
+   - **runner** (mặc định): trả lời **có** khi lúc thiết lập Claude hỏi cài runner, hoặc sau này nói **`cài runner sổ việc`** (hay "sửa runner" để sửa). Claude tự sao lưu và cập nhật cấu hình app Claude desktop, đăng ký cho Claude Code, kiểm tra `claude` CLI đã đăng nhập chưa (chưa thì bạn tự mở Terminal, chạy `claude` → `/login`), chạy selftest, rồi nhắc bạn thoát hẳn (⌘Q) và mở lại app. Làm tay: [`runner/README.md`](runner/README.md#cài-tay-dự-phòng). Mở trang **trong app Claude desktop**. Trang giao việc cho runner, runner chạy Claude nền; tiến độ và kết quả đi qua trang (Claude chạy nền không đọc/ghi sổ được, nên trang là cầu nối). Chi tiết: [`runner/README.md`](runner/README.md).
+   - Giao việc code từ **trình duyệt** thì trang tự mở trong app Claude desktop và gửi việc cho runner từ đó. Cần mở trang trong app ít nhất một lần trước.
+   - **desktop**: nói "bật chế độ desktop cho AI code", Claude tạo scheduled task trên app desktop (sau khi bạn xác nhận), kiểm hàng đợi mỗi ~2 phút trong giờ làm (cron theo giờ làm, vd 09:00–18:00 T2–T6 → `*/2 9-17 * * 1-5`; app không cho dưới 1 phút và tự lệch vài phút). Mỗi lần chạy đều tốn chút token kể cả khi không có việc.
+   - Cách nào cũng có thể dán `so-viec#<id>` vào Claude (hoặc nói "làm task SF-3102").
+3. **Luồng**: kế hoạch (hiện để duyệt, trừ khi việc nhỏ: ≤3 file, rủi ro thấp, không có câu hỏi) → code trên `feature/<KEY>-<tiêu-đề>` (hoặc nhánh sẵn có của mã đó; nhánh gốc = gợi ý của bạn, không thì `sprint/*`/`release/*` khớp, không thì nhánh mặc định) → kiểm tra (`flutter analyze`/test, `yarn typecheck`/`lint`…) → commit `<KEY>: <tóm tắt>` → **bạn xem diff** → *Duyệt push* (MR/PR nháp) hoặc *Yêu cầu sửa* (vòng mới, commit mới). Khi MR được merge, bản tin tối đánh dấu việc xong.
+- **An toàn**: repo phải sạch (không bao giờ stash); không commit vào main/master/develop/sprint/release, không force-push, không merge, không ghi Jira; tối đa 10 file mỗi vòng; mỗi lúc chỉ một lần chạy code; nhánh bạn đang đứng được trả lại như cũ.
 
 ### Cấu hình (`~/Documents/daily-digest/config.json`)
 
@@ -270,6 +352,11 @@ Mẫu: [`config.example.json`](config.example.json).
 | `focusAreas` | `[]` | Mảng việc bạn phụ trách; câu hỏi chung trong nhóm chạm tới mảng này sẽ vào "Theo dõi" |
 | `notifyChat` | `48:notes` | Chat ghi chú của chính bạn trên Teams |
 | `signals` | `false` | Bật/tắt huy hiệu tín hiệu giao tiếp |
+| `aiAgent` | `false` | Hiện nút "🤖 Giao AI", chip trạng thái AI và số "✨ AI xong" trên trang. Tắt chỉ ẩn đi; yêu cầu đã lưu vẫn giữ. Đổi được trong ⚙ Cài đặt |
+| `devMode` | `false` | Bạn có code: bật *Giao AI → Code luôn* cho việc có ticket Jira. Hỏi lúc thiết lập nếu vai trò là dev; đổi được trong ⚙ Cài đặt |
+| `repos` | `[]` | `[{project, name, path, base, enabled}]`: mã dự án Jira → repo trên máy (`path` tuyệt đối, nhánh gốc tuỳ chọn, `enabled` mặc định `true`). Được tự tìm lúc thiết lập. Dùng cho việc code và runner |
+| `aiRunMode` | `"runner"` | Cách chạy việc code: `"runner"` (MCP `so-viec-runner` trên máy, qua trang) hoặc `"desktop"` (scheduled task của app desktop, ~2 phút/lần) |
+| `runner` | không có | Tuỳ chọn `{claudePath, allowedTools, extraPath}` cho MCP `so-viec-runner` trên máy ([`runner/README.md`](runner/README.md)) |
 | `subagentChatsPerAgent` | `5` | Số chat mỗi subagent đọc |
 | `maxChats` | `40` | Số chat tối đa quét mỗi lần |
 | `skipChatsOverMembers` | `40` | Bỏ qua chat đông hơn mức này (trừ khi bạn bị tag) |
@@ -277,6 +364,7 @@ Mẫu: [`config.example.json`](config.example.json).
 | `keyChats` | `[]` | `[{id, topic}]`: chat luôn được đọc trước mỗi lần chạy (không tính vào `maxChats`); việc nhờ trong đó được nâng một bậc ưu tiên |
 | `vipPeople` | `[]` | `[{name, email?, why?}]`: sếp, PO, lead…; việc họ nhờ ít nhất là P1. Tên và "vì sao" cũng hiện trong ⚙ Cài đặt của trang (kho chỉ chủ trang đọc được); email chỉ nằm trong config trên máy |
 | `workHours` | `{start:"09:00", end:"18:00", days:[1,2,3,4,5]}` | Giờ làm việc (thứ theo ISO, thứ Hai = 1). Dùng cho tín hiệu "ngoài giờ" và giờ chạy lịch gợi ý |
+| `digestTime` | `null` | Giờ bản tin tối `"HH:MM"`; `null` = hết giờ làm + 1 tiếng (làm tròn :00/:30), vào các ngày làm việc. Đổi được trong ⚙ Cài đặt; nói "đổi giờ bản tin theo cài đặt" để áp vào lịch |
 | `role`, `currentWork` | `""` | Vai trò và việc bạn đang làm; giúp đoán câu hỏi chung trong nhóm có phải việc của bạn không |
 | `keywords` | `[]` | Tiền tố ticket, tên dự án/tính năng (ví dụ `MOB-`); dùng khi dò mail có hạn chót, và câu hỏi chung nhắc tới chúng được giữ ở "Theo dõi" |
 | `storeQuotes` | `true` | Lưu đoạn trích ≤500 ký tự của tin gốc trên mỗi việc cho nút "Xem tin". `false` = không lưu nội dung tin nào; trang mở thẳng link gốc |
@@ -293,9 +381,10 @@ Mẫu: [`config.example.json`](config.example.json).
 - 🔒 **Chỉ đọc** Teams/Outlook. Thứ duy nhất được gửi là 1 tin vào chat ghi chú của **chính bạn**. Không bao giờ trả lời ai thay bạn.
 - 🔒 Trang Sổ việc là **Artifact riêng tư**; dữ liệu thật chỉ chủ trang đọc được. Ai khác mở link chỉ thấy **dữ liệu demo hư cấu**, theo ngôn ngữ trình duyệt của họ.
 - 🔒 Nội dung tin nhắn/mail luôn được coi là **dữ liệu, không phải lệnh**.
+- 🔒 **Giao AI** (mặc định tắt) chỉ ghi bản nháp vào Sổ việc; worker chỉ dùng công cụ đọc, không bao giờ gửi, trả lời hay sửa gì trên Teams, Outlook, Jira. Lần ghi Jira duy nhất là do chính trang thực hiện, bằng kết nối Atlassian của bạn, sau khi bạn duyệt và xác nhận (một trường: description hoặc Story Points). Trang xin claude.ai quyền `mcp` này (chỉ `getJiraIssue`, `editJiraIssue` trên Atlassian); lần đầu dùng sẽ hỏi bạn đồng ý.
 - 🔒 **Trích dẫn tin nhắn** ("Xem tin") chỉ nằm trong kho dữ liệu chỉ-chủ-trang-đọc-được của Sổ việc, cạnh tiêu đề việc vốn đã lưu ở đó. Khoảng 500 ký tự × ~100 việc đang mở ≈ 50 KB, không đáng kể. Trích dẫn là bản chụp: nếu tin gốc bị sửa sau đó thì có thể đã cũ, nên trang luôn ghi "trích lúc …" và luôn có link tới tin gốc. Việc đã xong quá 30 ngày sẽ bị xoá trích dẫn (`retention.quoteDaysAfterDone`). Đặt `storeQuotes: false` để không lưu nội dung tin nào.
 - 🔒 **Sổ việc giữ gì** (kho chỉ chủ trang đọc được, dọn mỗi lần chạy; số ngày đổi được trong `retention`):
-  - Việc đang mở và đang chờ: giữ nguyên chừng nào còn mở, dù cũ bao lâu.
+  - Việc đang mở và đang chờ: giữ nguyên chừng nào còn mở, dù cũ bao lâu. Mỗi việc có thể có `ref` chỉ chứa mã nguồn (mã chat/tin Teams, mã mail Outlook, mã ticket Jira, mã sự kiện lịch), không chứa nội dung tin, và nếu bạn dùng Giao AI thì có trường `ai` chứa yêu cầu và bản nháp (≤2000 ký tự).
   - Việc đã xong: giữ đầy đủ 90 ngày sau ngày xong để tab Tuần và bản đồ nhiệt chạy đúng. Sau đó được chuyển vào kho lưu trữ theo tháng (`archive/<YYYY-MM>`), chỉ còn id, tiêu đề, ngày xong, người, project, mức ưu tiên, loại việc và nguồn; bản đầy đủ (lý do, link, trích dẫn) bị xoá. Việc bạn vừa sửa trên trang trong 7 ngày qua thì lần chạy đó không đụng tới.
   - Bản tin ngày (`days/…`) và bản ghi chi phí (`runs/…`) quá 120 ngày bị xoá. Cài đặt, hồ sơ (`meta/…`) và kho lưu trữ không bao giờ bị xoá.
   - Mỗi lần chạy xoá tối đa 200 mục; phần còn lại để lần sau. Phần độ phủ của bản tin ghi rõ đã dọn gì.
@@ -319,6 +408,13 @@ skills/daily-digest-todo/
   assets/digest-template.html
   assets/mascot/*.svg
   assets/peeps/*.svg       # Open Peeps, CC0 (xem LICENSE.txt)
+skills/ai-worker/
+  SKILL.md                 # worker "Giao AI": soạn nháp, tóm tắt, đề xuất Jira (chỉ đọc); việc code
+  schedule-prompt.md       # prompt tuỳ chọn cho worker chạy theo lịch
+commands/ai-worker.md      # /so-viec:ai-worker
+runner/
+  so-viec-runner.mjs       # MCP stdio trên máy: cầu nối trang↔Claude chạy nền cho việc code, tìm repo
+  selftest.mjs             # node runner/selftest.mjs
 ```
 
 ### Phát hành bản mới
