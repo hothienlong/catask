@@ -30,6 +30,7 @@
   "currentWork": "Màn hình ví điện tử, sprint 12",
   "keywords": ["MOB-", "ví điện tử"],
   "storeQuotes": true,
+  "crossSessionDone": true,
   "devMode": false,
   "aiRunMode": "runner",
   "repos": [

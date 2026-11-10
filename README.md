@@ -42,6 +42,7 @@
 - 🚦 **P0–P3 badges** (how critical it is, separate from when it's due): P0 critical (prod incident, blocking others, security, escalation), P1 important (anything your important people ask), P2 normal, P3 nice-to-have/FYI. You can change a todo's P on the page and Claude won't override it.
 - ↕️ **Sort order**: overdue / due today → tasks with a real due date (earliest first, so a P2 due tomorrow beats a P1 with no date) → P0→P3 → oldest first. The top 3 uses the same order.
 - 🔁 **Carry-over**: unfinished items stay. **AI suggests, you confirm**: when there's evidence a task is done (your "done/fixed", an MR link, an answer, a Jira Done mail, a merged MR, even in another chat that clearly matches the same task), the card shows **Looks done?** with the evidence and a link; you tap **✓ Done** or **✗ Not yet**. Nothing is closed without you.
+- 🧩 **Done somewhere else? Claude asks.** After each digest, catask saves a short list of your open tasks (titles and Jira keys) on your Mac. When you work with Claude Code in any other project and finish something that clearly matches one (same Jira key, or the request is plainly that task), Claude asks **Mark catask#ID · title done?** before ending its turn. Only a **Yes** closes it. Turn off with `crossSessionDone: false` or in ⚙ Settings.
 - 🏆 **Done today**: only recorded when there's real evidence in messages or mail.
 - 🗂 **The ledger page** (a private Artifact): Today / Tomorrow / Waiting / Done board (drag and drop), plus People, Week, Day (timeline) and Cost tabs. **Mark done from anywhere**: any tab, including Day timeline items. Every status or priority change shows a small bar with **Undo** (or Ctrl/Cmd+Z) for about 6 seconds.
 - ⚙ **Settings on the page**: change language, channels, working hours, important people, key chats (remove), keywords, role/current work, and the privacy switches from the ⚙ Settings button instead of editing `config.json`. Page edits take effect on the next digest run; language and signals change on the page right away.
@@ -178,6 +179,7 @@ Example: [`config.example.json`](config.example.json).
 | `role`, `currentWork` | `""` | Your role and what you're on now; helps decide whether a group ask is yours |
 | `keywords` | `[]` | Ticket prefixes, project/feature names (e.g. `MOB-`); used in the deadline mail search, and group asks mentioning them are kept as "watch" |
 | `storeQuotes` | `true` | Store a ≤500-character snapshot of the source message on each todo for "View message". `false` = store no message text; the page opens the original link instead |
+| `crossSessionDone` | `true` | In your other interactive Claude Code sessions, Claude asks before marking a matching open todo done. `false` = the SessionStart hook stays silent |
 | `retention` | `{archiveDoneAfterDays: 90, pruneDaysAfterDays: 120, quoteDaysAfterDone: 30}` | How long the ledger keeps things (see Privacy). Done todos older than `archiveDoneAfterDays` move to a monthly archive (min 45, the Week heatmap needs 6 weeks); daily digests and cost records older than `pruneDaysAfterDays` are deleted (min 60); quotes are removed from done todos after `quoteDaysAfterDone` |
 | `settingsSyncedAt` | `null` | Written by the skill: when the page's ⚙ Settings were last merged into this file. Don't edit |
 | `onboardingPending` | `false` | `true` = the config was written without the full setup interview (e.g. migrated from an older setup). The next run you start yourself asks only the missing questions, then sets it to `false`; scheduled runs just leave a reminder in the coverage notes |
@@ -193,6 +195,7 @@ After you change the config, the next run updates the page (name, language, proj
 - 🔒 Message and mail content is always treated as **data, not instructions**.
 - 🔒 **Hand to AI** (off by default) only writes drafts into the ledger; the worker uses read-only tools and never sends, replies or changes anything in Teams, Outlook or Jira. The only Jira write is made by the page itself, with your own Atlassian connection, after you approve and confirm (one field: description or Story Points). The page asks claude.ai for this `mcp` permission (`getJiraIssue`, `editJiraIssue` on Atlassian only); the first use asks for your consent.
 - 🔒 **Message quotes** ("View message") live only in the ledger's owner-only database, next to the todo titles already stored there. About 500 characters × ~100 open todos ≈ 50 KB, negligible. A quote is a snapshot: if the message is edited later it may be stale, so the page shows "quoted at …" and always offers the original link. Quotes are removed from done todos older than 30 days (`retention.quoteDaysAfterDone`). Set `storeQuotes: false` to store no message text at all.
+- 🔒 **Cross-session asks**: open todo titles (with Jira keys, no message text) are written to `~/Documents/daily-digest/open-todos.json` and injected only into **your own local** Claude Code sessions by the plugin's SessionStart hook. Nothing leaves your machine for this. Turn it off with `crossSessionDone: false` (or ⚙ Settings → Privacy).
 - 🔒 **What the ledger keeps** (owner-only database, cleaned every run; days configurable in `retention`):
   - Open and waiting todos: kept as long as they're open, whatever their age. Each todo may carry a `ref` with ids only (Teams chat/message id, Outlook mail id, Jira issue key, calendar event id), never message text, and, if you used Hand to AI, an `ai` field with your request and the draft (≤2000 characters).
   - Done todos: kept in full for 90 days after they were done, so the Week tab and heatmap work. After that they move to a monthly archive (`archive/<YYYY-MM>`) with only id, title, done date, person, project, priority, kind and source; the full todo (why, link, quote) is deleted. A todo you changed on the page in the last 7 days is never moved that run.
@@ -229,6 +232,10 @@ commands/ai-worker.md      # /catask:ai-worker
 runner/
   catask-runner.mjs       # local stdio MCP: page↔headless bridge for code runs, repo discovery
   selftest.mjs             # node runner/selftest.mjs
+hooks/
+  hooks.json               # SessionStart: list open todos in your other sessions
+  catask-context.mjs       # reads ~/Documents/daily-digest/open-todos.json
+  selftest.mjs             # node hooks/selftest.mjs
 ```
 
 ### Releasing a new version
@@ -259,6 +266,7 @@ MIT — see [`LICENSE`](LICENSE). © 2026 Hồ Thiên Long.
 - 🚦 **Nhãn P0–P3** (mức độ critical, tách riêng với độ gấp về thời gian): P0 nghiêm trọng (sự cố production, đang chặn người khác, bảo mật, sếp/người quan trọng escalate), P1 quan trọng (mọi việc người quan trọng của bạn nhờ), P2 bình thường, P3 có thì tốt/FYI. Bạn đổi P trên trang thì Claude không ghi đè.
 - ↕️ **Thứ tự sắp xếp**: quá hạn / hạn hôm nay → việc có hạn cụ thể (hạn sớm trước, nên P2 hạn mai đứng trước P1 không có hạn) → P0→P3 → việc cũ hơn trước. Top 3 dùng cùng thứ tự này.
 - 🔁 **Carry-over**: việc chưa xong hôm qua tự ở lại. **AI gợi ý, bạn xác nhận**: khi có bằng chứng việc đã xong (bạn nhắn "xong/đã fix", link MR, đã trả lời, mail Jira chuyển Done, MR đã merge; có thể thấy ở chat khác nếu khớp rõ đúng việc đó), thẻ hiện **Có vẻ đã xong?** kèm bằng chứng và link; bạn bấm **✓ Xong** hoặc **✗ Chưa**. Không việc nào tự bị đóng.
+- 🧩 **Làm xong ở chỗ khác? Claude hỏi.** Sau mỗi bản tin, catask lưu trên máy bạn một danh sách ngắn các việc đang mở (tiêu đề và mã Jira). Khi bạn làm việc với Claude Code ở bất kỳ project nào và làm xong việc khớp rõ (cùng mã Jira, hoặc yêu cầu chính là việc đó), Claude hỏi **Đánh dấu xong catask#ID · tiêu đề?** trước khi kết thúc lượt. Chỉ khi bạn chọn **Có** mới đóng. Tắt bằng `crossSessionDone: false` hoặc trong ⚙ Cài đặt.
 - 🏆 **Đã xong hôm nay**: chỉ ghi khi có bằng chứng thật trong tin nhắn/mail.
 - 🗂 **Trang catask** (Artifact riêng tư): bảng Hôm nay / Mai / Đang chờ / Xong (kéo thả được), tab Theo người, Tuần, Ngày (dòng thời gian), Chi phí. **Đánh dấu xong ở mọi nơi**: tab nào cũng được, kể cả mục trên dòng thời gian tab Ngày; mỗi lần đổi trạng thái hay mức ưu tiên đều hiện thanh nhỏ có nút **Hoàn tác** (hoặc Ctrl/Cmd+Z) trong khoảng 6 giây.
 - ⚙ **Cài đặt ngay trên trang**: đổi ngôn ngữ, kênh theo dõi, giờ làm, người quan trọng, chat theo dõi (bỏ bớt), từ khoá, vai trò/việc đang làm và hai công tắc riêng tư bằng nút ⚙ Cài đặt, khỏi sửa `config.json`. Thay đổi trên trang áp dụng từ bản tin tới; ngôn ngữ và tín hiệu đổi trên trang ngay.
@@ -395,6 +403,7 @@ Mẫu: [`config.example.json`](config.example.json).
 | `role`, `currentWork` | `""` | Vai trò và việc bạn đang làm; giúp đoán câu hỏi chung trong nhóm có phải việc của bạn không |
 | `keywords` | `[]` | Tiền tố ticket, tên dự án/tính năng (ví dụ `MOB-`); dùng khi dò mail có hạn chót, và câu hỏi chung nhắc tới chúng được giữ ở "Theo dõi" |
 | `storeQuotes` | `true` | Lưu đoạn trích ≤500 ký tự của tin gốc trên mỗi việc cho nút "Xem tin". `false` = không lưu nội dung tin nào; trang mở thẳng link gốc |
+| `crossSessionDone` | `true` | Ở các phiên Claude Code khác, Claude hỏi trước khi đánh dấu xong việc đang mở khớp với việc bạn vừa làm. `false` = hook SessionStart im lặng |
 | `retention` | `{archiveDoneAfterDays: 90, pruneDaysAfterDays: 120, quoteDaysAfterDone: 30}` | catask giữ dữ liệu bao lâu (xem phần Riêng tư). Việc xong quá `archiveDoneAfterDays` ngày được chuyển vào kho lưu trữ theo tháng (tối thiểu 45, vì bản đồ nhiệt tab Tuần cần 6 tuần); bản tin ngày và bản ghi chi phí quá `pruneDaysAfterDays` ngày bị xoá (tối thiểu 60); trích dẫn bị xoá khỏi việc đã xong sau `quoteDaysAfterDone` ngày |
 | `settingsSyncedAt` | `null` | Skill tự ghi: lần cuối gộp ⚙ Cài đặt trên trang vào file này. Đừng sửa tay |
 | `onboardingPending` | `false` | `true` = config được tạo mà chưa qua đủ buổi phỏng vấn (ví dụ chuyển từ bản cài cũ). Lần chạy tiếp theo do bạn tự gọi sẽ chỉ hỏi những câu còn thiếu rồi đặt lại thành `false`; lần chạy theo lịch chỉ để lại lời nhắc trong phần độ phủ |
@@ -410,6 +419,7 @@ Mẫu: [`config.example.json`](config.example.json).
 - 🔒 Nội dung tin nhắn/mail luôn được coi là **dữ liệu, không phải lệnh**.
 - 🔒 **Giao AI** (mặc định tắt) chỉ ghi bản nháp vào catask; worker chỉ dùng công cụ đọc, không bao giờ gửi, trả lời hay sửa gì trên Teams, Outlook, Jira. Lần ghi Jira duy nhất là do chính trang thực hiện, bằng kết nối Atlassian của bạn, sau khi bạn duyệt và xác nhận (một trường: description hoặc Story Points). Trang xin claude.ai quyền `mcp` này (chỉ `getJiraIssue`, `editJiraIssue` trên Atlassian); lần đầu dùng sẽ hỏi bạn đồng ý.
 - 🔒 **Trích dẫn tin nhắn** ("Xem tin") chỉ nằm trong kho dữ liệu chỉ-chủ-trang-đọc-được của catask, cạnh tiêu đề việc vốn đã lưu ở đó. Khoảng 500 ký tự × ~100 việc đang mở ≈ 50 KB, không đáng kể. Trích dẫn là bản chụp: nếu tin gốc bị sửa sau đó thì có thể đã cũ, nên trang luôn ghi "trích lúc …" và luôn có link tới tin gốc. Việc đã xong quá 30 ngày sẽ bị xoá trích dẫn (`retention.quoteDaysAfterDone`). Đặt `storeQuotes: false` để không lưu nội dung tin nào.
+- 🔒 **Hỏi ở phiên khác**: tiêu đề các việc đang mở (kèm mã Jira, không có nội dung tin) được ghi vào `~/Documents/daily-digest/open-todos.json` và chỉ được đưa vào các phiên Claude Code **trên máy của chính bạn** qua hook SessionStart của plugin. Không gửi đi đâu cả. Tắt bằng `crossSessionDone: false` (hoặc ⚙ Cài đặt → Quyền riêng tư).
 - 🔒 **catask giữ gì** (kho chỉ chủ trang đọc được, dọn mỗi lần chạy; số ngày đổi được trong `retention`):
   - Việc đang mở và đang chờ: giữ nguyên chừng nào còn mở, dù cũ bao lâu. Mỗi việc có thể có `ref` chỉ chứa mã nguồn (mã chat/tin Teams, mã mail Outlook, mã ticket Jira, mã sự kiện lịch), không chứa nội dung tin, và nếu bạn dùng Giao AI thì có trường `ai` chứa yêu cầu và bản nháp (≤2000 ký tự).
   - Việc đã xong: giữ đầy đủ 90 ngày sau ngày xong để tab Tuần và bản đồ nhiệt chạy đúng. Sau đó được chuyển vào kho lưu trữ theo tháng (`archive/<YYYY-MM>`), chỉ còn id, tiêu đề, ngày xong, người, project, mức ưu tiên, loại việc và nguồn; bản đầy đủ (lý do, link, trích dẫn) bị xoá. Việc bạn vừa sửa trên trang trong 7 ngày qua thì lần chạy đó không đụng tới.
@@ -446,6 +456,10 @@ commands/ai-worker.md      # /catask:ai-worker
 runner/
   catask-runner.mjs       # MCP stdio trên máy: cầu nối trang↔Claude chạy nền cho việc code, tìm repo
   selftest.mjs             # node runner/selftest.mjs
+hooks/
+  hooks.json               # SessionStart: list open todos in your other sessions
+  catask-context.mjs       # reads ~/Documents/daily-digest/open-todos.json
+  selftest.mjs             # node hooks/selftest.mjs
 ```
 
 ### Phát hành bản mới

@@ -885,7 +885,7 @@ html.ai-fold { --aibar-h: 41px }
       secKw: 'Từ khoá', kwLabel: 'Từ khoá mới', kwPh: 'VD: MOB-, tên dự án', kwEmpty: 'Chưa có từ khoá.', kwHint: 'Mã ticket, tên dự án, tên tính năng. Có thể gõ nhiều từ, cách nhau bằng dấu phẩy.',
       secRole: 'Vai trò và việc đang làm', role: 'Vai trò', currentWork: 'Việc đang làm',
       secAi: 'Trợ lý AI (thử nghiệm)', aiAgent: 'Cho phép giao việc cho AI', aiAgentHint: 'Hiện nút "🤖 Giao AI" trên việc. AI chỉ soạn nháp hoặc tóm tắt từ dữ liệu trong sổ, không gửi gì thay bạn. Cần chạy "xử lý việc giao AI" (tay hoặc theo lịch) và tốn thêm token. Bật/tắt là thấy ngay; dữ liệu cũ vẫn được giữ.',
-      secPriv: 'Quyền riêng tư', sq: 'Lưu đoạn trích tin', sqHint: 'Cho nút "Xem tin". Chỉ bạn đọc được, khoảng 50 KB, là bản chụp lúc quét nên tin gốc có thể đã sửa.',
+      secPriv: 'Quyền riêng tư', csd: 'Hỏi đánh dấu xong khi tôi làm việc với Claude ở chỗ khác', csdHint: 'Tên các việc đang mở được đưa vào các phiên Claude Code trên máy bạn. Khi bạn làm xong việc khớp, Claude hỏi trước, không tự đóng.', sq: 'Lưu đoạn trích tin', sqHint: 'Cho nút "Xem tin". Chỉ bạn đọc được, khoảng 50 KB, là bản chụp lúc quét nên tin gốc có thể đã sửa.',
       sig: 'Tín hiệu giao tiếp', sigHint: 'Nhãn như "Gấp ảo", "Ngoài giờ" trên việc và tin nổi bật. Bật/tắt là thấy ngay trên trang.',
       add: 'Thêm', rm: 'Bỏ {0}', save: 'Lưu', cancel: 'Huỷ', saving: 'Đang lưu…', dirty: 'Có thay đổi chưa lưu', clean: 'Chưa có thay đổi',
       setSaved: 'Đã lưu. Áp dụng từ bản tin tới.', setSaveFail: 'Chưa lưu được cài đặt ({0}). Thử lại sau.', demoSetSaved: 'Bản demo: không lưu.',
@@ -1136,7 +1136,7 @@ html.ai-fold { --aibar-h: 41px }
       secKw: 'Keywords', kwLabel: 'New keyword', kwPh: 'e.g. MOB-, a project name', kwEmpty: 'No keywords yet.', kwHint: 'Ticket prefixes, project or feature names. Separate several with commas.',
       secRole: 'Role and current work', role: 'Role', currentWork: 'Current work',
       secAi: 'AI assistant (beta)', aiAgent: 'Allow handing tasks to AI', aiAgentHint: 'Shows a "🤖 Hand to AI" button on tasks. AI only drafts or summarizes from catask data and never sends anything for you. Needs "process AI queue" to run (by hand or on a schedule) and uses extra tokens. Applies right away; existing data is kept.',
-      secPriv: 'Privacy', sq: 'Store message snippets', sqHint: 'For "View message". Only you can read them, about 50 KB, a snapshot taken at scan time, so the original may have changed.',
+      secPriv: 'Privacy', csd: 'Ask to mark done when I finish matching work in other Claude sessions', csdHint: 'Open task titles are given to Claude Code sessions on your own machine. When you finish a matching one, Claude asks first and never closes it by itself.', sq: 'Store message snippets', sqHint: 'For "View message". Only you can read them, about 50 KB, a snapshot taken at scan time, so the original may have changed.',
       sig: 'Communication signals', sigHint: 'Badges like "False urgency" or "After hours" on tasks and highlights. Shows or hides on the page right away.',
       add: 'Add', rm: 'Remove {0}', save: 'Save', cancel: 'Cancel', saving: 'Saving…', dirty: 'Unsaved changes', clean: 'No changes',
       setSaved: 'Saved. Takes effect from the next digest.', setSaveFail: 'Couldn’t save settings ({0}). Try again later.', demoSetSaved: 'Demo: not saved.',
@@ -3120,7 +3120,7 @@ html.ai-fold { --aibar-h: 41px }
   function str(v, n) { return String(v == null ? '' : v).trim().slice(0, n) }
   function uniq(list, key) { var seen = {}; return list.filter(function (x) { var k = key(x).toLowerCase(); if (!k || seen[k]) return false; seen[k] = 1; return true }) }
   function defSettings() {
-    return { language: PROFILE.language === 'en' || PROFILE.language === 'vi' ? PROFILE.language : LANG, signals: PROFILE.signals === true, aiAgent: PROFILE.aiAgent === true, storeQuotes: true,
+    return { language: PROFILE.language === 'en' || PROFILE.language === 'vi' ? PROFILE.language : LANG, signals: PROFILE.signals === true, aiAgent: PROFILE.aiAgent === true, storeQuotes: true, crossSessionDone: true,
       channels: CHANNELS.slice(), workHours: { start: '09:00', end: '18:00', days: [1, 2, 3, 4, 5] }, vipPeople: [], keyChats: [], keywords: [], role: '', currentWork: '', devMode: false, aiRunMode: 'runner', repos: [], digestTime: null };
   }
   /* Dev repos: {project (Jira key prefix), name, path (absolute, on this machine), base (branch hint)}. Empty rows drop out. */
@@ -3142,7 +3142,7 @@ html.ai-fold { --aibar-h: 41px }
     o = o || {}; var df = defSettings(), wh = o.workHours || {};
     return {
       language: o.language === 'en' || o.language === 'vi' ? o.language : df.language,
-      signals: o.signals === true, aiAgent: o.aiAgent === true, storeQuotes: o.storeQuotes !== false,
+      signals: o.signals === true, aiAgent: o.aiAgent === true, storeQuotes: o.storeQuotes !== false, crossSessionDone: o.crossSessionDone !== false,
       channels: Array.isArray(o.channels) ? CHANNELS.filter(function (c) { return o.channels.indexOf(c) >= 0 }) : df.channels,
       workHours: { start: HM.test(wh.start || '') ? wh.start : '09:00', end: HM.test(wh.end || '') ? wh.end : '18:00',
         days: Array.isArray(wh.days) ? [1, 2, 3, 4, 5, 6, 7].filter(function (n) { return wh.days.indexOf(n) >= 0 || wh.days.indexOf(String(n)) >= 0 }) : [1, 2, 3, 4, 5] },
@@ -3225,7 +3225,7 @@ html.ai-fold { --aibar-h: 41px }
       (S.devAsk && !d.devMode ? '<div class="ai-confirm" role="group" aria-labelledby="devAskQ"><p id="devAskQ"><b>' + esc(t('devAskQ')) + '</b></p><div class="dlg-actions">' +
         '<button type="button" class="btn-sec" data-dev-no>' + esc(t('devAskNo')) + '</button><button type="button" class="btn-pri" data-dev-ok>' + esc(t('devAskOk')) + '</button></div></div>' : '') +
       (d.devMode ? modeBox(d, ro) + runnerDiag(d) + repoSummary(d) + errLine(E.repo) : ''));
-    h += sec('priv', 'secPriv', [['storeQuotes', 'sq', 'sqHint'], ['signals', 'sig', 'sigHint']].map(function (x) {
+    h += sec('priv', 'secPriv', [['storeQuotes', 'sq', 'sqHint'], ['crossSessionDone', 'csd', 'csdHint'], ['signals', 'sig', 'sigHint']].map(function (x) {
       return '<label class="set-switch"><span><b>' + esc(t(x[1])) + '</b><span class="set-hint">' + esc(t(x[2])) + '</span></span>' +
         '<input type="checkbox" role="switch" class="sw" data-set-tg="' + x[0] + '"' + (d[x[0]] ? ' checked' : '') + dis + '></label>' }).join(''));
     h += '</div>' + setFoot();
@@ -3943,7 +3943,7 @@ html.ai-fold { --aibar-h: 41px }
     ];
     var runs = [0, 1, 2].map(function (i) { var d = addDays(TODAY, -i), cr = 2100000 - i * 180000, cw = 480000 + i * 30000, out = 21000 - i * 1500;
       return { runId: 'demo-' + i, date: d, start: minHm(hmMin(dT) + 3 + i), end: minHm(hmMin(dT) + 24 + i), minutes: 21 + i, model: 'claude-opus-5-5', calls: 16 - i, subagents: 2, total: { input: 40, cacheRead: cr, cacheWrite: cw, output: out }, equivInput: Math.round(40 + cr * .1 + cw * 1.25 + out * 5), weeklyBefore: 30 + i * 3, weeklyAfter: 32 + i * 3 } });
-    var settings = { language: LANG, signals: false, aiAgent: true, storeQuotes: true, channels: CHANNELS.slice(), workHours: { start: '09:00', end: '18:00', days: [1, 2, 3, 4, 5] },
+    var settings = { language: LANG, signals: false, aiAgent: true, storeQuotes: true, crossSessionDone: true, channels: CHANNELS.slice(), workHours: { start: '09:00', end: '18:00', days: [1, 2, 3, 4, 5] },
       vipPeople: [{ name: c.rabbit.replace(/\s*\(.*\)\s*$/, ''), why: c.setVipWhy }], keyChats: [{ id: 'demo-chat-1', topic: c.teamMobile }, { id: 'demo-chat-2', topic: c.teamPay }],
       keywords: c.setKw.slice(), role: c.setRole, currentWork: c.setWork, devMode: true, repos: [Object.assign({}, DREPO)], timezone: 'Asia/Ho_Chi_Minh', updatedBy: 'skill' };
     return { todos: todos, days: days, runs: runs, settings: settings };
