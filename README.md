@@ -80,6 +80,8 @@
 
 Update later with `/plugin marketplace update catask`.
 
+After installing, run **`/catask:setup`**: the setup interview, your digest schedule and (for developers) the runner, without running a digest yet. Or just say "evening digest" to set up and run the first one right away.
+
 **From your organization's plugin library** (when published there):
 
 ```
@@ -303,6 +305,8 @@ MIT — see [`LICENSE`](LICENSE). © 2026 Hồ Thiên Long.
 ```
 
 Cập nhật bản mới bằng `/plugin marketplace update catask`.
+
+Cài xong, gõ **`/catask:setup`**: phỏng vấn thiết lập, đặt lịch bản tin và (với dev) cài runner, chưa chạy bản tin. Hoặc nói luôn "bản tin tối" để vừa thiết lập vừa chạy bản tin đầu tiên.
 
 **Từ thư viện plugin của tổ chức** (khi đã được publish):
 
