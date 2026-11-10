@@ -3140,6 +3140,18 @@ html.ai-fold { --aibar-h: 41px }
     if (!(proj || str(r.name, 80) || path || str(r.base, 120))) return false;
     return !/^(\/|[A-Za-z]:[\\/])/.test(path) || (r.enabled !== false && !/^[A-Z][A-Z0-9]*$/.test(proj));
   }
+  /* keyChats / excludeChats: normally [{id, topic}], but a hand-edited config may hold plain strings
+     (a "19:…" chat id or a chat name) or {topic|name} without id. Strings are kept as is (the skill
+     resolves and normalizes them on its next config write); an id-less object becomes its name string. */
+  function cleanChats(a) {
+    return (Array.isArray(a) ? a : []).map(function (c) {
+      if (typeof c === 'string') return str(c, 200) || null;
+      if (!c || typeof c !== 'object') return null;
+      if (c.id) return { id: String(c.id), topic: str(c.topic || c.name, 120) };
+      return str(c.topic || c.name, 200) || null;
+    }).filter(function (c) { return c });
+  }
+  function chatLabel(c) { return typeof c === 'string' ? c : (c.topic || c.id) }
   /* The editable fields only, trimmed, deduped and capped: used to compare (dirty) and to save. */
   function cleanSettings(o) {
     o = o || {}; var df = defSettings(), wh = o.workHours || {};
@@ -3150,8 +3162,7 @@ html.ai-fold { --aibar-h: 41px }
       workHours: { start: HM.test(wh.start || '') ? wh.start : '09:00', end: HM.test(wh.end || '') ? wh.end : '18:00',
         days: Array.isArray(wh.days) ? [1, 2, 3, 4, 5, 6, 7].filter(function (n) { return wh.days.indexOf(n) >= 0 || wh.days.indexOf(String(n)) >= 0 }) : [1, 2, 3, 4, 5] },
       vipPeople: uniq((Array.isArray(o.vipPeople) ? o.vipPeople : []).map(function (p) { var x = { name: str(p && p.name, 60) }, w = str(p && p.why, 80); if (w) x.why = w; return x }), function (p) { return p.name }),
-      keyChats: (Array.isArray(o.keyChats) ? o.keyChats : []).filter(function (c) { return c && c.id }).map(function (c) { return { id: String(c.id), topic: str(c.topic, 120) } }),
-      excludeChats: (Array.isArray(o.excludeChats) ? o.excludeChats : []).filter(function (c) { return c && c.id }).map(function (c) { return { id: String(c.id), topic: str(c.topic, 120) } }),
+      keyChats: cleanChats(o.keyChats), excludeChats: cleanChats(o.excludeChats),
       keywords: uniq((Array.isArray(o.keywords) ? o.keywords : []).map(function (k) { return str(k, 40) }), function (k) { return k }),
       role: str(o.role, 80), currentWork: str(o.currentWork, 300),
       digestTime: HM.test(o.digestTime || '') ? o.digestTime : null,
@@ -3216,8 +3227,8 @@ html.ai-fold { --aibar-h: 41px }
       (ro ? '' : '<div class="set-row"><label class="set-field">' + esc(t('vipName')) + '<input class="set-in" data-set-in="vipName" maxlength="60" autocomplete="off" value="' + esc(S.setIn.vipName) + '"></label>' +
         '<label class="set-field">' + esc(t('vipWhy')) + '<input class="set-in" data-set-in="vipWhy" maxlength="80" autocomplete="off" value="' + esc(S.setIn.vipWhy) + '"></label>' +
         '<button type="button" class="set-add" data-set-add="vip">' + esc(t('add')) + '</button></div>') + errLine(E.vip) + '<p class="set-hint">' + esc(t('vipHint')) + '</p>');
-    h += sec('chat', 'secChat', chipList(d.keyChats.map(function (c) { return [c.topic || c.id] }), 'chat', 'chatEmpty', ro) + '<p class="set-hint">' + esc(t('chatHint')) + '</p>');
-    h += sec('xchat', 'secXChat', chipList(d.excludeChats.map(function (c) { return [c.topic || c.id] }), 'xchat', 'xchatEmpty', ro) + '<p class="set-hint">' + esc(t('xchatHint')) + '</p>');
+    h += sec('chat', 'secChat', chipList(d.keyChats.map(function (c) { return [chatLabel(c)] }), 'chat', 'chatEmpty', ro) + '<p class="set-hint">' + esc(t('chatHint')) + '</p>');
+    h += sec('xchat', 'secXChat', chipList(d.excludeChats.map(function (c) { return [chatLabel(c)] }), 'xchat', 'xchatEmpty', ro) + '<p class="set-hint">' + esc(t('xchatHint')) + '</p>');
     h += sec('kw', 'secKw', chipList(d.keywords.map(function (k) { return [k] }), 'kw', 'kwEmpty', ro) +
       (ro ? '' : '<div class="set-row"><label class="set-field">' + esc(t('kwLabel')) + '<input class="set-in" data-set-in="kw" maxlength="200" autocomplete="off" placeholder="' + esc(t('kwPh')) + '" value="' + esc(S.setIn.kw) + '"></label>' +
         '<button type="button" class="set-add" data-set-add="kw">' + esc(t('add')) + '</button></div>') + errLine(E.kw) + '<p class="set-hint">' + esc(t('kwHint')) + '</p>');

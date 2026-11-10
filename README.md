@@ -78,7 +78,17 @@
 /plugin install catask@catask
 ```
 
-Update later with `/plugin marketplace update catask`, then `/reload-plugins`. To get new versions automatically: `/plugin` → **Marketplaces** → **catask** → **Enable auto-update** (off by default for GitHub marketplaces). Installs from your organization library update by themselves when you restart Claude Code.
+**Update** (GitHub installs):
+
+- In a session: `/plugin marketplace update catask`, then `/reload-plugins`. Or run **`/catask:update`** and Claude does it for you and tells you the old → new version.
+- From Terminal (works with the `claude` CLI or the one bundled with the Claude desktop app):
+
+  ```
+  C="$(command -v claude || ls -d "$HOME/Library/Application Support/Claude/claude-code"/*/*/claude.app/Contents/MacOS/claude | sort | tail -1)"; "$C" plugin marketplace update catask && "$C" plugin update catask@catask
+  ```
+
+  Then run `/reload-plugins` in an open session, or start a new one.
+- **Automatic updates**: installs from your organization library update by themselves when Claude Code restarts. GitHub installs can turn on auto-update once: `/plugin` → **Marketplaces** → **catask** → **Enable auto-update** (off by default for GitHub marketplaces), or answer yes when `/catask:setup` offers it.
 
 After installing, run **`/catask:setup`**: the setup interview, your digest schedule and (for developers) the runner, without running a digest yet. Or just say "evening digest" to set up and run the first one right away.
 
@@ -177,7 +187,7 @@ Example: [`config.example.json`](config.example.json).
 | `skipChatsOverMembers` | `40` | Skip chats bigger than this (unless you're tagged) |
 | `channels` | all five | Sources to read: `teamsChats`, `teamsChannelMentions`, `outlookMail`, `jiraMail`, `calendar`. Skipped sources are listed in the coverage notes |
 | `keyChats` | `[]` | `[{id, topic}]`: chats always read first every run (outside `maxChats`); asks there go up one priority level |
-| `excludeChats` | `[]` | `[{id, topic}]`: chats never read (e.g. social or team-bonding groups); dropped before the busiest `maxChats` are picked. A chat that is also a key chat is still read. Remove in ⚙ Settings; add via `update my profile` |
+| `excludeChats` | `[]` | `[{id, topic}]`: chats never read (e.g. social or team-bonding groups); dropped before the busiest `maxChats` are picked. A chat that is also a key chat is still read. Remove in ⚙ Settings; add via `update my profile`. Hand-written entries may also be a chat name or a `19:…` chat id (for both lists); Claude matches names to your chats and saves them back as `[{id, topic}]` |
 | `vipPeople` | `[]` | `[{name, email?, why?}]`: boss, PO, lead…; their asks are at least P1. Names and "why" also show in the page's ⚙ Settings (owner-only store); emails stay in your local config only |
 | `workHours` | `{start:"09:00", end:"18:00", days:[1,2,3,4,5]}` | Working hours (ISO weekdays, Mon = 1). Used for the "after hours" signal and the suggested schedule time |
 | `digestTime` | `null` | Your evening digest time `"HH:MM"`; `null` = end of working hours + 1 h (rounded to :00/:30), on your working days. Also in ⚙ Settings; say "update digest schedule" to apply it to the scheduled task |
@@ -226,7 +236,7 @@ skills/daily-digest-todo/
   scripts/render.py        # JSON schema check + offline HTML backup
   scripts/ai_milestones.py # Claude Code work blocks (titles + times)
   scripts/run_tokens.py    # token usage of the scheduled runs
-  assets/so-viec.html      # the ledger page (Artifact), vi + en UI — GENERATED, see Develop
+  assets/catask.html       # the ledger page (Artifact), vi + en UI — GENERATED, see Develop
   assets/digest-template.html
   assets/mascot/*.svg
   assets/peeps/*.svg       # Open Peeps, CC0 (see LICENSE.txt)
@@ -234,8 +244,10 @@ skills/ai-worker/
   SKILL.md                 # "Hand to AI" worker: drafts, summaries, Jira proposals (read-only); code tasks
   schedule-prompt.md       # optional prompt for a scheduled worker
 commands/ai-worker.md      # /catask:ai-worker
-page-src/so-viec.src.html  # readable source of the page (edit this)
-scripts/build-page.mjs     # builds assets/so-viec.html from it
+commands/setup.md          # /catask:setup
+commands/update.md         # /catask:update
+page-src/catask.src.html   # readable source of the page (edit this)
+scripts/build-page.mjs     # builds assets/catask.html from it
 tests/smoke.js             # page smoke test (fake DOM)
 runner/
   catask-runner.mjs       # local stdio MCP: page↔headless bridge for code runs, repo discovery
@@ -248,11 +260,11 @@ hooks/
 
 ### Develop
 
-The shipped page `skills/daily-digest-todo/assets/so-viec.html` is generated (minified, so it is cheap for Claude to read before publishing). Don't edit it by hand:
+The shipped page `skills/daily-digest-todo/assets/catask.html` is generated (minified, so it is cheap for Claude to read before publishing). Don't edit it by hand:
 
-1. Edit `page-src/so-viec.src.html`.
+1. Edit `page-src/catask.src.html`.
 2. Run `node scripts/build-page.mjs` (Node 22; downloads the pinned `esbuild` via `npx` the first time). It minifies the inline `<style>`/`<script>`, strips HTML comments, keeps lines short, and checks ids, `data-*` attributes, the `<title>` and `node --check`. `node scripts/build-page.mjs --check` fails if the built file is stale.
-3. Test both: `for f in page-src/so-viec.src.html skills/daily-digest-todo/assets/so-viec.html; do for l in vi en; do for m in demo owner; do FAKE=2026-11-11 node tests/smoke.js $f $l $m | tail -1; done; done; done` → `ALL PASS` ×8.
+3. Test both: `for f in page-src/catask.src.html skills/daily-digest-todo/assets/catask.html; do for l in vi en; do for m in demo owner; do FAKE=2026-11-11 node tests/smoke.js $f $l $m | tail -1; done; done; done` → `ALL PASS` ×8.
 4. Commit both files. SVGs in `assets/peeps/` and `assets/mascot/` are already optimized (`npx -y svgo@4.0.0 --multipass -p 0` for peeps, `-p 1` for mascots); the page loads them as published supporting files.
 
 ### Releasing a new version
@@ -319,7 +331,17 @@ MIT — see [`LICENSE`](LICENSE). © 2026 Hồ Thiên Long.
 /plugin install catask@catask
 ```
 
-Cập nhật bản mới bằng `/plugin marketplace update catask`, rồi `/reload-plugins`. Muốn tự nhận bản mới: `/plugin` → **Marketplaces** → **catask** → **Enable auto-update** (marketplace GitHub mặc định tắt). Cài từ thư viện plugin của công ty thì tự cập nhật khi mở lại Claude Code.
+**Cập nhật** (cài từ GitHub):
+
+- Trong phiên Claude: `/plugin marketplace update catask`, rồi `/reload-plugins`. Hoặc gõ **`/catask:update`**, Claude tự làm và báo bản cũ → bản mới.
+- Từ Terminal (chạy được với `claude` CLI hoặc bản `claude` đi kèm app Claude desktop):
+
+  ```
+  C="$(command -v claude || ls -d "$HOME/Library/Application Support/Claude/claude-code"/*/*/claude.app/Contents/MacOS/claude | sort | tail -1)"; "$C" plugin marketplace update catask && "$C" plugin update catask@catask
+  ```
+
+  Xong thì gõ `/reload-plugins` trong phiên đang mở, hoặc mở phiên mới.
+- **Tự cập nhật**: cài từ thư viện plugin của công ty thì tự cập nhật khi mở lại Claude Code. Cài từ GitHub thì bật tự cập nhật một lần: `/plugin` → **Marketplaces** → **catask** → **Enable auto-update** (marketplace GitHub mặc định tắt), hoặc trả lời "có" khi `/catask:setup` hỏi.
 
 Cài xong, gõ **`/catask:setup`**: phỏng vấn thiết lập, đặt lịch bản tin và (với dev) cài runner, chưa chạy bản tin. Hoặc nói luôn "bản tin tối" để vừa thiết lập vừa chạy bản tin đầu tiên.
 
@@ -418,7 +440,7 @@ Mẫu: [`config.example.json`](config.example.json).
 | `skipChatsOverMembers` | `40` | Bỏ qua chat đông hơn mức này (trừ khi bạn bị tag) |
 | `channels` | đủ cả năm | Nguồn cần đọc: `teamsChats`, `teamsChannelMentions`, `outlookMail`, `jiraMail`, `calendar`. Nguồn bị bỏ qua được ghi trong phần độ phủ |
 | `keyChats` | `[]` | `[{id, topic}]`: chat luôn được đọc trước mỗi lần chạy (không tính vào `maxChats`); việc nhờ trong đó được nâng một bậc ưu tiên |
-| `excludeChats` | `[]` | `[{id, topic}]`: chat không bao giờ đọc (vd nhóm tán gẫu, gắn kết); bị loại trước khi chọn `maxChats` chat sôi nổi nhất. Chat vừa là chat quan trọng thì vẫn đọc. Xoá được trong ⚙ Cài đặt; thêm bằng `cập nhật hồ sơ` |
+| `excludeChats` | `[]` | `[{id, topic}]`: chat không bao giờ đọc (vd nhóm tán gẫu, gắn kết); bị loại trước khi chọn `maxChats` chat sôi nổi nhất. Chat vừa là chat quan trọng thì vẫn đọc. Xoá được trong ⚙ Cài đặt; thêm bằng `cập nhật hồ sơ`. Tự ghi tay thì mỗi mục có thể là tên chat hoặc id chat `19:…` (cả hai danh sách); Claude tự khớp tên với chat của bạn rồi lưu lại dạng `[{id, topic}]` |
 | `vipPeople` | `[]` | `[{name, email?, why?}]`: sếp, PO, lead…; việc họ nhờ ít nhất là P1. Tên và "vì sao" cũng hiện trong ⚙ Cài đặt của trang (kho chỉ chủ trang đọc được); email chỉ nằm trong config trên máy |
 | `workHours` | `{start:"09:00", end:"18:00", days:[1,2,3,4,5]}` | Giờ làm việc (thứ theo ISO, thứ Hai = 1). Dùng cho tín hiệu "ngoài giờ" và giờ chạy lịch gợi ý |
 | `digestTime` | `null` | Giờ bản tin tối `"HH:MM"`; `null` = hết giờ làm + 1 tiếng (làm tròn :00/:30), vào các ngày làm việc. Đổi được trong ⚙ Cài đặt; nói "đổi giờ bản tin theo cài đặt" để áp vào lịch |
@@ -467,7 +489,7 @@ skills/daily-digest-todo/
   scripts/render.py        # kiểm schema JSON + bản HTML dự phòng
   scripts/ai_milestones.py # block làm việc Claude Code (tên + giờ)
   scripts/run_tokens.py    # token của các lần chạy theo lịch
-  assets/so-viec.html      # trang catask (Artifact), giao diện vi + en — FILE SINH RA, xem Phát triển
+  assets/catask.html       # trang catask (Artifact), giao diện vi + en — FILE SINH RA, xem Phát triển
   assets/digest-template.html
   assets/mascot/*.svg
   assets/peeps/*.svg       # Open Peeps, CC0 (xem LICENSE.txt)
@@ -475,8 +497,10 @@ skills/ai-worker/
   SKILL.md                 # worker "Giao AI": soạn nháp, tóm tắt, đề xuất Jira (chỉ đọc); việc code
   schedule-prompt.md       # prompt tuỳ chọn cho worker chạy theo lịch
 commands/ai-worker.md      # /catask:ai-worker
-page-src/so-viec.src.html  # mã nguồn dễ đọc của trang (sửa ở đây)
-scripts/build-page.mjs     # build assets/so-viec.html từ file đó
+commands/setup.md          # /catask:setup
+commands/update.md         # /catask:update
+page-src/catask.src.html   # mã nguồn dễ đọc của trang (sửa ở đây)
+scripts/build-page.mjs     # build assets/catask.html từ file đó
 tests/smoke.js             # smoke test trang (DOM giả)
 runner/
   catask-runner.mjs       # MCP stdio trên máy: cầu nối trang↔Claude chạy nền cho việc code, tìm repo
@@ -489,9 +513,9 @@ hooks/
 
 ### Phát triển
 
-Trang phát hành `skills/daily-digest-todo/assets/so-viec.html` là file sinh ra (đã minify cho Claude đọc rẻ trước khi publish). Đừng sửa tay:
+Trang phát hành `skills/daily-digest-todo/assets/catask.html` là file sinh ra (đã minify cho Claude đọc rẻ trước khi publish). Đừng sửa tay:
 
-1. Sửa `page-src/so-viec.src.html`.
+1. Sửa `page-src/catask.src.html`.
 2. Chạy `node scripts/build-page.mjs` (Node 22; lần đầu `npx` tải `esbuild` đã ghim phiên bản). Script minify `<style>`/`<script>`, bỏ comment HTML, giữ dòng ngắn, và kiểm id, thuộc tính `data-*`, `<title>`, `node --check`. `node scripts/build-page.mjs --check` báo lỗi nếu file build đã cũ.
 3. Test cả hai: chạy `tests/smoke.js` như phần Develop (tiếng Anh) → `ALL PASS` ×8.
 4. Commit cả hai file. SVG trong `assets/peeps/` và `assets/mascot/` đã được tối ưu sẵn.

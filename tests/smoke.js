@@ -1,4 +1,4 @@
-// usage: FAKE=YYYY-MM-DD node tests/smoke.js <so-viec.html> <vi|en> <demo|owner>
+// usage: FAKE=YYYY-MM-DD node tests/smoke.js <catask.html> <vi|en> <demo|owner>
 // Runs the page's main script in a fake DOM and checks rendering, i18n and ledger writes.
 if(process.env.FAKE){const R=Date, off=new R(process.env.FAKE+'T12:00:00')-new R(); global.Date=class extends R{constructor(...a){ if(a.length) super(...a); else super(R.now()+off)} static now(){return R.now()+off}}}
 const fs=require('fs'); const html=fs.readFileSync(process.argv[2],'utf8');
@@ -540,6 +540,15 @@ function ownerSettingsUndo(){
     ok(!S.setOpen&&els.status.textContent.startsWith(other==='en'?'Saved. Takes effect from the next digest.':'Đã lưu. Áp dụng từ bản tin tới.'),'owner: saved toast, drawer closed');
     settingsDoc=Object.assign({},settingsDoc,{keywords:['SF-','LATER-'],updatedBy:'skill'}); snapByPath['meta/settings']();
     ok(S.settings.keywords.includes('LATER-'),'owner: snapshot refreshes settings while closed');
+    /* hand-edited config: string / id-less chat entries are kept, shown by name, removable, saved back as is */
+    settingsDoc=Object.assign({},settingsDoc,{keyChats:['  Mobile squad ',{topic:'Named only'},{id:'19:y@thread.v2',topic:'Y chat'},null,''],excludeChats:['19:zz@thread.v2','Lunch <crew>'],updatedBy:'skill'}); snapByPath['meta/settings']();
+    ok(S.settings.keyChats.length===3&&S.settings.keyChats[0]==='Mobile squad'&&S.settings.keyChats[1]==='Named only'&&S.settings.keyChats[2].id==='19:y@thread.v2'&&S.settings.excludeChats[0]==='19:zz@thread.v2'&&S.settings.excludeChats[1]==='Lunch <crew>','owner: string chat entries tolerated '+JSON.stringify(S.settings.keyChats));
+    openSet(); const sh=P().innerHTML;
+    ok(sh.includes('Mobile squad')&&sh.includes('Named only')&&sh.includes('Y chat')&&sh.includes('19:zz@thread.v2')&&sh.includes('Lunch &lt;crew&gt;')&&!sh.includes('Lunch <crew>'),'owner: string chat entries shown (escaped) as labels');
+    pclick('data-set-rm','xchat',{'data-i':1}); ok(S.setDraft.excludeChats.length===1&&S.setDraft.excludeChats[0]==='19:zz@thread.v2','owner: remove string skipped chat');
+    pclick('data-set-save'); await wait(30);
+    const ws=updates.filter(x=>x[0]==='meta/settings'&&x[2]==='set').pop();
+    ok(ws&&ws[1].keyChats[0]==='Mobile squad'&&ws[1].keyChats[2].id==='19:y@thread.v2'&&ws[1].excludeChats.length===1&&ws[1].excludeChats[0]==='19:zz@thread.v2','owner: string chat entries saved back as is');
   });
 }
 function navHtml(){ return html.split('<nav class="tabs"')[1].split('</nav>')[0] }
