@@ -4,15 +4,17 @@
 // Zero dependencies, read-only, fast. Prints nothing (exit 0) when the cache is missing or stale, the
 // feature is off in config.json (crossSessionDone: false), or the session runs inside the catask plugin itself.
 import fs from 'node:fs';
-import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { resolveStateDir, askedToday, markAsked } from '../scripts/state-dir.mjs';
 
 const MAX_AGE_MS = 3 * 24 * 3600 * 1000;
 const MAX_TODOS = 40;
 const here = path.dirname(fileURLToPath(import.meta.url));
 const pluginRoot = process.env.CLAUDE_PLUGIN_ROOT || path.dirname(here);
-const dir = process.env.CATASK_DIGEST_DIR || path.join(os.homedir(), 'Documents', 'daily-digest');
+const state = resolveStateDir();
+const dir = state.dir;
+const stateScript = path.join(here, '..', 'scripts', 'state-dir.mjs');
 
 function readJson(p) { try { return JSON.parse(fs.readFileSync(p, 'utf8')) } catch { return null } }
 function real(p) { try { return fs.realpathSync(p) } catch { return path.resolve(p) } }
@@ -35,6 +37,7 @@ function main() {
   try { if (!process.stdin.isTTY) input = JSON.parse(fs.readFileSync(0, 'utf8') || '{}') } catch { input = {} }
   const cwd = input.cwd || process.cwd();
   if (inside(cwd, pluginRoot) || isCataskRepo(cwd)) return;
+  if (state.status === 'blocked') return askToMigrate();
 
   const cfg = readJson(path.join(dir, 'config.json')) || {};
   if (cfg.crossSessionDone === false) return;
@@ -57,7 +60,21 @@ function main() {
     ...lines,
     '',
     'Rule: if during this session you finish work that clearly matches one of these (the same Jira key in the branch, a commit or the task, or the user\'s request is plainly that todo), ask ONCE per todo per session with AskUserQuestion before you end the turn: "Mark catask#<id> · <title> done?" with the options "Yes, mark done" / "Not yet". Weak topic similarity does not count. Never ask in headless, scheduled or -p runs, or when AskUserQuestion is unavailable. Never mark anything done without a Yes. Otherwise ignore this list and never mention it.',
-    `On Yes: with the ArtifactData tool (load it via ToolSearch) on ${url || 'the catask page (url in ~/Documents/daily-digest/artifact-url.txt)'}, "get" todos/<id>, then a pinned "update" (if_version) of {status: "done", doneAt: today's date YYYY-MM-DD in ${tz}, movedBy: "user", prevStatus: <its old status>, doneBy: "ai+user", suggestDone: null, updatedAt: now ISO}. Skip it if it is already done. If ArtifactData is not available, append {"id": "<id>", "at": "<now ISO>", "evidence": "<one line: what was finished>"} to the JSON array in ~/Documents/daily-digest/pending-done.json (create it as [] if missing); the next digest applies it. Then tell the user in one line.`,
+    `On Yes: with the ArtifactData tool (load it via ToolSearch) on ${url || `the catask page (url in ${path.join(dir, 'artifact-url.txt')})`}, "get" todos/<id>, then a pinned "update" (if_version) of {status: "done", doneAt: today's date YYYY-MM-DD in ${tz}, movedBy: "user", prevStatus: <its old status>, doneBy: "ai+user", suggestDone: null, updatedAt: now ISO}. Skip it if it is already done. If ArtifactData is not available, append {"id": "<id>", "at": "<now ISO>", "evidence": "<one line: what was finished>"} to the JSON array in ${path.join(dir, 'pending-done.json')} (create it as [] if missing); the next digest applies it. Then tell the user in one line.`,
+  ];
+  process.stdout.write(out.join('\n') + '\n');
+}
+
+// Legacy data in ~/Documents/daily-digest that macOS hides from Claude Code: ask the user (once a
+// day) whether to move it to ~/.catask through Terminal, which can show the normal macOS prompt.
+function askToMigrate() {
+  const day = new Date().toISOString().slice(0, 10);
+  if (askedToday(day)) return;
+  markAsked(day);
+  const out = [
+    '[catask] catask keeps its data in ~/Documents/daily-digest, but macOS blocks Claude Code from the Documents folder without showing a permission prompt, so catask (open-todo reminders, AI worker, digest) cannot read it.',
+    'Rule: before your first reply in this session, ask the user ONCE with AskUserQuestion (in the language they write in): "catask cannot read its data in ~/Documents. Move it to ~/.catask now? A Terminal window will open; if macOS asks whether Terminal may access Documents, click Allow." with the options "Move it now" / "Not now". Never ask in headless, scheduled or -p runs, or when AskUserQuestion is unavailable.',
+    `On "Move it now": run \`node "${stateScript}" --open-terminal --wait 180\` with Bash (timeout 200000 ms) and read its JSON: status "ok" or "migrated" = done, tell the user in one line; otherwise tell them the Terminal window says what to enable, and that they can ask again later. On "Not now": say they can ask "move catask data" any time. Then continue with what they asked.`,
   ];
   process.stdout.write(out.join('\n') + '\n');
 }

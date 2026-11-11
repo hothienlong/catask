@@ -16,7 +16,7 @@ Check it: `node runner/selftest.mjs` (never starts a real run; the repo scan is 
 
 A headless `claude -p` has the Skill, Atlassian (`mcp__claude_ai_Atlassian__*`) and GitLab MCP tools, but **not** `ArtifactData`, so it can't read or write the ledger. Instead:
 
-1. The page calls `startTask({todoId, task})` with a snapshot of the todo (`{id, title, ref, url, quote, why, due, priority, ai}`, ≤ 60 KB). The runner stores it as `~/Documents/daily-digest/runner/tasks/<id>.in.json` (data only — never put into the prompt or a command line) and starts `claude -p` detached with a fixed prompt naming the in/out files.
+1. The page calls `startTask({todoId, task})` with a snapshot of the todo (`{id, title, ref, url, quote, why, due, priority, ai}`, ≤ 60 KB). The runner stores it as `~/.catask/runner/tasks/<id>.in.json` (data only — never put into the prompt or a command line) and starts `claude -p` detached with a fixed prompt naming the in/out files.
 2. The worker (file mode) writes every progress step and its result to `<id>.out.json` (`{todoId, round, updatedAt, ai: {...changed fields}, todo?: {...}}`), atomically.
 3. The page polls `taskStatus` while it's open and calls `listPending` when it opens, to pick up results produced while it was closed. It copies `out.ai` into its database, then calls `ackTask({todoId, updatedAt})`, which archives the files to `tasks/done/` (last 50 kept).
 
@@ -33,7 +33,7 @@ The page declares this list in its manifest: `startTask`, `taskStatus`, `cancelT
 | `ackTask({todoId, updatedAt})` | `{acked}` — only when the run ended and `updatedAt` matches |
 | `discoverRepos({})` | Up to 30 `[{name, path, remote, lastCommitAt, myCommits30d, projectKeys, source}]` (`structuredContent.repos`), read-only: git repos up to depth 3 under `~/Developer`, `~/Projects`, `~/projects`, `~/code`, `~/src`, `~/work`, `~/Documents`, `~/repos`, plus folders from `~/.claude/projects`. No file contents. |
 
-`claude -p` runs in `~/Documents/daily-digest` with `--permission-mode acceptEdits`, `--allowedTools` from config `runner.allowedTools` (default: `Read, Edit, Write, Glob, Grep, Bash(git/flutter/dart/yarn/npm/glab/gh:*)`, `mv -f` inside the tasks dir, `Skill`, `ToolSearch`, read-only Jira tools `mcp__claude_ai_Atlassian__getJiraIssue`/`listJiraIssueComments`/`searchJiraIssuesUsingJql`/`getAccessibleAtlassianResources`, and `mcp__GitLab__create_merge_request`), and `--add-dir` for every enabled `repos[].path`. Logs: `~/Documents/daily-digest/runner/logs/`.
+`claude -p` runs in `~/.catask` with `--permission-mode acceptEdits`, `--allowedTools` from config `runner.allowedTools` (default: `Read, Edit, Write, Glob, Grep, Bash(git/flutter/dart/yarn/npm/glab/gh:*)`, `mv -f` inside the tasks dir, `Skill`, `ToolSearch`, read-only Jira tools `mcp__claude_ai_Atlassian__getJiraIssue`/`listJiraIssueComments`/`searchJiraIssuesUsingJql`/`getAccessibleAtlassianResources`, and `mcp__GitLab__create_merge_request`), and `--add-dir` for every enabled `repos[].path`. Logs: `~/.catask/runner/logs/`.
 
 Optional config: `runner.claudePath`, `runner.allowedTools` (array or comma list), `runner.extraPath` (absolute dirs added to `PATH`, e.g. your Flutter SDK `bin`).
 

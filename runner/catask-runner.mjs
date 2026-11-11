@@ -17,6 +17,7 @@ import { spawn, spawnSync, execFile } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { resolveStateDir } from '../scripts/state-dir.mjs';
 
 const SERVER_NAME = 'catask-runner';
 const SERVER_VERSION = '0.7.0';
@@ -25,7 +26,8 @@ const SUPPORTED_PROTOCOLS = ['2025-06-18', '2025-03-26', '2024-11-05'];
 const TODO_ID_RE = /^[0-9]{4}-[0-9]{2}-[0-9]{2}-[a-z0-9-]{1,40}$/;
 const MAX_TASK_BYTES = 60 * 1024;
 const HOME = os.homedir();
-const STATE_DIR = process.env.CATASK_STATE_DIR || process.env.SO_VIEC_STATE_DIR || path.join(HOME, 'Documents', 'daily-digest');
+// ~/.catask (moved from ~/Documents/daily-digest when readable); env overrides win. See scripts/state-dir.mjs.
+const STATE_DIR = resolveStateDir().dir;
 const CONFIG_PATH = path.join(STATE_DIR, 'config.json');
 const RUNNER_DIR = path.join(STATE_DIR, 'runner');
 const LOG_DIR = path.join(RUNNER_DIR, 'logs');

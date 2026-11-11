@@ -1438,9 +1438,9 @@ html.ai-fold { --aibar-h: 41px }
     var ref = taskRef(td), txt = link ? pageUrl() + '#catask-' + encodeURIComponent(td.id) : ref;
     copyText(txt, function (ok) { snackShow(ok ? { kind: 'copy', verb: t(link ? 'cpLink' : 'cpDone'), title: link ? txt : ref } : { verb: t('cpFail') }, null) });
   }
-  /* Opened with #catask-<id> (or the old #so-viec-<id>): scroll to that task once and flash it. */
+  /* Opened with #catask-<id>: scroll to that task once and flash it. */
   function flashHash() {
-    var m = /^#(?:catask|so-viec)-(.+)$/.exec(location.hash || ''), id; if (!m) return;
+    var m = /^#catask-(.+)$/.exec(location.hash || ''), id; if (!m) return;
     try { id = decodeURIComponent(m[1]) } catch (e) { id = m[1] }
     if (S.flashed === id) return; S.flashed = id;
     setTimeout(function () {

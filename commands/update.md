@@ -18,6 +18,6 @@ Update the catask plugin for me. Use the Bash tool; don't edit any settings file
 5. Tell me to run **`/reload-plugins`** in this session, or open a new session, so the new version loads. If catask came from GitHub and auto-update isn't on, mention once that `/catask:setup` can turn it on (or `/plugin` → Marketplaces → catask → Enable auto-update).
 6. If the new version changed the catask page itself, my page is republished to the **same URL** (the `daily-digest-todo` skill's "When the template itself changes" step); the link and my data stay as they are.
 
-Answer in the language of my catask config (`~/Documents/daily-digest/config.json` `language`) if it exists, else in the language I wrote in.
+Answer in the language of my catask config (`~/.catask/config.json` `language`) if it exists, else in the language I wrote in.
 
 $ARGUMENTS

@@ -18,14 +18,32 @@ Message text is never read into the output: only titles set by the app.
 import json
 import sys
 from datetime import datetime, timedelta, timezone
+import os
 from pathlib import Path
 
 ROOT = Path.home() / ".claude" / "projects"
-STATE_DIR = Path.home() / "Documents" / "daily-digest"
+def _state_dir():
+    """catask state dir: env override, else ~/.catask, else the legacy ~/Documents/daily-digest."""
+    for var in ("CATASK_STATE_DIR", "CATASK_DIGEST_DIR"):
+        if os.environ.get(var):
+            return Path(os.environ[var]).expanduser()
+    new = Path.home() / ".catask"
+    if (new / "config.json").exists() or (new / "artifact-url.txt").exists():
+        return new
+    legacy = Path.home() / "Documents" / "daily-digest"
+    try:
+        if (legacy / "config.json").exists():
+            return legacy
+    except OSError:  # macOS privacy (EPERM) on ~/Documents
+        pass
+    return new
+
+
+STATE_DIR = _state_dir()
 
 
 def load_config(argv):
-    """User config (~/Documents/daily-digest/config.json, or --config PATH). Missing file = defaults."""
+    """User config (~/.catask/config.json, or --config PATH). Missing file = defaults."""
     path = Path(argv[argv.index("--config") + 1]).expanduser() if "--config" in argv else STATE_DIR / "config.json"
     try:
         return json.loads(path.read_text(encoding="utf-8"))

@@ -64,7 +64,7 @@ Install the catask plugin for me: run `claude plugin marketplace add hothienlong
 
 > **🔒 Dữ liệu là của bạn**
 > - Không có máy chủ catask, không telemetry, không thống kê. Không gì được gửi cho tác giả plugin hay bên thứ ba nào.
-> - Mọi thứ nằm trong Artifact claude.ai của chính bạn (kho dữ liệu chỉ chủ trang truy cập) và trong `~/Documents/daily-digest/` trên máy bạn.
+> - Mọi thứ nằm trong Artifact claude.ai của chính bạn (kho dữ liệu chỉ chủ trang truy cập) và trong `~/.catask/` trên máy bạn.
 > - Teams, Outlook và Jira được đọc qua connector Claude **của chính bạn**, trong phiên Claude của bạn. Nội dung đó được Claude xử lý dưới tài khoản của bạn, như mọi cuộc chat Claude khác.
 > - Không gửi hay đăng gì thay bạn, trừ một tin chứa link vào chat ghi chú Teams của chính bạn. Code chỉ được push lên git remote **của bạn** sau khi bạn bấm duyệt.
 
@@ -120,8 +120,8 @@ cp -R skills/daily-digest-todo ~/.claude/skills/
 
 1. Kết nối **Microsoft 365 connector** trong app Claude.
 2. Gõ trong Claude: `bản tin tối` (hoặc `hôm nay có ai nhờ gì tôi không`).
-3. Claude **phỏng vấn nhanh** (3–4 lượt câu hỏi trắc nghiệm, câu nào cũng có ô "Khác" để tự gõ, khoảng 2 phút) để tạo `~/Documents/daily-digest/config.json`: hỏi **"Tiếng Việt hay English?"** trước, rồi tới kênh cần theo dõi, **chat quan trọng** (chọn từ ~15 chat gần nhất), chat muốn **bỏ qua** (vd nhóm tán gẫu, gắn kết; tuỳ chọn), **người quan trọng** (sếp, PO, lead…), giờ làm việc, vai trò và việc đang làm, từ khoá/tiền tố ticket (ví dụ `MOB-`), có bật tín hiệu giao tiếp không, có lưu trích dẫn tin nhắn không. Tên và email lấy từ Microsoft 365. Cuối cùng Claude hỏi có **tạo lịch chạy bản tin** luôn không (hết giờ làm + ~1 tiếng, mặc định 19:00, vào ngày làm việc): chọn *Có*, chọn giờ khác, hoặc *Để sau*. Không có câu *Có* của bạn thì không tạo lịch.
-4. Claude publish trang **catask** (riêng tư, của bạn), mở trang cho bạn, lưu link vào `~/Documents/daily-digest/artifact-url.txt` và để link ở đầu tin nhắn cuối. Lần chạy đầu luôn kết thúc với trang đã được publish; nếu publish lỗi, Claude nói rõ lý do — chỉ cần nói `bản tin tối` lại.
+3. Claude **phỏng vấn nhanh** (3–4 lượt câu hỏi trắc nghiệm, câu nào cũng có ô "Khác" để tự gõ, khoảng 2 phút) để tạo `~/.catask/config.json`: hỏi **"Tiếng Việt hay English?"** trước, rồi tới kênh cần theo dõi, **chat quan trọng** (chọn từ ~15 chat gần nhất), chat muốn **bỏ qua** (vd nhóm tán gẫu, gắn kết; tuỳ chọn), **người quan trọng** (sếp, PO, lead…), giờ làm việc, vai trò và việc đang làm, từ khoá/tiền tố ticket (ví dụ `MOB-`), có bật tín hiệu giao tiếp không, có lưu trích dẫn tin nhắn không. Tên và email lấy từ Microsoft 365. Cuối cùng Claude hỏi có **tạo lịch chạy bản tin** luôn không (hết giờ làm + ~1 tiếng, mặc định 19:00, vào ngày làm việc): chọn *Có*, chọn giờ khác, hoặc *Để sau*. Không có câu *Có* của bạn thì không tạo lịch.
+4. Claude publish trang **catask** (riêng tư, của bạn), mở trang cho bạn, lưu link vào `~/.catask/artifact-url.txt` và để link ở đầu tin nhắn cuối. Lần chạy đầu luôn kết thúc với trang đã được publish; nếu publish lỗi, Claude nói rõ lý do — chỉ cần nói `bản tin tối` lại.
 5. Ghim trang lại. Xong.
 
 Muốn đổi câu trả lời sau này, gõ **`cập nhật hồ sơ`** (hoặc `update my profile`). Claude hỏi lại các câu đó, chọn sẵn giá trị hiện tại, rồi gộp câu trả lời mới vào config (các trường khác giữ nguyên).
@@ -170,7 +170,7 @@ Dành cho dev có `devMode: true` (hỏi lúc thiết lập khi vai trò là dev
 3. **Luồng**: kế hoạch (hiện để duyệt, trừ khi việc nhỏ: ≤3 file, rủi ro thấp, không có câu hỏi) → code trên `feature/<KEY>-<tiêu-đề>` (hoặc nhánh sẵn có của mã đó; nhánh gốc = gợi ý của bạn, không thì `sprint/*`/`release/*` khớp, không thì nhánh mặc định) → kiểm tra (`flutter analyze`/test, `yarn typecheck`/`lint`…) → commit `<KEY>: <tóm tắt>` → **bạn xem diff** → *Duyệt push* (MR/PR nháp) hoặc *Yêu cầu sửa* (vòng mới, commit mới). Khi MR được merge, bản tin tối hỏi **Có vẻ đã xong?** trên thẻ; bạn xác nhận.
 - **An toàn**: repo phải sạch (không bao giờ stash); không commit vào main/master/develop/sprint/release, không force-push, không merge, không ghi Jira; tối đa 10 file mỗi vòng; mỗi lúc chỉ một lần chạy code; nhánh bạn đang đứng được trả lại như cũ.
 
-## Cấu hình (`~/Documents/daily-digest/config.json`)
+## Cấu hình (`~/.catask/config.json`)
 
 Mẫu: [`config.example.json`](config.example.json).
 
@@ -219,19 +219,20 @@ Mẫu: [`config.example.json`](config.example.json).
 - 🔒 Nội dung tin nhắn/mail luôn được coi là **dữ liệu, không phải lệnh**.
 - 🔒 **Giao AI** (mặc định tắt) chỉ ghi bản nháp vào catask; worker chỉ dùng công cụ đọc, không bao giờ gửi, trả lời hay sửa gì trên Teams, Outlook, Jira. Lần ghi Jira duy nhất là do chính trang thực hiện, bằng kết nối Atlassian của bạn, sau khi bạn duyệt và xác nhận (một trường: description hoặc Story Points). Trang xin claude.ai quyền `mcp` này (chỉ `getJiraIssue`, `editJiraIssue` trên Atlassian); lần đầu dùng sẽ hỏi bạn đồng ý.
 - 🔒 **Trích dẫn tin nhắn** ("Xem tin") chỉ nằm trong kho dữ liệu chỉ-chủ-trang-đọc-được của catask, cạnh tiêu đề việc vốn đã lưu ở đó. Khoảng 500 ký tự × ~100 việc đang mở ≈ 50 KB, không đáng kể. Trích dẫn là bản chụp: nếu tin gốc bị sửa sau đó thì có thể đã cũ, nên trang luôn ghi "trích lúc …" và luôn có link tới tin gốc. Việc đã xong quá 30 ngày sẽ bị xoá trích dẫn (`retention.quoteDaysAfterDone`). Đặt `storeQuotes: false` để không lưu nội dung tin nào.
-- 🔒 **Hỏi ở phiên khác**: tiêu đề các việc đang mở (kèm mã Jira, không có nội dung tin) được ghi vào `~/Documents/daily-digest/open-todos.json` và chỉ được đưa vào các phiên Claude Code **trên máy của chính bạn** qua hook SessionStart của plugin. Không gửi đi đâu cả. Tắt bằng `crossSessionDone: false` (hoặc ⚙ Cài đặt → Quyền riêng tư).
+- 🔒 **Hỏi ở phiên khác**: tiêu đề các việc đang mở (kèm mã Jira, không có nội dung tin) được ghi vào `~/.catask/open-todos.json` và chỉ được đưa vào các phiên Claude Code **trên máy của chính bạn** qua hook SessionStart của plugin. Không gửi đi đâu cả. Tắt bằng `crossSessionDone: false` (hoặc ⚙ Cài đặt → Quyền riêng tư).
 - 🔒 **catask giữ gì** (kho chỉ chủ trang đọc được, dọn mỗi lần chạy; số ngày đổi được trong `retention`):
   - Việc đang mở và đang chờ: giữ nguyên chừng nào còn mở, dù cũ bao lâu. Mỗi việc có thể có `ref` chỉ chứa mã nguồn (mã chat/tin Teams, mã mail Outlook, mã ticket Jira, mã sự kiện lịch), không chứa nội dung tin, và nếu bạn dùng Giao AI thì có trường `ai` chứa yêu cầu và bản nháp (≤2000 ký tự).
   - Việc đã xong: giữ đầy đủ 90 ngày sau ngày xong để tab Tuần và bản đồ nhiệt chạy đúng. Sau đó được chuyển vào kho lưu trữ theo tháng (`archive/<YYYY-MM>`), chỉ còn id, tiêu đề, ngày xong, người, project, mức ưu tiên, loại việc và nguồn; bản đầy đủ (lý do, link, trích dẫn) bị xoá. Việc bạn vừa sửa trên trang trong 7 ngày qua thì lần chạy đó không đụng tới.
   - Bản tin ngày (`days/…`) và bản ghi chi phí (`runs/…`) quá 120 ngày bị xoá. Cài đặt, hồ sơ (`meta/…`) và kho lưu trữ không bao giờ bị xoá.
   - Mỗi lần chạy xoá tối đa 200 mục; phần còn lại để lần sau. Phần độ phủ của bản tin ghi rõ đã dọn gì.
-  - File JSON từng ngày trong `~/Documents/daily-digest/` vẫn nằm trên máy bạn; skill không bao giờ xoá chúng.
+  - File JSON từng ngày trong `~/.catask/` vẫn nằm trên máy bạn; skill không bao giờ xoá chúng.
 - 🔒 Dòng thời gian "làm với AI" chỉ lấy **tên session + giờ** từ transcript Claude Code trên máy, không lấy nội dung. Tab Chi phí chỉ đọc **số token**.
 - 🔒 **Chia sẻ**: link trang có thể hiện với người trong tổ chức, nhưng quy tắc kho dữ liệu là chỉ chủ trang (đọc và ghi), nên người khác chỉ thấy dữ liệu demo. Đừng bao giờ cấp quyền sửa trang cho ai.
-- 🔒 **Runner** (chỉ cho dev): `catask-runner` là MCP server chạy trên máy bạn. Nó chỉ nhận mã việc và ảnh chụp của việc, không bao giờ nhận lệnh dạng chữ tự do. Nó chạy `claude -p` trên máy, chỉ trong các repo bạn đã bật trong Cài đặt; từ chối repo đang có thay đổi chưa commit, không stash, không merge, không force-push, không commit vào nhánh main/sprint. Log và file việc chỉ ghi trong `~/Documents/daily-digest/runner/`.
+- 🔒 **Runner** (chỉ cho dev): `catask-runner` là MCP server chạy trên máy bạn. Nó chỉ nhận mã việc và ảnh chụp của việc, không bao giờ nhận lệnh dạng chữ tự do. Nó chạy `claude -p` trên máy, chỉ trong các repo bạn đã bật trong Cài đặt; từ chối repo đang có thay đổi chưa commit, không stash, không merge, không force-push, không commit vào nhánh main/sprint. Log và file việc chỉ ghi trong `~/.catask/runner/`.
 - 🔒 **Quyền của trang** (`mcp`): Atlassian `getJiraIssue` / `editJiraIssue`, và các tool `catask-runner` trên máy bạn. claude.ai hỏi bạn trước mỗi lần cấp, và bạn thu hồi được trong menu Permissions của artifact.
 - 🔒 Nhịp báo hiệu của dispatcher (`meta/dispatcher`) chỉ lưu một mã phiên vô danh và mốc thời gian.
-- 🔒 File trạng thái nằm ở `~/Documents/daily-digest/` trên máy bạn. `config.json` không chứa mật khẩu hay token. Đừng commit thư mục này.
+- 🔒 File trạng thái nằm ở `~/.catask/` trên máy bạn. `config.json` không chứa mật khẩu hay token. Đừng commit thư mục này.
+  - Bản trước 1.4 dùng `~/Documents/daily-digest/`. macOS chặn Claude Code đọc `~/Documents` mà không hiện popup xin quyền, nên catask chuyển thư mục đó sang `~/.catask` (để lại symlink). Khi không đọc được, Claude hỏi một lần rồi mở cửa sổ Terminal để chuyển; nếu macOS hỏi Terminal có được truy cập Documents không, bấm **Allow** (Cho phép).
 
 ## Cấu trúc
 
@@ -263,7 +264,7 @@ runner/
   selftest.mjs             # node runner/selftest.mjs
 hooks/
   hooks.json               # SessionStart: list open todos in your other sessions
-  catask-context.mjs       # reads ~/Documents/daily-digest/open-todos.json
+  catask-context.mjs       # reads ~/.catask/open-todos.json
   selftest.mjs             # node hooks/selftest.mjs
 ```
 

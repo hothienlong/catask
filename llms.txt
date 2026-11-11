@@ -26,7 +26,7 @@
 ## Rules the plugin follows
 
 - Read-only on Teams, Outlook and Jira; never sends, replies or posts for the user. Only writes to the user's own catask page and their own Teams notes chat.
-- Data lives in the user's private Artifact database and in `~/Documents/daily-digest/` on their machine.
+- Data lives in the user's private Artifact database and in `~/.catask/` on their machine.
 
 ## Docs
 

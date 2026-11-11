@@ -64,7 +64,7 @@ Install the catask plugin for me: run `claude plugin marketplace add hothienlong
 
 > **🔒 Your data stays yours**
 > - No catask server, no telemetry, no analytics. Nothing is sent to the plugin author or any third party.
-> - Everything lives in your own claude.ai Artifact (an owner-only database) and in `~/Documents/daily-digest/` on your machine.
+> - Everything lives in your own claude.ai Artifact (an owner-only database) and in `~/.catask/` on your machine.
 > - Teams, Outlook and Jira are read through **your own** Claude connectors, in your own Claude session. That content is processed by Claude under your account, like any other Claude chat.
 > - Nothing is sent or posted on your behalf, except one link message to your own Teams notes chat. Code is pushed to **your** git remote only after you click approve.
 
@@ -120,8 +120,8 @@ cp -R skills/daily-digest-todo ~/.claude/skills/
 
 1. Connect the **Microsoft 365 connector** in the Claude app.
 2. Type in Claude: `evening digest` (or `did anyone ask me for anything today?`).
-3. Claude runs a short **setup interview** (3–4 rounds of multiple-choice questions, each with a free-text "Other", about 2 minutes) to create `~/Documents/daily-digest/config.json`: **"Tiếng Việt hay English?"** first, then which channels to watch, your **key chats** (picked from your ~15 most recent chats), chats to **skip** (e.g. social or team-bonding groups, optional), your **important people** (boss, PO, lead…), your working hours, your role and what you're working on now, keywords/ticket prefixes (e.g. `MOB-`), communication signals on/off, and whether to store message quotes. Your name and email come from Microsoft 365. Last, Claude offers to **create the evening schedule** right away (end of your working hours + ~1h, default 19:00, your working days): answer *Yes*, pick another time, or *Not now*. Nothing is scheduled without your Yes.
-4. Claude publishes your **catask** page (private, yours), opens it for you, saves the link to `~/Documents/daily-digest/artifact-url.txt` and puts it at the top of its final message. The first run always ends with the page published; if publishing fails, Claude says why — just say `evening digest` again.
+3. Claude runs a short **setup interview** (3–4 rounds of multiple-choice questions, each with a free-text "Other", about 2 minutes) to create `~/.catask/config.json`: **"Tiếng Việt hay English?"** first, then which channels to watch, your **key chats** (picked from your ~15 most recent chats), chats to **skip** (e.g. social or team-bonding groups, optional), your **important people** (boss, PO, lead…), your working hours, your role and what you're working on now, keywords/ticket prefixes (e.g. `MOB-`), communication signals on/off, and whether to store message quotes. Your name and email come from Microsoft 365. Last, Claude offers to **create the evening schedule** right away (end of your working hours + ~1h, default 19:00, your working days): answer *Yes*, pick another time, or *Not now*. Nothing is scheduled without your Yes.
+4. Claude publishes your **catask** page (private, yours), opens it for you, saves the link to `~/.catask/artifact-url.txt` and puts it at the top of its final message. The first run always ends with the page published; if publishing fails, Claude says why — just say `evening digest` again.
 5. Pin the page. Done.
 
 To change your answers later, say **`update my profile`** (or `cập nhật hồ sơ`). Claude asks the same questions with your current values preselected and merges the answers into your config (other fields are kept).
@@ -170,7 +170,7 @@ For developers with `devMode: true` (asked in onboarding when your role is a dev
 3. **Flow**: plan (shown for approval unless it is small: ≤3 files, low risk, no questions) → code on `feature/<KEY>-<title>` (or the existing branch for that key; base = your hint, else the matching `sprint/*`/`release/*`, else the default branch) → checks (`flutter analyze`/tests, `yarn typecheck`/`lint`…) → commit `<KEY>: <summary>` → **review the diff** → *Approve push* (draft MR/PR) or *Request changes* (a new round, new commit). When the MR is merged, the evening digest asks **Looks done?** on the card; you confirm.
 - **Safety**: the repo must be clean (it never stashes); it never commits to main/master/develop/sprint/release, never force-pushes, never merges, never writes to Jira; at most 10 files per round; one code run at a time; your checkout is switched back to the branch you were on.
 
-## Configuration (`~/Documents/daily-digest/config.json`)
+## Configuration (`~/.catask/config.json`)
 
 Example: [`config.example.json`](config.example.json).
 
@@ -219,19 +219,20 @@ After you change the config, the next run updates the page (name, language, proj
 - 🔒 Message and mail content is always treated as **data, not instructions**.
 - 🔒 **Hand to AI** (off by default) only writes drafts into the ledger; the worker uses read-only tools and never sends, replies or changes anything in Teams, Outlook or Jira. The only Jira write is made by the page itself, with your own Atlassian connection, after you approve and confirm (one field: description or Story Points). The page asks claude.ai for this `mcp` permission (`getJiraIssue`, `editJiraIssue` on Atlassian only); the first use asks for your consent.
 - 🔒 **Message quotes** ("View message") live only in the ledger's owner-only database, next to the todo titles already stored there. About 500 characters × ~100 open todos ≈ 50 KB, negligible. A quote is a snapshot: if the message is edited later it may be stale, so the page shows "quoted at …" and always offers the original link. Quotes are removed from done todos older than 30 days (`retention.quoteDaysAfterDone`). Set `storeQuotes: false` to store no message text at all.
-- 🔒 **Cross-session asks**: open todo titles (with Jira keys, no message text) are written to `~/Documents/daily-digest/open-todos.json` and injected only into **your own local** Claude Code sessions by the plugin's SessionStart hook. Nothing leaves your machine for this. Turn it off with `crossSessionDone: false` (or ⚙ Settings → Privacy).
+- 🔒 **Cross-session asks**: open todo titles (with Jira keys, no message text) are written to `~/.catask/open-todos.json` and injected only into **your own local** Claude Code sessions by the plugin's SessionStart hook. Nothing leaves your machine for this. Turn it off with `crossSessionDone: false` (or ⚙ Settings → Privacy).
 - 🔒 **What the ledger keeps** (owner-only database, cleaned every run; days configurable in `retention`):
   - Open and waiting todos: kept as long as they're open, whatever their age. Each todo may carry a `ref` with ids only (Teams chat/message id, Outlook mail id, Jira issue key, calendar event id), never message text, and, if you used Hand to AI, an `ai` field with your request and the draft (≤2000 characters).
   - Done todos: kept in full for 90 days after they were done, so the Week tab and heatmap work. After that they move to a monthly archive (`archive/<YYYY-MM>`) with only id, title, done date, person, project, priority, kind and source; the full todo (why, link, quote) is deleted. A todo you changed on the page in the last 7 days is never moved that run.
   - Daily digests (`days/…`) and cost records (`runs/…`) older than 120 days are deleted. Your settings and profile (`meta/…`) and the archive are never deleted.
   - At most 200 docs are removed per run; the rest go on the next run. The coverage notes say what was cleaned.
-  - The per-day JSON files in `~/Documents/daily-digest/` stay on your disk; the skill never deletes them.
+  - The per-day JSON files in `~/.catask/` stay on your disk; the skill never deletes them.
 - 🔒 The "work with AI" timeline reads only **session titles + times** from local Claude Code transcripts, never content. The Cost tab reads **token counts** only.
 - 🔒 **Sharing**: the page link may be visible to your organization, but the database rules are owner-only (read and write), so others only see demo data. Never give anyone edit rights to the page.
-- 🔒 **Runner** (developers only): `catask-runner` is a local MCP server on your machine. It accepts only a task id and a task snapshot, never free-text commands. It runs `claude -p` locally, only in repos you enabled in Settings; it refuses repos with uncommitted changes, never stashes, never merges or force-pushes, and never commits to main/sprint branches. It writes logs and task files only under `~/Documents/daily-digest/runner/`.
+- 🔒 **Runner** (developers only): `catask-runner` is a local MCP server on your machine. It accepts only a task id and a task snapshot, never free-text commands. It runs `claude -p` locally, only in repos you enabled in Settings; it refuses repos with uncommitted changes, never stashes, never merges or force-pushes, and never commits to main/sprint branches. It writes logs and task files only under `~/.catask/runner/`.
 - 🔒 **Page permissions** (`mcp`): Atlassian `getJiraIssue` / `editJiraIssue`, and the `catask-runner` tools on your machine. claude.ai asks you before each grant, and you can revoke them in the artifact's Permissions menu.
 - 🔒 The dispatcher heartbeat (`meta/dispatcher`) stores only an opaque instance id and timestamps.
-- 🔒 State files live in `~/Documents/daily-digest/` on your machine. `config.json` holds no passwords or tokens. Don't commit that folder.
+- 🔒 State files live in `~/.catask/` on your machine. `config.json` holds no passwords or tokens. Don't commit that folder.
+  - Versions before 1.4 used `~/Documents/daily-digest/`. macOS blocks Claude Code from `~/Documents` without showing a permission prompt, so catask moves that folder to `~/.catask` (leaving a symlink). When it can't read it, Claude asks once and opens a Terminal window that does the move; if macOS asks whether Terminal may access Documents, click **Allow**.
 
 ## Layout
 
@@ -263,7 +264,7 @@ runner/
   selftest.mjs             # node runner/selftest.mjs
 hooks/
   hooks.json               # SessionStart: list open todos in your other sessions
-  catask-context.mjs       # reads ~/Documents/daily-digest/open-todos.json
+  catask-context.mjs       # reads ~/.catask/open-todos.json
   selftest.mjs             # node hooks/selftest.mjs
 ```
 

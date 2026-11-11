@@ -13,20 +13,38 @@ Each usage block is {"input", "cacheRead", "cacheWrite", "output"}.
 "equivInput" weights tokens by their relative price versus fresh input
 (cache read 0.1x, cache write 1.25x, output 5x) so runs can be compared.
 A run still in progress is reported with what it has logged so far ("partial": true).
-Dates/times use the timezone from ~/Documents/daily-digest/config.json (default Asia/Ho_Chi_Minh).
+Dates/times use the timezone from ~/.catask/config.json (default Asia/Ho_Chi_Minh).
 """
 import json
 import sys
 import time
 from datetime import datetime, timedelta, timezone
+import os
 from pathlib import Path
 
 ROOT = Path.home() / ".claude" / "projects"
-STATE_DIR = Path.home() / "Documents" / "daily-digest"
+def _state_dir():
+    """catask state dir: env override, else ~/.catask, else the legacy ~/Documents/daily-digest."""
+    for var in ("CATASK_STATE_DIR", "CATASK_DIGEST_DIR"):
+        if os.environ.get(var):
+            return Path(os.environ[var]).expanduser()
+    new = Path.home() / ".catask"
+    if (new / "config.json").exists() or (new / "artifact-url.txt").exists():
+        return new
+    legacy = Path.home() / "Documents" / "daily-digest"
+    try:
+        if (legacy / "config.json").exists():
+            return legacy
+    except OSError:  # macOS privacy (EPERM) on ~/Documents
+        pass
+    return new
+
+
+STATE_DIR = _state_dir()
 
 
 def load_config(argv):
-    """User config (~/Documents/daily-digest/config.json, or --config PATH). Missing file = defaults."""
+    """User config (~/.catask/config.json, or --config PATH). Missing file = defaults."""
     path = Path(argv[argv.index("--config") + 1]).expanduser() if "--config" in argv else STATE_DIR / "config.json"
     try:
         return json.loads(path.read_text(encoding="utf-8"))

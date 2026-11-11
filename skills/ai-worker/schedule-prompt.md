@@ -8,10 +8,11 @@ You can run the worker by hand any time: say **`xử lý việc giao AI`** / **`
 4. **Prompt**: paste the block below as is. Nothing personal goes in it.
 
 ````text
-Run the `ai-worker` skill (load it with the Skill tool; if the Skill tool can't find it, Read `~/.claude/skills/ai-worker/SKILL.md` or the copy inside the installed "catask" plugin) and follow every step. Write progress steps and the final message in the `language` of `~/Documents/daily-digest/config.json` ("vi" or "en").
+Run the `ai-worker` skill (load it with the Skill tool; if the Skill tool can't find it, Read `~/.claude/skills/ai-worker/SKILL.md` or the copy inside the installed "catask" plugin) and follow every step. Write progress steps and the final message in the `language` of `~/.catask/config.json` ("vi" or "en").
 
 Summary in case the skill can't be loaded:
-- Read `~/Documents/daily-digest/config.json` and `~/Documents/daily-digest/artifact-url.txt`; if missing, stop and say the evening digest must run once first.
+- State dir: run the skill's **state dir preflight** (unattended rules: never open Terminal, never ask) and use its `dir` wherever `~/.catask` appears below.
+- Read `~/.catask/config.json` and `~/.catask/artifact-url.txt`; if missing, stop and say the evening digest must run once first.
 - With `ArtifactData` (load via ToolSearch), find `todos` whose `ai.status` is "queued" (query, or list and filter). Mark `running` todos whose `ai.startedAt` is over 30 minutes old as `error` ("timed out"). Process at most 5, oldest `ai.requestedAt` first.
 - For each: pinned (`if_version`) update of only the `ai` object → `running` with `startedAt` and a first step. Use the request (`kind`, `instruction` — or `note` on older requests —, `context`, `mode`, `target`) and the ledger data first (title, why, quote, from, url, ref, due); for a draft with a quote and why, read nothing else. For `jira_*` kinds, read the issue once with `getJiraIssue` (read-only, markdown). Otherwise read the source read-only (via `ref`, else the url, else sender+text) only when there is no quote/why, `ai.readSource` is true, or the instruction asks for more context; at most one read per task and two per run.
 - draft_reply / draft_nudge = a short, ready-to-send message in the thread's language and tone, placeholders instead of invented facts. summary = 3–6 bullets: ask, who, deadline, state, next step. meeting_prep = goal, points, open questions, what to bring. jira_description = concise Jira-markdown sections (Context, Scope, Tasks, Dependencies, AC if missing) in the ticket's language. jira_ac = testable criteria. jira_estimate = points + 1–2 line rationale. custom = follow the instruction, read-only and draft-only.
