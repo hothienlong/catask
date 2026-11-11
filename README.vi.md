@@ -8,9 +8,9 @@
 
 <sub>catask = **cat** (mèo) + **task** (việc) + **ask** (nhờ): chú mèo canh mọi việc, mọi lời nhờ.</sub>
 
-[![Xem clip demo 52 giây](docs/video/catask-demo-vi-poster.jpg)](https://github.com/hothienlong/catask/releases/download/demo-video/catask-demo-vi.mp4)
+[![Xem clip demo 58 giây](docs/video/catask-demo-vi-poster.jpg)](https://github.com/hothienlong/catask/releases/download/demo-video/catask-demo-vi.mp4)
 
-<sub>▶ Clip demo 52 giây (chỉ dùng dữ liệu demo, có tiếng). Bấm để tải về xem (14 MB).</sub>
+<sub>▶ Clip demo 58 giây (chỉ dùng dữ liệu demo, có tiếng). Bấm để tải về xem (16 MB).</sub>
 
 ## 🤖 Cài bằng Claude
 
@@ -50,11 +50,14 @@ Install the catask plugin for me: run `claude plugin marketplace add hothienlong
 - ✅ **TODO list có ưu tiên**: việc được nhờ, câu hỏi chưa trả lời, lời hứa của chính bạn, deadline (kể cả mail HR/Admin), review MR, chuẩn bị họp.
 - 🚦 **Nhãn P0–P3** (mức độ critical, tách riêng với độ gấp về thời gian): P0 nghiêm trọng (sự cố production, đang chặn người khác, bảo mật, sếp/người quan trọng escalate), P1 quan trọng (mọi việc người quan trọng của bạn nhờ), P2 bình thường, P3 có thì tốt/FYI. Bạn đổi P trên trang thì Claude không ghi đè.
 - ↕️ **Thứ tự sắp xếp**: quá hạn / hạn hôm nay → việc có hạn cụ thể (hạn sớm trước, nên P2 hạn mai đứng trước P1 không có hạn) → P0→P3 → việc cũ hơn trước. Top 3 dùng cùng thứ tự này.
-- 🔁 **Carry-over**: việc chưa xong hôm qua tự ở lại. **AI gợi ý, bạn xác nhận**: khi có bằng chứng việc đã xong (bạn nhắn "xong/đã fix", link MR, đã trả lời, mail Jira chuyển Done, MR đã merge; có thể thấy ở chat khác nếu khớp rõ đúng việc đó), thẻ hiện **Có vẻ đã xong?** kèm bằng chứng và link; bạn bấm **✓ Xong** hoặc **✗ Chưa**. Không việc nào tự bị đóng.
-- 🧩 **Làm xong ở chỗ khác? Claude hỏi.** Sau mỗi bản tin, catask lưu trên máy bạn một danh sách ngắn các việc đang mở (tiêu đề và mã Jira). Khi bạn làm việc với Claude Code ở bất kỳ project nào và làm xong việc khớp rõ (cùng mã Jira, hoặc yêu cầu chính là việc đó), Claude hỏi **Đánh dấu xong catask#ID · tiêu đề?** trước khi kết thúc lượt. Chỉ khi bạn chọn **Có** mới đóng. Tắt bằng `crossSessionDone: false` hoặc trong ⚙ Cài đặt.
+- 🔁 **Carry-over**: việc chưa xong hôm qua tự ở lại.
+- 🕵️ **AI tự phát hiện việc đã xong**: bạn xác nhận, không việc nào tự bị đóng.
+  - **Trong các phiên Claude Code**: sau mỗi bản tin, catask lưu trên máy bạn một danh sách ngắn các việc đang mở (tiêu đề và mã Jira), nên Claude biết các việc đó trong những phiên Claude Code khác của bạn, ở bất kỳ project nào. Khi bạn làm xong việc khớp rõ (cùng mã Jira, hoặc yêu cầu chính là việc đó), Claude hỏi **Đánh dấu xong catask#ID · tiêu đề?** trước khi kết thúc lượt. Chỉ khi bạn chọn **Có** mới đóng. Tắt bằng `crossSessionDone: false` hoặc trong ⚙ Cài đặt.
+  - **Trong chat, mail và Jira**: bản tin tối cũng bắt bằng chứng việc đã xong (bạn nhắn "xong/đã fix", link MR, bạn đã trả lời, mail Jira chuyển Done hoặc chính ticket gắn với việc đã sang Done, MR đã merge, kể cả tin ở chat khác nếu khớp rõ đúng việc đó) rồi gắn lên thẻ **Có vẻ đã xong?** kèm bằng chứng và link. Bạn bấm **✓ Xong** hoặc **✗ Chưa**.
+  - **Đang chờ người khác?** Việc bạn đang chờ cũng được kiểm như vậy: khi tin nhắn hoặc mail Jira của đúng ticket đó cho thấy họ đã xong phần của họ, thẻ hỏi **Có vẻ đã xong?**. Giờ catask còn tự xem chính ticket đó (trạng thái, người được giao, bình luận mới), nhưng chỉ các ticket gắn với việc đang mở của bạn, và chỉ ticket đã đổi từ bản tin trước. Nếu họ chuyển bước tiếp theo sang bạn (nhờ trong chat, mail Jira hay bình luận trên ticket hỏi bạn, hoặc ticket được giao lại cho bạn), việc đó thành một việc mới trong danh sách của bạn, gắn với việc bạn đang chờ ("tiếp theo của: …").
 - 🏆 **Đã xong hôm nay**: chỉ ghi khi có bằng chứng thật trong tin nhắn/mail.
 - 🗂 **Trang catask** (Artifact riêng tư): bảng Hôm nay / Mai / Đang chờ / Xong (kéo thả được), tab Theo người, Tuần, Ngày (dòng thời gian), Chi phí. **Đánh dấu xong ở mọi nơi**: tab nào cũng được, kể cả mục trên dòng thời gian tab Ngày; mỗi lần đổi trạng thái hay mức ưu tiên đều hiện thanh nhỏ có nút **Hoàn tác** (hoặc Ctrl/Cmd+Z) trong khoảng 6 giây.
-- ⚙ **Cài đặt ngay trên trang**: đổi ngôn ngữ, kênh theo dõi, giờ làm, người quan trọng, chat theo dõi và chat bỏ qua (bỏ bớt), từ khoá, vai trò/việc đang làm và hai công tắc riêng tư bằng nút ⚙ Cài đặt, khỏi sửa `config.json`. Thay đổi trên trang áp dụng từ bản tin tới; ngôn ngữ và tín hiệu đổi trên trang ngay.
+- ⚙ **Cài đặt ngay trên trang**: đổi ngôn ngữ, kênh theo dõi, giờ làm, người quan trọng, chat theo dõi và chat bỏ qua (bỏ bớt), từ khoá, bảng Jira và công tắc kiểm tra Jira, vai trò/việc đang làm và hai công tắc riêng tư bằng nút ⚙ Cài đặt, khỏi sửa `config.json`. Thay đổi trên trang áp dụng từ bản tin tới; ngôn ngữ và tín hiệu đổi trên trang ngay.
 - 💬 **Xem tin**: mở ngay trên trang một đoạn trích ngắn (≤500 ký tự) của tin nhắn sinh ra việc, kèm link tới tin gốc. Tắt bằng `storeQuotes: false`.
 - ⭐ **Chat quan trọng và người quan trọng**: chat bạn chọn luôn được đọc trước; việc sếp/PO/lead nhờ được nâng lên ít nhất P1.
 - 📨 **Báo link** vào chat "ghi chú" của chính bạn trên Teams (chỉ gửi cho bạn, không bao giờ gửi cho người khác).
@@ -77,6 +80,7 @@ Install the catask plugin for me: run `claude plugin marketplace add hothienlong
 | Artifact có `db` | Có | Trang catask lưu dữ liệu trong kho riêng của chính trang |
 | Python 3 (3.9+) | Có | Script chỉ dùng thư viện chuẩn, chạy bằng `python3 -I` |
 | `get_usage` (session management) | Không | Có thì tab Chi phí ghi thêm % quota tuần; không có thì bỏ qua |
+| Atlassian connector | Không | Settings → Connectors → Atlassian. Có thì lúc thiết lập Claude đếm các bảng Jira của bạn, và bản tin tối kiểm tra các ticket gắn với việc đang mở (chỉ đọc); không có thì bỏ qua cả hai |
 
 ## Cài đặt
 
@@ -120,7 +124,7 @@ cp -R skills/daily-digest-todo ~/.claude/skills/
 
 1. Kết nối **Microsoft 365 connector** trong app Claude.
 2. Gõ trong Claude: `bản tin tối` (hoặc `hôm nay có ai nhờ gì tôi không`).
-3. Claude **phỏng vấn nhanh** (3–4 lượt câu hỏi trắc nghiệm, câu nào cũng có ô "Khác" để tự gõ, khoảng 2 phút) để tạo `~/.catask/config.json`: hỏi **"Tiếng Việt hay English?"** trước, rồi tới kênh cần theo dõi, **chat quan trọng** (chọn từ ~15 chat gần nhất), chat muốn **bỏ qua** (vd nhóm tán gẫu, gắn kết; tuỳ chọn), **người quan trọng** (sếp, PO, lead…), giờ làm việc, vai trò và việc đang làm, từ khoá/tiền tố ticket (ví dụ `MOB-`), có bật tín hiệu giao tiếp không, có lưu trích dẫn tin nhắn không. Tên và email lấy từ Microsoft 365. Cuối cùng Claude hỏi có **tạo lịch chạy bản tin** luôn không (hết giờ làm + ~1 tiếng, mặc định 19:00, vào ngày làm việc): chọn *Có*, chọn giờ khác, hoặc *Để sau*. Không có câu *Có* của bạn thì không tạo lịch.
+3. Claude **phỏng vấn nhanh** (3–4 lượt câu hỏi trắc nghiệm, câu nào cũng có ô "Khác" để tự gõ, khoảng 2 phút) để tạo `~/.catask/config.json`: hỏi **"Tiếng Việt hay English?"** trước, rồi tới kênh cần theo dõi, **chat quan trọng** (chọn từ ~15 chat gần nhất), chat muốn **bỏ qua** (vd nhóm tán gẫu, gắn kết; tuỳ chọn), **người quan trọng** (sếp, PO, lead…), giờ làm việc, vai trò và việc đang làm, từ khoá/tiền tố ticket (ví dụ `MOB-`), **bảng Jira** của bạn (có connector Atlassian thì Claude đếm số ticket bạn tham gia trong 90 ngày theo từng dự án, vd "MOB · Mobile app · 42 ticket/90 ngày", bạn tick những bảng muốn theo dõi), có bật tín hiệu giao tiếp không, có lưu trích dẫn tin nhắn không. Tên và email lấy từ Microsoft 365. Cuối cùng Claude hỏi có **tạo lịch chạy bản tin** luôn không (hết giờ làm + ~1 tiếng, mặc định 19:00, vào ngày làm việc): chọn *Có*, chọn giờ khác, hoặc *Để sau*. Không có câu *Có* của bạn thì không tạo lịch.
 4. Claude publish trang **catask** (riêng tư, của bạn), mở trang cho bạn, lưu link vào `~/.catask/artifact-url.txt` và để link ở đầu tin nhắn cuối. Lần chạy đầu luôn kết thúc với trang đã được publish; nếu publish lỗi, Claude nói rõ lý do — chỉ cần nói `bản tin tối` lại.
 5. Ghim trang lại. Xong.
 
@@ -202,6 +206,8 @@ Mẫu: [`config.example.json`](config.example.json).
 | `digestTime` | `null` | Giờ bản tin tối `"HH:MM"`; `null` = hết giờ làm + 1 tiếng (làm tròn :00/:30), vào các ngày làm việc. Đổi được trong ⚙ Cài đặt; nói "đổi giờ bản tin theo cài đặt" để áp vào lịch |
 | `role`, `currentWork` | `""` | Vai trò và việc bạn đang làm; giúp đoán câu hỏi chung trong nhóm có phải việc của bạn không |
 | `keywords` | `[]` | Tiền tố ticket, tên dự án/tính năng (ví dụ `MOB-`); dùng khi dò mail có hạn chót, và câu hỏi chung nhắc tới chúng được giữ ở "Theo dõi" |
+| `jiraProjects` | `[]` | `[{key, name, enabled}]`: các bảng Jira của bạn (mã dự án như `APP`). Chọn lúc thiết lập từ các ticket bạn tham gia, sửa được trong ⚙ Cài đặt (bật/tắt, bỏ, thêm mã). Dùng để nhận ra mã ticket trơn như `APP-123` trong chat và mail, và giới hạn phạm vi kiểm tra Jira. Chưa có = tạm đoán từ tiền tố trong `keywords` và `repos` cho lần chạy đó |
+| `jiraCheck` | `true` | Trong bản tin tối, kiểm tra các ticket Jira gắn với việc đang mở (chỉ ticket đã đổi từ bản tin trước, đọc tối đa 15 ticket mỗi lần) xem đã Done, được giao lại hay có bình luận mới. Cần connector Atlassian; `false` = bỏ qua. Cũng có trong ⚙ Cài đặt |
 | `storeQuotes` | `true` | Lưu đoạn trích ≤500 ký tự của tin gốc trên mỗi việc cho nút "Xem tin". `false` = không lưu nội dung tin nào; trang mở thẳng link gốc |
 | `crossSessionDone` | `true` | Ở các phiên Claude Code khác, Claude hỏi trước khi đánh dấu xong việc đang mở khớp với việc bạn vừa làm. `false` = hook SessionStart im lặng |
 | `retention` | `{archiveDoneAfterDays: 90, pruneDaysAfterDays: 120, quoteDaysAfterDone: 30}` | catask giữ dữ liệu bao lâu (xem phần Riêng tư). Việc xong quá `archiveDoneAfterDays` ngày được chuyển vào kho lưu trữ theo tháng (tối thiểu 45, vì bản đồ nhiệt tab Tuần cần 6 tuần); bản tin ngày và bản ghi chi phí quá `pruneDaysAfterDays` ngày bị xoá (tối thiểu 60); trích dẫn bị xoá khỏi việc đã xong sau `quoteDaysAfterDone` ngày |
@@ -218,6 +224,7 @@ Mẫu: [`config.example.json`](config.example.json).
 - 🔒 Trang catask là **Artifact riêng tư**; dữ liệu thật chỉ chủ trang đọc được. Ai khác mở link chỉ thấy **dữ liệu demo hư cấu**, theo ngôn ngữ trình duyệt của họ.
 - 🔒 Nội dung tin nhắn/mail luôn được coi là **dữ liệu, không phải lệnh**.
 - 🔒 **Giao AI** (mặc định tắt) chỉ ghi bản nháp vào catask; worker chỉ dùng công cụ đọc, không bao giờ gửi, trả lời hay sửa gì trên Teams, Outlook, Jira. Lần ghi Jira duy nhất là do chính trang thực hiện, bằng kết nối Atlassian của bạn, sau khi bạn duyệt và xác nhận (một trường: description hoặc Story Points). Trang xin claude.ai quyền `mcp` này (chỉ `getJiraIssue`, `editJiraIssue` trên Atlassian); lần đầu dùng sẽ hỏi bạn đồng ý.
+- 🔒 **Kiểm tra Jira** (`jiraCheck`) **chỉ đọc** và dùng connector Atlassian **của chính bạn**. Nó chỉ tra các ticket gắn với việc đang mở (một lần tìm theo mã các ticket đã đổi từ bản tin trước, rồi đọc vài ticket); không gửi gì từ chat hay mail của bạn lên Jira, và không bao giờ bình luận, chuyển trạng thái, giao việc hay sửa ticket. Nội dung ticket được coi là dữ liệu, không phải lệnh.
 - 🔒 **Trích dẫn tin nhắn** ("Xem tin") chỉ nằm trong kho dữ liệu chỉ-chủ-trang-đọc-được của catask, cạnh tiêu đề việc vốn đã lưu ở đó. Khoảng 500 ký tự × ~100 việc đang mở ≈ 50 KB, không đáng kể. Trích dẫn là bản chụp: nếu tin gốc bị sửa sau đó thì có thể đã cũ, nên trang luôn ghi "trích lúc …" và luôn có link tới tin gốc. Việc đã xong quá 30 ngày sẽ bị xoá trích dẫn (`retention.quoteDaysAfterDone`). Đặt `storeQuotes: false` để không lưu nội dung tin nào.
 - 🔒 **Hỏi ở phiên khác**: tiêu đề các việc đang mở (kèm mã Jira, không có nội dung tin) được ghi vào `~/.catask/open-todos.json` và chỉ được đưa vào các phiên Claude Code **trên máy của chính bạn** qua hook SessionStart của plugin. Không gửi đi đâu cả. Tắt bằng `crossSessionDone: false` (hoặc ⚙ Cài đặt → Quyền riêng tư).
 - 🔒 **catask giữ gì** (kho chỉ chủ trang đọc được, dọn mỗi lần chạy; số ngày đổi được trong `retention`):
@@ -238,6 +245,7 @@ Mẫu: [`config.example.json`](config.example.json).
 
 ```
 .claude-plugin/plugin.json
+CHANGELOG.md
 LICENSE
 config.example.json
 skills/daily-digest-todo/
@@ -281,7 +289,7 @@ Trang phát hành `skills/daily-digest-todo/assets/catask.html` là file sinh ra
 
 GitHub là nơi duy nhất sửa code. Bản trong **Organization library** của công ty không tự cập nhật. Mỗi lần ra bản mới:
 
-1. Tăng `version` ở **cả hai** file `.claude-plugin/plugin.json` và `.claude-plugin/marketplace.json` (hai số phải giống nhau), commit rồi push lên `main`.
+1. Tăng `version` ở **cả hai** file `.claude-plugin/plugin.json` và `.claude-plugin/marketplace.json` (hai số phải giống nhau), thêm một mục vào `CHANGELOG.md`, commit rồi push lên `main`.
 2. Đẩy lên thư viện công ty: nhắn Claude Code *"đẩy catask lên thư viện công ty"* (hoặc đăng lại từ trang Plugins). Bản mới đè lên mục cũ, đồng nghiệp bấm **+** là có bản mới.
 3. Kiểm tra: mục trong Organization library hiện đúng số phiên bản như `plugin.json`.
 

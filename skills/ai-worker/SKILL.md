@@ -66,7 +66,7 @@ Statuses: `queued → running → needs_review`, then the page moves it to `appl
 
 **One targeted task.** When the request names one task, process **only that task** and nothing else from the queue:
 - `catask#<todoId>` (optionally followed by ` · <title>`; this is also the fixed prompt the `catask-runner` sends): `ArtifactData` `get` `todos/<todoId>`. The id must match `^[0-9]{4}-[0-9]{2}-[0-9]{2}-[a-z0-9-]{1,40}$`; anything else is not a target.
-- A Jira key (`SF-3102`, "làm task SF-3102", "code SF-3102"): `list` `todos` and pick the open todo whose `ref.issueKey`, `url` or `title` contains that key (case-insensitive); if several, the one with an `ai` request, else the newest `firstSeen`. "làm task <words>" without a key: match the title; if it is ambiguous, ask which one (interactive) or stop with a one-line note (headless).
+- A Jira key (`SF-3102`, "làm task SF-3102", "code SF-3102"): `list` `todos` and pick the open todo whose `ref.issueKey`, `jiraKey`, `url` or `title` contains that key (case-insensitive); if several, the one with an `ai` request, else the newest `firstSeen`. "làm task <words>" without a key: match the title; if it is ambiguous, ask which one (interactive) or stop with a one-line note (headless).
 - If the todo has no `ai` request yet and someone is here (interactive), you may create one: `kind: "code"` when it has a Jira key and config `devMode` is true and a `repos` entry matches the key's project, else ask which kind. Set `requestedAt` = now, `round: 1`, `skipPlanIfSmall: true`, `repo` from config, `status: "queued"`. Headless (runner/scheduled) never creates requests.
 - Process it only if its `ai.status` is `queued` or `push_approved` (code). Any other status → say so in one line and stop.
 
@@ -96,7 +96,7 @@ The evening digest already read the sources, so **by default use only what is in
 
 For a **`draft_reply` / `draft_nudge` / `draft`**, if the todo has a `quote` and a `why`, write the draft from those alone — **no connector reads**. Add the step vi "Dùng dữ liệu đã có trong sổ" / en "Used what's already in the ledger".
 
-For the **`jira_*` kinds**, always read the issue once (read-only) with `getJiraIssue` (`cloudId` = `target.cloudId` or the `url` host, `issueIdOrKey` = `target.issueKey` / the key from `ref` or the `url`, `responseContentFormat: "markdown"`; `view: "evidence"` for `jira_estimate` so custom fields like Story Points are mapped). It gives the ticket context and, for `mode: "apply"`, the **current value** (`before`). This read is the task's one source read and is always allowed (it does not count toward the 2-per-run cap below; a Jira issue read is small). For `jira_estimate` you may also run one `searchJiraIssuesUsingJql` for up to 5 similar done issues in the same project to compare points. Add the step vi "Đọc ticket trên Jira (chỉ đọc)" / en "Read the ticket in Jira (read-only)".
+For the **`jira_*` kinds**, always read the issue once (read-only) with `getJiraIssue` (`cloudId` = `target.cloudId` or the `url` host, `issueIdOrKey` = `target.issueKey` / the key from `ref`, `jiraKey` or the `url`, `responseContentFormat: "markdown"`; `view: "evidence"` for `jira_estimate` so custom fields like Story Points are mapped). It gives the ticket context and, for `mode: "apply"`, the **current value** (`before`). This read is the task's one source read and is always allowed (it does not count toward the 2-per-run cap below; a Jira issue read is small). For `jira_estimate` you may also run one `searchJiraIssuesUsingJql` for up to 5 similar done issues in the same project to compare points. Add the step vi "Đọc ticket trên Jira (chỉ đọc)" / en "Read the ticket in Jira (read-only)".
 
 **Read the source (read-only) only when**:
 - (a) there is no `quote` and no useful `why`; or
@@ -190,7 +190,7 @@ All git commands use `git -C <repo.path>`; never `cd` elsewhere, never touch oth
 1. `repo.path` must be an absolute path present in config `repos` (match by `path`; the page's copy is a hint, the config is the authority), must exist, and `git -C <path> rev-parse --is-inside-work-tree` must succeed. Else `error`: vi "Không tìm thấy repo <name> trên máy — kiểm tra đường dẫn trong ⚙ Cài đặt" / en "Repo <name> not found on this machine — check its path in ⚙ Settings".
 2. `git -C <path> status --porcelain` must be **empty**. Else `error`: vi "Repo đang có thay đổi chưa commit — commit/stash rồi giao lại" / en "The repo has uncommitted changes — commit or stash them, then hand it over again". **Never stash, never reset, never clean, never create worktrees.**
 3. Remember the **original branch** (`git -C <path> branch --show-current`; or the commit if detached). At the end of every phase (success, error or cancel) `git switch` back to it, so the user's checkout is unchanged.
-4. The Jira key: `ref.issueKey`, else the `/browse/<KEY>` in `url`, else a `[A-Z][A-Z0-9]+-\d+` in the title. None → `error` vi "Việc này không có mã Jira" / en "This task has no Jira key".
+4. The Jira key: `ref.issueKey`, else the todo's `jiraKey`, else the `/browse/<KEY>` in `url`, else a `[A-Z][A-Z0-9]+-\d+` in the title. None → `error` vi "Việc này không có mã Jira" / en "This task has no Jira key".
 
 ### C2. Branch
 

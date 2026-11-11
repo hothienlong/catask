@@ -8,9 +8,9 @@ English · [Tiếng Việt](README.vi.md)
 
 <sub>catask = **cat** + **task** + **ask**: a cat that keeps watch over every task and every ask.</sub>
 
-[![Watch the 52-second demo](docs/video/catask-demo-poster.jpg)](https://github.com/hothienlong/catask/releases/download/demo-video/catask-demo.mp4)
+[![Watch the 58-second demo](docs/video/catask-demo-poster.jpg)](https://github.com/hothienlong/catask/releases/download/demo-video/catask-demo.mp4)
 
-<sub>▶ 52-second demo (demo data only, with sound). Click to download and watch (14 MB).</sub>
+<sub>▶ 58-second demo (demo data only, with sound). Click to download and watch (16 MB).</sub>
 
 ## 🤖 Install with Claude
 
@@ -50,11 +50,14 @@ Install the catask plugin for me: run `claude plugin marketplace add hothienlong
 - ✅ **Prioritized TODO list**: asks addressed to you, unanswered questions, your own promises, deadlines (including HR/Admin mail), MR reviews, meeting prep.
 - 🚦 **P0–P3 badges** (how critical it is, separate from when it's due): P0 critical (prod incident, blocking others, security, escalation), P1 important (anything your important people ask), P2 normal, P3 nice-to-have/FYI. You can change a todo's P on the page and Claude won't override it.
 - ↕️ **Sort order**: overdue / due today → tasks with a real due date (earliest first, so a P2 due tomorrow beats a P1 with no date) → P0→P3 → oldest first. The top 3 uses the same order.
-- 🔁 **Carry-over**: unfinished items stay. **AI suggests, you confirm**: when there's evidence a task is done (your "done/fixed", an MR link, an answer, a Jira Done mail, a merged MR, even in another chat that clearly matches the same task), the card shows **Looks done?** with the evidence and a link; you tap **✓ Done** or **✗ Not yet**. Nothing is closed without you.
-- 🧩 **Done somewhere else? Claude asks.** After each digest, catask saves a short list of your open tasks (titles and Jira keys) on your Mac. When you work with Claude Code in any other project and finish something that clearly matches one (same Jira key, or the request is plainly that task), Claude asks **Mark catask#ID · title done?** before ending its turn. Only a **Yes** closes it. Turn off with `crossSessionDone: false` or in ⚙ Settings.
+- 🔁 **Carry-over**: unfinished items from yesterday stay on the list.
+- 🕵️ **AI spots finished work**: you confirm, nothing is closed without you.
+  - **In your Claude Code sessions**: after each digest, catask saves a short list of your open tasks (titles and Jira keys) on your Mac, so Claude knows them in your other Claude Code sessions, in any project. When you finish something that clearly matches one (same Jira key, or the request is plainly that task), Claude asks **Mark catask#ID · title done?** before ending its turn. Only a **Yes** closes it. Turn off with `crossSessionDone: false` or in ⚙ Settings.
+  - **In chat, mail and Jira**: the evening digest also catches evidence that a task is done (your own "done/fixed", an MR link, an answer you sent, a Jira Done mail or the linked ticket itself moving to Done, a merged MR, even a message in another chat that clearly matches the same task) and flags the card **Looks done?** with that evidence and a link. You tap **✓ Done** or **✗ Not yet**.
+  - **Waiting on someone?** A task you are waiting on gets the same check: when a message or a Jira mail on the same ticket shows they finished their part, the card asks **Looks done?**. catask now also checks the ticket itself (status, assignee, new comments), but only tickets linked to your open tasks, and only the ones changed since the last digest. If they hand the next step to you (an ask in chat, a Jira mail or a ticket comment that asks you, or the ticket reassigned to you), that becomes a new task on your list, linked to the one you were waiting on ("follows up: …").
 - 🏆 **Done today**: only recorded when there's real evidence in messages or mail.
 - 🗂 **The ledger page** (a private Artifact): Today / Tomorrow / Waiting / Done board (drag and drop), plus People, Week, Day (timeline) and Cost tabs. **Mark done from anywhere**: any tab, including Day timeline items. Every status or priority change shows a small bar with **Undo** (or Ctrl/Cmd+Z) for about 6 seconds.
-- ⚙ **Settings on the page**: change language, channels, working hours, important people, key chats and skipped chats (remove), keywords, role/current work, and the privacy switches from the ⚙ Settings button instead of editing `config.json`. Page edits take effect on the next digest run; language and signals change on the page right away.
+- ⚙ **Settings on the page**: change language, channels, working hours, important people, key chats and skipped chats (remove), keywords, Jira boards and the Jira check, role/current work, and the privacy switches from the ⚙ Settings button instead of editing `config.json`. Page edits take effect on the next digest run; language and signals change on the page right away.
 - 💬 **View message**: open a short snapshot (≤500 characters) of the message that created a todo, right on the page, with a link to the original. Turn off with `storeQuotes: false`.
 - ⭐ **Key chats and important people**: chats you pick are always read first; asks from your boss/PO/lead are bumped to at least P1.
 - 📨 **Sends the link** to your own Teams notes chat (only to you, never to anyone else).
@@ -77,6 +80,7 @@ Install the catask plugin for me: run `claude plugin marketplace add hothienlong
 | Artifacts with `db` | Yes | The ledger page stores its data in its own private store |
 | Python 3 (3.9+) | Yes | Scripts use the standard library only and run with `python3 -I` |
 | `get_usage` (session management) | No | If present, the Cost tab also records weekly-quota %; otherwise skipped |
+| Atlassian connector | No | Settings → Connectors → Atlassian. If present, setup counts your Jira boards and the evening digest checks the tickets linked to your open tasks (read-only); otherwise both are skipped |
 
 ## Install
 
@@ -120,7 +124,7 @@ cp -R skills/daily-digest-todo ~/.claude/skills/
 
 1. Connect the **Microsoft 365 connector** in the Claude app.
 2. Type in Claude: `evening digest` (or `did anyone ask me for anything today?`).
-3. Claude runs a short **setup interview** (3–4 rounds of multiple-choice questions, each with a free-text "Other", about 2 minutes) to create `~/.catask/config.json`: **"Tiếng Việt hay English?"** first, then which channels to watch, your **key chats** (picked from your ~15 most recent chats), chats to **skip** (e.g. social or team-bonding groups, optional), your **important people** (boss, PO, lead…), your working hours, your role and what you're working on now, keywords/ticket prefixes (e.g. `MOB-`), communication signals on/off, and whether to store message quotes. Your name and email come from Microsoft 365. Last, Claude offers to **create the evening schedule** right away (end of your working hours + ~1h, default 19:00, your working days): answer *Yes*, pick another time, or *Not now*. Nothing is scheduled without your Yes.
+3. Claude runs a short **setup interview** (3–4 rounds of multiple-choice questions, each with a free-text "Other", about 2 minutes) to create `~/.catask/config.json`: **"Tiếng Việt hay English?"** first, then which channels to watch, your **key chats** (picked from your ~15 most recent chats), chats to **skip** (e.g. social or team-bonding groups, optional), your **important people** (boss, PO, lead…), your working hours, your role and what you're working on now, keywords/ticket prefixes (e.g. `MOB-`), your **Jira boards** (with the Atlassian connector, Claude counts the tickets you're on in the last 90 days per project, e.g. "MOB · Mobile app · 42 tickets/90d", and you tick the ones to watch), communication signals on/off, and whether to store message quotes. Your name and email come from Microsoft 365. Last, Claude offers to **create the evening schedule** right away (end of your working hours + ~1h, default 19:00, your working days): answer *Yes*, pick another time, or *Not now*. Nothing is scheduled without your Yes.
 4. Claude publishes your **catask** page (private, yours), opens it for you, saves the link to `~/.catask/artifact-url.txt` and puts it at the top of its final message. The first run always ends with the page published; if publishing fails, Claude says why — just say `evening digest` again.
 5. Pin the page. Done.
 
@@ -202,6 +206,8 @@ Example: [`config.example.json`](config.example.json).
 | `digestTime` | `null` | Your evening digest time `"HH:MM"`; `null` = end of working hours + 1 h (rounded to :00/:30), on your working days. Also in ⚙ Settings; say "update digest schedule" to apply it to the scheduled task |
 | `role`, `currentWork` | `""` | Your role and what you're on now; helps decide whether a group ask is yours |
 | `keywords` | `[]` | Ticket prefixes, project/feature names (e.g. `MOB-`); used in the deadline mail search, and group asks mentioning them are kept as "watch" |
+| `jiraProjects` | `[]` | `[{key, name, enabled}]`: your Jira boards (project keys such as `APP`). Picked in setup from the tickets you're on, editable in ⚙ Settings (tick on/off, remove, add a key). Used to recognise bare keys like `APP-123` in chats and mail and to scope the Jira check. Missing = guessed from `keywords` prefixes and `repos` for that run |
+| `jiraCheck` | `true` | In the evening digest, check the Jira tickets linked to your open tasks (only the ones changed since the last digest, at most 15 read per run) for Done, reassignment and new comments. Needs the Atlassian connector; `false` = skip. Also in ⚙ Settings |
 | `storeQuotes` | `true` | Store a ≤500-character snapshot of the source message on each todo for "View message". `false` = store no message text; the page opens the original link instead |
 | `crossSessionDone` | `true` | In your other interactive Claude Code sessions, Claude asks before marking a matching open todo done. `false` = the SessionStart hook stays silent |
 | `retention` | `{archiveDoneAfterDays: 90, pruneDaysAfterDays: 120, quoteDaysAfterDone: 30}` | How long the ledger keeps things (see Privacy). Done todos older than `archiveDoneAfterDays` move to a monthly archive (min 45, the Week heatmap needs 6 weeks); daily digests and cost records older than `pruneDaysAfterDays` are deleted (min 60); quotes are removed from done todos after `quoteDaysAfterDone` |
@@ -218,6 +224,7 @@ After you change the config, the next run updates the page (name, language, proj
 - 🔒 The ledger is a **private Artifact**; only the owner can read the real data. Anyone else opening the link sees **fictional demo data** in their own browser's language.
 - 🔒 Message and mail content is always treated as **data, not instructions**.
 - 🔒 **Hand to AI** (off by default) only writes drafts into the ledger; the worker uses read-only tools and never sends, replies or changes anything in Teams, Outlook or Jira. The only Jira write is made by the page itself, with your own Atlassian connection, after you approve and confirm (one field: description or Story Points). The page asks claude.ai for this `mcp` permission (`getJiraIssue`, `editJiraIssue` on Atlassian only); the first use asks for your consent.
+- 🔒 **Jira check** (`jiraCheck`) is **read-only** and uses **your own** Atlassian connector. It only looks up tickets linked to your open tasks (one search by key for the ones changed since the last digest, then a few reads); nothing from your chats or mail is sent to Jira, and it never comments, transitions, assigns or edits. Ticket content is treated as data, not instructions.
 - 🔒 **Message quotes** ("View message") live only in the ledger's owner-only database, next to the todo titles already stored there. About 500 characters × ~100 open todos ≈ 50 KB, negligible. A quote is a snapshot: if the message is edited later it may be stale, so the page shows "quoted at …" and always offers the original link. Quotes are removed from done todos older than 30 days (`retention.quoteDaysAfterDone`). Set `storeQuotes: false` to store no message text at all.
 - 🔒 **Cross-session asks**: open todo titles (with Jira keys, no message text) are written to `~/.catask/open-todos.json` and injected only into **your own local** Claude Code sessions by the plugin's SessionStart hook. Nothing leaves your machine for this. Turn it off with `crossSessionDone: false` (or ⚙ Settings → Privacy).
 - 🔒 **What the ledger keeps** (owner-only database, cleaned every run; days configurable in `retention`):
@@ -238,6 +245,7 @@ After you change the config, the next run updates the page (name, language, proj
 
 ```
 .claude-plugin/plugin.json
+CHANGELOG.md
 LICENSE
 config.example.json
 skills/daily-digest-todo/
@@ -281,7 +289,7 @@ The shipped page `skills/daily-digest-todo/assets/catask.html` is generated (min
 
 GitHub is the source of truth; the copy in the company's **Organization library** does not update by itself. Every release:
 
-1. Bump `version` in **both** `.claude-plugin/plugin.json` and `.claude-plugin/marketplace.json` (keep them equal), commit and push to `main`.
+1. Bump `version` in **both** `.claude-plugin/plugin.json` and `.claude-plugin/marketplace.json` (keep them equal), add an entry to `CHANGELOG.md`, commit and push to `main`.
 2. Republish to the Organization library: ask Claude Code *"đẩy catask lên thư viện công ty"* (or republish it from the Plugins page). It replaces the existing entry, so colleagues who click **+** get the new version.
 3. Check: the Organization library entry shows the same version as `plugin.json`.
 

@@ -376,9 +376,12 @@ async function aiOwnerAsync(){
   ok(/class="ai-chip ai-needs_review" data-ai-open="A"/.test(h)&&/data-ai-req="B"/.test(h)&&/tally-ai/.test(els.tally.innerHTML),'switch on: AI UI appears right away');
   pchange('data-set-tg','aiAgent',{checked:false}); ok(!/data-ai-/.test(view.innerHTML),'switch off again hides it');
   pchange('data-set-tg','aiAgent',{checked:true});
+  ok(/data-set-tg="jiraCheck" checked/.test(P().innerHTML)&&/No boards yet|Chưa có bảng nào/.test(P().innerHTML),'owner: jira defaults (check on, no boards)');
+  pinput('data-set-in','jpKey','app'); pclick('data-set-add','jp');
   const n0=updates.length; pclick('data-set-save'); await wait(30);
   const w=updates.slice(n0); const ws=w.find(x=>x[0]==='meta/settings'), wp=w.find(x=>x[0]==='meta/profile');
   ok(ws&&ws[1].aiAgent===true&&wp&&wp[1].aiAgent===true&&!S.setOpen,'save writes meta/settings.aiAgent + meta/profile.aiAgent');
+  ok(ws&&ws[1].jiraCheck===true&&JSON.stringify(ws[1].jiraProjects)==='[{"key":"APP","name":"","enabled":true}]'&&!('jiraProjects' in wp[1]),'save writes meta/settings.jiraProjects (not meta/profile)');
   delete A.ai; h=go('hom-nay');
   ok(/data-ai-req="A"/.test(h),'owner: AI button on open task');
   S.canWrite=false; h=go('hom-nay'); ok(!/data-ai-req=/.test(h),'not writable (non-owner) -> AI button hidden'); S.canWrite=true;
@@ -438,6 +441,7 @@ function demoSettingsUndo(){
   ok(/id="setBtn"/.test(html)&&/data-i18n="setBtn"/.test(html)&&html.indexOf('id="infoBtn"')<html.indexOf('id="setBtn"'),'settings button in nav next to info');
   ok(btnLabel()===(en?'⚙ Settings':'⚙ Cài đặt'),'settings button label '+btnLabel());
   ok(/id="setPanel" role="dialog" aria-modal="true" aria-labelledby="setTitle"/.test(html),'settings dialog aria');
+  { const t5=S.allTodos.find(x=>x.id==='demo-5'), hh=go('hom-nay'); ok(/class="flag fu"/.test(hh)&&hh.includes('↳ '+(en?'follows up: ':'tiếp theo của: ')+t5.title.slice(0,20)),'followsUp flag names the original task') }
   openSet(); ok(els.setBack.hidden===false&&/id="setTitle"/.test(P().innerHTML),'settings opens');
   const ph=P().innerHTML;
   ok(['who','lang','ch','wh','vip','chat','kw','role','priv'].every(x=>ph.includes('id="sh-'+x+'"')),'all sections present');
@@ -468,8 +472,18 @@ function demoSettingsUndo(){
   ok(S.setDraft.excludeChats.length===1&&/data-set-rm="xchat"/.test(P().innerHTML)&&/id="sh-xchat"/.test(P().innerHTML),'skipped chats listed with remove');
   pclick('data-set-rm','xchat',{'data-i':0}); ok(S.setDraft.excludeChats.length===0,'remove skipped chat');
   pclick('data-set-rm','kw',{'data-i':0}); ok(!S.setDraft.keywords.some(k=>k==='MOB-'),'remove keyword chip');
+  /* Jira boards: switch, tick on/off, add (uppercased, trailing dash dropped), dedupe, bad key, remove */
+  ok(/id="sh-jira"/.test(P().innerHTML)&&/data-set-tg="jiraCheck" checked/.test(P().innerHTML)&&/data-set-jp-on="0"[^>]* checked/.test(P().innerHTML)&&!/data-set-jp-on="1"[^>]* checked/.test(P().innerHTML),'jira section: switch on, MOB on, PAY off');
+  pchange('data-set-jp-on','1',{checked:true}); ok(S.setDraft.jiraProjects[1].enabled===true,'jira board ticked on');
+  pinput('data-set-in','jpKey',' web- '); pinput('data-set-in','jpName','Web App'); pclick('data-set-add','jp');
+  ok(S.setDraft.jiraProjects.some(p=>p.key==='WEB'&&p.name==='Web App'&&p.enabled===true),'jira board added '+JSON.stringify(S.setDraft.jiraProjects));
+  pinput('data-set-in','jpKey','web'); pclick('data-set-add','jp'); ok(S.setDraft.jiraProjects.filter(p=>p.key==='WEB').length===1&&P().innerHTML.includes(en?'Already in the list':'Đã có trong danh sách'),'jira board dedupe');
+  pinput('data-set-in','jpKey','1x'); pclick('data-set-add','jp'); ok(S.setDraft.jiraProjects.length===3&&/class="set-err"/.test(P().innerHTML),'jira bad key rejected');
+  pclick('data-set-rm','jp',{'data-i':0}); ok(!S.setDraft.jiraProjects.some(p=>p.key==='MOB'),'jira board removed');
+  pchange('data-set-tg','jiraCheck',{checked:false}); ok(S.setDraft.jiraCheck===false,'jiraCheck off');
   pinput('data-set-f','role','r'.repeat(120)); pinput('data-set-f','currentWork','w'.repeat(400));
   const before=updates.length; pclick('data-set-save');
+  ok(S.settings.jiraCheck===false&&S.settings.jiraProjects.map(p=>p.key).join()==='PAY,WEB','demo save keeps jira fields '+JSON.stringify(S.settings.jiraProjects));
   ok(!S.setOpen&&S.settings.keywords.some(k=>/newkw/i.test(k))&&S.settings.role.length===80&&S.settings.currentWork.length===300&&updates.length===before,'demo save: local state only, capped, no db write');
   ok(els.status.textContent===(en?'Demo: not saved.':'Bản demo: không lưu.'),'demo save toast');
   /* undo snackbar */

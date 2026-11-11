@@ -6,6 +6,7 @@ Validates the minimal schema so a malformed run fails loudly instead of
 publishing a blank page.
 """
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -56,6 +57,7 @@ REF_KEYS = {
     "calendar": (("eventId",), ()),
 }
 REF_ID_MAX = 512
+JIRA_KEY = re.compile(r"^[A-Z][A-Z0-9]+-\d+$")
 
 
 def check_ref(where, t, errs):
@@ -109,6 +111,14 @@ def validate(d):
                 errs.append(f"todos[{i}].{flag} must be true or false")
         check_quote(f"todos[{i}]", t, errs)
         check_ref(f"todos[{i}]", t, errs)
+        # Bare Jira key seen in a chat/mail (e.g. "APP-123" without a link): the key only, no content.
+        if t.get("jiraKey") is not None and not (isinstance(t["jiraKey"], str) and JIRA_KEY.match(t["jiraKey"])):
+            errs.append(f"todos[{i}].jiraKey must be a Jira key like APP-123")
+        # A new task that came out of an open one (e.g. the Jira check found the next step is mine).
+        if t.get("followsUp") is not None and not (isinstance(t["followsUp"], str) and t["followsUp"].strip()):
+            errs.append(f"todos[{i}].followsUp must be the id of the original todo")
+        if isinstance(t.get("followsUp"), str) and t["followsUp"] == t.get("id"):
+            errs.append(f"todos[{i}].followsUp can't point at itself")
         check_signals(f"todos[{i}]", t.get("signals"), errs)
         if t.get("id") in ids:
             errs.append(f"duplicate todo id {t.get('id')}")

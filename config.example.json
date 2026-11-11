@@ -32,6 +32,10 @@
   "role": "Mobile developer",
   "currentWork": "Màn hình ví điện tử, sprint 12",
   "keywords": ["MOB-", "ví điện tử"],
+  "jiraProjects": [
+    { "key": "MOB", "name": "Mobile App", "enabled": true }
+  ],
+  "jiraCheck": true,
   "storeQuotes": true,
   "crossSessionDone": true,
   "devMode": false,
