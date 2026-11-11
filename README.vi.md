@@ -8,6 +8,10 @@
 
 <sub>catask = **cat** (mèo) + **task** (việc) + **ask** (nhờ): chú mèo canh mọi việc, mọi lời nhờ.</sub>
 
+[![Xem clip demo 52 giây](docs/video/catask-demo-vi-poster.jpg)](https://github.com/hothienlong/catask/releases/download/demo-video/catask-demo-vi.mp4)
+
+<sub>▶ Clip demo 52 giây (chỉ dùng dữ liệu demo, có tiếng). Bấm để tải về xem (14 MB).</sub>
+
 ## 🤖 Cài bằng Claude
 
 Dán đoạn này vào Claude Code (hoặc tab Code của app Claude desktop):

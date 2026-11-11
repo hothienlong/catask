@@ -8,6 +8,10 @@ English · [Tiếng Việt](README.vi.md)
 
 <sub>catask = **cat** + **task** + **ask**: a cat that keeps watch over every task and every ask.</sub>
 
+[![Watch the 52-second demo](docs/video/catask-demo-poster.jpg)](https://github.com/hothienlong/catask/releases/download/demo-video/catask-demo.mp4)
+
+<sub>▶ 52-second demo (demo data only, with sound). Click to download and watch (14 MB).</sub>
+
 ## 🤖 Install with Claude
 
 Copy this into Claude Code (or the Code tab of the Claude desktop app):
