@@ -200,11 +200,17 @@ function aiDemoTests(){
   ok(S.dlgMode==='ai'&&/id="msgTitle"/.test(d)&&d.includes(esc2(t2.ai.result.text.split('\n')[0]))&&/class="ai-result"/.test(d),'panel shows result text');
   ok(/data-copy[^>]*>📋 (Copy|Chép)</.test(d)&&/<ul class="ai-src"><li><a href="https:\/\/teams.microsoft.com\/" target="_blank" rel="noopener">/.test(d)&&/<ol class="ai-steps">/.test(d),'panel: copy button, sources, steps');
   ok(/data-ai-act="accept"/.test(d)&&/data-ai-act="redo"/.test(d)&&/data-ai-act="cancel"/.test(d)&&d.includes(en?'AI only drafts':'AI chỉ soạn nháp'),'needs_review actions + safety note');
+  ok(/class="btn-pri" data-ai-act="accept">/.test(d)&&d.includes(en?"I'll copy it myself":'Tôi tự copy')&&!/Dùng được|Looks good/.test(d),'accept button renamed (I\'ll copy it myself / Tôi tự copy)');
+  ok(!/data-ai-act="draft-apply"/.test(d),'non-Jira draft: no Write to Jira');
   if(en) ok(!VI.test(d),'EN panel: no VI strings');
   const resText=t2.ai.result.text; let copied=null; navigator.clipboard={writeText:x=>{copied=x;return Promise.resolve()}}; dclick('data-copy','');
   globalThis.__chain.push(async()=>{ await wait(5); ok(copied===resText&&S.lastCopy==='aiCopied','copy writes result text to clipboard'); delete navigator.clipboard });
   dclick('data-ai-act','accept'); ok(t2.ai.status==='accepted'&&t2.ai.result&&els.msgBack.hidden,'accept -> accepted, keeps result');
-  ok(!/data-ai-open="demo-2"/.test(go('hom-nay'))&&/data-ai-req="demo-2"/.test(view.innerHTML)&&/class="tally-ai" data-ai-open="demo-9"[^>]*><b>1<\/b>/.test(els.tally.innerHTML),'accepted: chip gone, button back, tally count drops to 1');
+  ok(/class="ai-chip ai-accepted" data-ai-open="demo-2"/.test(go('hom-nay'))&&!/data-ai-req="demo-2"/.test(view.innerHTML)&&/class="tally-ai" data-ai-open="demo-9"[^>]*><b>1<\/b>/.test(els.tally.innerHTML),'accepted: clickable used chip on the card, tally count drops to 1');
+  ok(STYLE.includes('.ai-chip.ai-cancelled,.dlg-meta.ai-chip{cursor:default}')&&!/\.ai-chip\.ai-accepted[^{}]*\{[^}]*cursor:default/.test(STYLE),'used chip has no cursor:default; cancelled keeps it');
+  click('[data-ai-open]','data-ai-open','demo-2'); d=D().innerHTML;
+  ok(S.dlgMode==='ai'&&d.includes(esc2(t2.ai.result.text.split('\n')[0]))&&/data-copy/.test(d)&&/<ul class="ai-src">/.test(d)&&!/data-ai-act="(accept|redo|draft-apply)"/.test(d)&&/data-ai-req="demo-2"/.test(d),'used chip reopens the result read-only (text, copy, sources; no re-accept)');
+  escD();
   snackClick('[data-undo]'); ok(t2.ai.status==='needs_review','undo accept');
   go('hom-nay'); click('[data-ai-open]','data-ai-open','demo-2'); dinput('ngắn hơn'); dclick('data-ai-act','redo');
   ok(t2.ai.status==='queued'&&t2.ai.attempt===2&&t2.ai.note==='ngắn hơn'&&!t2.ai.result&&t2.ai.steps.length===0,'redo -> queued, attempt+1, new note, result cleared');
@@ -297,6 +303,19 @@ function aiApplyDemoTests(){
   dclick('data-ai-act','apply'); ok(/class="ai-err" role="alert"/.test(D().innerHTML)&&t9.ai.status==='needs_review','non-numeric story points blocked');
   dclick('data-ai-act','accept'); ok(t9.ai.status==='accepted','use it by hand -> accepted');
   escD();
+  // draft (mode "draft") jira_description -> Write to Jira (demo: simulated)
+  t9.ai={status:'needs_review',kind:'jira_description',instruction:'',note:'',mode:'draft',requestedAt:TODAY+'T10:00:00+07:00',steps:[],attempt:1,updatedBy:'worker',result:{text:'DRAFT DESC'}};
+  click('[data-ai-open]','data-ai-open','demo-9'); d=D().innerHTML;
+  ok(/class="btn-pri" data-ai-act="draft-apply">(Write to Jira|Ghi lên Jira)</.test(d)&&/class="btn-sec" data-ai-act="accept"/.test(d),'jira draft: Write to Jira (primary) + I\'ll copy it myself');
+  if(en) ok(!VI.test(d),'EN draft panel: no VI strings');
+  dclick('data-ai-act','draft-apply'); d=D().innerHTML;
+  ok(/class="ai-confirm"/.test(d)&&d.includes(en?'Overwrite the description of MOB-2048':'Ghi đè mô tả của MOB-2048')&&d.includes('DRAFT DESC'),'draft: same before/after confirm');
+  dclick('data-ai-act','apply-no'); d=D().innerHTML; ok(!/ai-confirm/.test(d)&&/data-ai-act="draft-apply"/.test(d)&&t9.ai.mode==='draft','draft confirm cancel: back to the draft');
+  dclick('data-ai-act','draft-apply'); dclick('data-ai-act','apply-ok');
+  ok(t9.ai.status==='applied'&&t9.ai.appliedAt&&t9.ai.result.proposed.after==='DRAFT DESC'&&t9.ai.result.appliedUrl==='https://example.atlassian.net/browse/MOB-2048','draft -> applied like the apply flow');
+  escD();
+  t9.ai=Object.assign({},t9.ai,{status:'needs_review',kind:'jira_estimate',appliedAt:undefined,mode:'draft',result:{text:'5'}});
+  click('[data-ai-open]','data-ai-open','demo-9'); ok(!/data-ai-act="draft-apply"/.test(D().innerHTML),'jira_estimate draft: no Write to Jira'); escD();
 }
 /* ---- owner: page applies via the viewer's Atlassian connector (mcp) ---- */
 async function aiMcpAsync(){
@@ -357,6 +376,35 @@ async function aiMcpAsync(){
   // i) ambiguous write failure
   reset(); J.editErr={code:'server_unavailable',retryable:true,message:'x'}; d=await open(); dclick('data-ai-act','apply'); dclick('data-ai-act','apply-ok'); await wait(30);
   ok(D().innerHTML.includes(en?'Not sure whether Jira was updated':'Không rõ Jira đã cập nhật chưa')&&__calls.filter(c=>c.tool==='editJiraIssue').length===1,'ambiguous write error: says check Jira, no auto retry');
+  // j) draft (mode "draft") -> Write to Jira: fresh read, confirm shows what gets replaced, same write path
+  const dft=(o)=>Object.assign({mode:'draft',target:undefined,result:{text:'DRAFT DESC'}},o||{});
+  reset(dft()); J.desc='OLD DESC'; d=await open();
+  ok(/data-ai-act="draft-apply"/.test(d)&&__calls.length===0,'owner draft: Write to Jira shown, no read on open');
+  dclick('data-ai-act','draft-apply'); await wait(30); d=D().innerHTML;
+  ok(__calls.length===1&&__calls[0].tool==='getJiraIssue'&&JSON.stringify(__calls[0].inp)===JSON.stringify({cloudId:'veepme.atlassian.net',issueIdOrKey:'SF-3101',responseContentFormat:'markdown',view:'compact'})&&__calls[0].opt.cache===false,'draft: fresh getJiraIssue read like the apply flow');
+  ok(/class="ai-confirm"/.test(d)&&d.includes('OLD DESC')&&d.includes(en?'will be fully replaced':'sẽ bị thay hoàn toàn')&&/data-ai-act="apply-ok"/.test(d),'draft confirm: shows current description + replace warning');
+  const nd=updates.length; dclick('data-ai-act','apply-ok'); await wait(30);
+  const ed2=__calls.filter(c=>c.tool==='editJiraIssue');
+  ok(__calls[1]&&__calls[1].tool==='getJiraIssue'&&ed2.length===1&&JSON.stringify(ed2[0].inp)===JSON.stringify({cloudId:'veepme.atlassian.net',issueIdOrKey:'SF-3101',fields:{description:'DRAFT DESC'},contentFormat:'markdown'}),'draft: re-read then editJiraIssue description only');
+  const wd=updates.slice(nd).filter(x=>x[0]==='todos/J'); const wda=wd.length&&wd[wd.length-1][1].ai;
+  ok(wda&&wda.status==='applied'&&wda.appliedAt&&wda.result.appliedUrl==='https://veepme.atlassian.net/browse/SF-3101'&&wda.result.proposed.before==='OLD DESC'&&wda.result.proposed.after==='DRAFT DESC'&&wda.updatedBy==='page','draft: db ai applied + proposal recorded');
+  ok(/class="ai-ok"/.test(D().innerHTML),'draft: panel switches to applied');
+  // k) jira_ac draft merges into the current description, replacing the old AC section
+  reset(dft({kind:'jira_ac',result:{text:'## Acceptance criteria\n- new one\n- new two'}})); J.desc='## Context\nx\n\n## Acceptance criteria\n- old\n\n## Notes\ny'; d=await open();
+  dclick('data-ai-act','draft-apply'); await wait(30); ok(D().innerHTML.includes(en?'plus an Acceptance criteria section':'+ mục Acceptance criteria'),'AC draft confirm explains the merge');
+  dclick('data-ai-act','apply-ok'); await wait(30);
+  const ea=__calls.filter(c=>c.tool==='editJiraIssue')[0];
+  ok(ea&&ea.inp.fields.description==='## Context\nx\n\n## Acceptance criteria\n\n- new one\n- new two\n\n## Notes\ny','AC draft: old AC section replaced, rest kept '+JSON.stringify(ea&&ea.inp.fields));
+  reset(dft({kind:'jira_ac',result:{text:'- a'}})); J.desc=''; d=await open(); dclick('data-ai-act','draft-apply'); await wait(30);
+  ok(!D().innerHTML.includes(en?'plus an Acceptance criteria section':'+ mục Acceptance criteria'),'empty description: no replace warning');
+  dclick('data-ai-act','apply-ok'); await wait(30); ok(__calls.filter(c=>c.tool==='editJiraIssue')[0].inp.fields.description==='## Acceptance criteria\n\n- a','AC draft on empty description');
+  // l) media + mcp null + non-writer + estimate
+  reset(dft()); J.html=true; J.desc='<p><img src="x"></p>'; d=await open(); dclick('data-ai-act','draft-apply'); await wait(30);
+  ok(D().innerHTML.includes(en?'images or special formatting':'ảnh/định dạng đặc biệt')&&!__calls.some(c=>c.tool==='editJiraIssue')&&Jt.ai.status==='needs_review','draft media guard: no write');
+  reset(dft(),null); d=await open(); dclick('data-ai-act','draft-apply'); await wait(30);
+  ok(!/data-ai-act="draft-apply"/.test(D().innerHTML)&&D().innerHTML.includes(en?'Connect Atlassian on claude.ai':'Kết nối Atlassian trên claude.ai'),'draft, mcp null: button gone, connect hint');
+  reset(dft()); S.canWrite=false; d=await open(); ok(!/data-ai-act="draft-apply"/.test(d),'viewer who cannot write: no Write to Jira'); S.canWrite=true;
+  reset(dft({kind:'jira_estimate',result:{text:'5'}})); d=await open(); ok(!/data-ai-act="draft-apply"/.test(d),'jira_estimate draft: no Write to Jira');
   if(en){ ok(!VI.test(D().innerHTML),'EN owner apply panel: no VI strings') } else console.log('SKIP EN owner panel check (page is in '+document.documentElement.lang+')');
   escD(); globalThis.__mcp=mcpMock;
 }

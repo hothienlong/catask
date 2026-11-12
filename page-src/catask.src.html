@@ -277,8 +277,10 @@ a { color: var(--accent) }
 .ai-chip.ai-running { background: var(--accent-wash); color: var(--accent) }
 .ai-chip.ai-needs_review { background: var(--accent); color: var(--lift); font-weight: 700; box-shadow: var(--shadow) }
 .ai-chip.ai-error { background: var(--over-wash); color: var(--over); border-color: var(--over) }
-.ai-chip.ai-accepted, .ai-chip.ai-cancelled { background: transparent; color: var(--faint); border-color: var(--rule); cursor: default }
-.ai-chip:not(.ai-accepted):not(.ai-cancelled):hover { outline: 1.5px solid var(--ink); outline-offset: 1px }
+.ai-chip.ai-accepted, .ai-chip.ai-cancelled { background: transparent; color: var(--faint); border-color: var(--rule) }
+.ai-chip.ai-cancelled, .dlg-meta .ai-chip { cursor: default }
+.ai-chip:not(.ai-cancelled):hover { outline: 1.5px solid var(--ink); outline-offset: 1px }
+.dlg-meta .ai-chip:hover { outline: none }
 .three .sub .ai-btn, .three .sub .ai-chip, .dlg-actions .ai-btn, .dlg-actions .ai-chip { margin-left: 6px }
 @media (prefers-reduced-motion: no-preference) {
   .ai-chip.ai-running { animation: ai-pulse 1.8s ease-in-out infinite }
@@ -949,7 +951,8 @@ html.ai-fold { --aibar-h: 41px }
       aiApplyToolErr: 'Jira từ chối: {0}', aiApplyConsent: 'Cần bạn cho phép trang dùng Atlassian. Bấm lại để claude.ai hỏi.',
       aiApplyUnknown: 'Không rõ Jira đã cập nhật chưa. Mở ticket kiểm tra trước khi thử lại.', aiApplyReadErr: 'Chưa đọc được Jira ({0}). Thử lại sau.',
       aiAfterEmpty: 'Nội dung mới đang trống.', aiSpNum: 'Story point phải là một số, VD 3 hoặc 0.5.',
-      aiAccept: 'Dùng được', aiRedo: 'Làm lại', aiCancel: 'Huỷ', aiCancelAria: 'Huỷ việc giao AI', aiRetry: 'Thử lại', aiRedoNote: 'Ghi chú cho lần làm lại (không bắt buộc)',
+      aiAccept: 'Tôi tự copy', aiWriteJira: 'Ghi lên Jira', aiDraftReading: 'Đang đọc mô tả hiện tại trên Jira…',
+      aiDraftReplace: 'Mô tả hiện tại trên Jira (ở trên) sẽ bị thay hoàn toàn bằng nội dung mới.', aiDraftReplaceAc: 'Mô tả mới = mô tả hiện tại (ở trên) + mục Acceptance criteria (thay mục cũ nếu có).', aiRedo: 'Làm lại', aiCancel: 'Huỷ', aiCancelAria: 'Huỷ việc giao AI', aiRetry: 'Thử lại', aiRedoNote: 'Ghi chú cho lần làm lại (không bắt buộc)',
       aiErr: 'Lỗi: {0}', tAi: '✨ AI xong', tAiAria: '{0} việc AI đã làm xong, bấm để xem việc đầu tiên',
       snAi: 'Đã giao AI', snAiAccept: 'Đã dùng bản AI', snAiRedo: 'Giao AI làm lại', snAiRetry: 'Giao AI thử lại', snAiCancel: 'Đã huỷ giao AI', snAiApplied: 'Đã cập nhật {0} trên Jira',
       /* copy task id */
@@ -1204,7 +1207,8 @@ html.ai-fold { --aibar-h: 41px }
       aiApplyToolErr: 'Jira refused: {0}', aiApplyConsent: 'The page needs your permission to use Atlassian. Click again and claude.ai will ask.',
       aiApplyUnknown: 'Not sure whether Jira was updated. Open the ticket and check before trying again.', aiApplyReadErr: 'Couldn’t read Jira ({0}). Try again later.',
       aiAfterEmpty: 'The new content is empty.', aiSpNum: 'Story points must be a number, e.g. 3 or 0.5.',
-      aiAccept: 'Looks good', aiRedo: 'Redo', aiCancel: 'Cancel', aiCancelAria: 'Cancel the AI request', aiRetry: 'Try again', aiRedoNote: 'Note for the redo (optional)',
+      aiAccept: 'I\'ll copy it myself', aiWriteJira: 'Write to Jira', aiDraftReading: 'Reading the current description in Jira…',
+      aiDraftReplace: 'The current Jira description (shown above) will be fully replaced by the new content.', aiDraftReplaceAc: 'New description = the current one (shown above) plus an Acceptance criteria section (replacing the old one if any).', aiRedo: 'Redo', aiCancel: 'Cancel', aiCancelAria: 'Cancel the AI request', aiRetry: 'Try again', aiRedoNote: 'Note for the redo (optional)',
       aiErr: 'Error: {0}', tAi: '✨ AI ready', tAiAria: '{0} AI results ready, click to view the first one',
       snAi: 'Handed to AI', snAiAccept: 'AI result used', snAiRedo: 'Sent back to AI', snAiRetry: 'Retrying with AI', snAiCancel: 'AI request cancelled', snAiApplied: 'Updated {0} in Jira',
       /* copy task id */
@@ -1481,7 +1485,7 @@ html.ai-fold { --aibar-h: 41px }
   }
   function aiCtl(td) {
     if (!aiOn()) return '';
-    if (aiLive(td) || (aiOf(td) && aiOf(td).status === 'applied')) return aiChip(td);
+    if (aiLive(td) || (aiOf(td) && (aiOf(td).status === 'applied' || aiOf(td).status === 'accepted'))) return aiChip(td);  /* used results reopen read-only */
     if (!canAI(td)) return '';
     return '<button type="button" class="ai-btn" data-ai-req="' + esc(td.id) + '" aria-haspopup="dialog" aria-label="' + esc(t('aiBtnAria', td.title)) + '">' + esc(t('aiBtn')) + '</button>';
   }
@@ -2503,9 +2507,66 @@ html.ai-fold { --aibar-h: 41px }
   }
   function keepFocus() { var act = document.activeElement; return act && act.getAttribute && act.getAttribute('data-ai-act') ? '[data-ai-act="' + act.getAttribute('data-ai-act') + '"]' : null }
   function curAfter(a) { var p = a.result.proposed; return S.aiForm && S.aiForm.id === S.aiPanel && S.aiForm.after != null ? S.aiForm.after : String(p.after == null ? '' : p.after) }
+  /* Draft -> Jira: a jira_description / jira_ac draft (mode "draft", no proposal) can be written by the page too.
+     "Write to Jira" reads the live description (same getJiraIssue call), builds a proposal on the fly
+     (jira_ac: current description + an "## Acceptance criteria" section, replacing an old one), then runs the
+     apply flow above unchanged: in-panel confirm -> fresh re-read + drift check -> write one field -> `applied`. */
+  var DRAFT_JIRA = ['jira_description', 'jira_ac'];
+  function draftJiraOk(a, td) {
+    return !!a && !isCode(a) && inReview(a) && !isApply(a) && DRAFT_JIRA.indexOf(a.kind) >= 0 && !!(a.result && norm(a.result.text)) &&
+      !!applyKey(a, td) && !!applyCloud(a, td) && (S.demo || (!!db && S.canWrite));
+  }
+  function draftOn(td) { var d = S.aiDraft; return !!d && !!td && d.id === td.id && d.step === 'ready' && draftJiraOk(aiOf(td), td) }
+  var AC_H = /^(#{1,6})\s*(\*\*)?\s*(acceptance criteria|tiêu chí (nghiệm thu|chấp nhận))\s*:?\s*(\*\*)?\s*$/i;
+  function acMerge(cur, text) {
+    var body = norm(text).split('\n'); if (body.length && AC_H.test(body[0])) body.shift();
+    var sec = '## Acceptance criteria\n\n' + norm(body.join('\n')), c = norm(cur); if (!c) return sec;
+    var ls = c.split('\n'), s = -1, lv = 0, i, m;
+    for (i = 0; i < ls.length; i++) if ((m = AC_H.exec(ls[i]))) { s = i; lv = m[1].length; break }
+    if (s < 0) return c + '\n\n' + sec;
+    var e = ls.length; for (i = s + 1; i < ls.length; i++) if ((m = /^(#{1,6})\s/.exec(ls[i])) && m[1].length <= lv) { e = i; break }
+    return norm(ls.slice(0, s).join('\n') + '\n\n' + sec + (e < ls.length ? '\n\n' + ls.slice(e).join('\n') : ''));
+  }
+  /* The ai object the panel and the apply flow work on: the stored one, or (after "Write to Jira") the draft with its proposal. */
+  function aiView(td) {
+    var a = aiOf(td); if (!a || !draftOn(td)) return a;
+    var before = String(S.aiDraft.before || ''), after = a.kind === 'jira_ac' ? acMerge(before, a.result.text) : norm(a.result.text);
+    return Object.assign({}, a, { mode: 'apply', target: Object.assign({}, a.target, { system: 'jira', issueKey: applyKey(a, td), field: 'description', cloudId: applyCloud(a, td) }),
+      result: Object.assign({}, a.result, { proposed: { field: 'description', before: before, after: after } }) });
+  }
+  function draftJira(td) {
+    var a = aiOf(td), id = td.id; if (!draftJiraOk(a, td) || mcpOff()) return;
+    function ready(cur) { S.aiDraft = { id: id, step: 'ready', before: cur }; if (S.aiForm) S.aiForm.after = null; S.aiApply = { id: id, step: 'confirm' }; if (panelOpen(id)) renderAiPanel('[data-ai-act="apply-ok"]') }
+    function fail(msg) { S.aiDraft = { id: id, step: 'err', err: msg }; if (panelOpen(id)) renderAiPanel('[data-ai-act="draft-apply"]') }
+    /* Demo: simulated, nothing leaves the page. */
+    if (S.demo) return ready('');
+    S.aiDraft = { id: id, step: 'busy' }; renderAiPanel('.dlg-x');
+    getMcp().then(function (mcp) {
+      if (!mcp) { S.aiDraft = null; if (panelOpen(id)) renderAiPanel(); return }
+      return mcp.callTool('Atlassian', 'getJiraIssue', jiraReadIn(a, td), { cache: false }).then(function (res) {
+        var c = jiraCur(res, 'description');
+        S.aiLive = { id: id, cur: c.cur, html: c.html, unknown: c.unknown };
+        if (c.html) return fail(t('aiMedia'));
+        if (c.unknown) return fail(t('aiApplyReadErr', t('err')));
+        ready(c.cur);
+      }, function (e) {
+        var k = e && e.code;
+        if (MCP_BLOCK.indexOf(k) >= 0) { S.mcpBlocked = k; S.aiDraft = null; if (panelOpen(id)) renderAiPanel(); return }
+        fail(k === 'tool_error' ? t('aiApplyToolErr', String((e && e.message) || '').slice(0, 200)) : k === 'approval_required' || k === 'consent_required' ? t('aiApplyConsent') : t('aiApplyReadErr', k || t('err')));
+      });
+    });
+  }
+  function draftBox(td, a) {
+    if (!draftJiraOk(a, td)) return '';
+    var d = S.aiDraft && S.aiDraft.id === td.id ? S.aiDraft : null;
+    if (d && d.step === 'busy') return '<p class="ai-hint" role="status">' + esc(t('aiDraftReading')) + '</p>';
+    if (d && d.step === 'err') return '<p class="ai-err" role="alert">' + esc(d.err) + '</p>';
+    if (mcpOff()) return '<p class="ai-warn" role="status">' + esc(mcpMsg()) + '</p>';
+    return '';
+  }
   function openAiPanel(id) {
     var td = findTodo(id); if (!aiOn() || !aiOf(td)) return;
-    S.aiPanel = id; S.aiApply = null; S.aiLive = null;
+    S.aiPanel = id; S.aiApply = null; S.aiLive = null; S.aiDraft = null;
     S.aiForm = { id: id, kind: aiKindOf(aiOf(td)), note: '', err: '', after: null, fb: '' }; S.codeConfirm = null;
     renderAiPanel();
     aiPeek(td);
@@ -2546,7 +2607,8 @@ html.ai-fold { --aibar-h: 41px }
     var why = applyBlocked(td, a), ap = S.aiApply && S.aiApply.id === td.id ? S.aiApply : null, fl = L('AIF')[f] || f;
     if (why) return '<p class="ai-warn" role="status">' + esc(why) + '</p>';
     if (!ap) return '';
-    if (ap.step === 'confirm') return '<div class="ai-confirm" role="group" aria-labelledby="aiConfQ"><p id="aiConfQ"><b>' + esc(f === 'storyPoints' ? t('aiConfirmSp', key, after) : t('aiConfirmQ', fl, key)) + '</b></p>' +
+    var rpl = draftOn(td) && norm(a.result.proposed.before) ? '<p class="ai-warn">' + esc(t(aiOf(td).kind === 'jira_ac' ? 'aiDraftReplaceAc' : 'aiDraftReplace')) + '</p>' : '';
+    if (ap.step === 'confirm') return '<div class="ai-confirm" role="group" aria-labelledby="aiConfQ"><p id="aiConfQ"><b>' + esc(f === 'storyPoints' ? t('aiConfirmSp', key, after) : t('aiConfirmQ', fl, key)) + '</b></p>' + rpl +
       '<div class="dlg-actions"><button type="button" class="btn-sec" data-ai-act="apply-no">' + esc(t('aiCancel')) + '</button><button type="button" class="btn-pri" data-ai-act="apply-ok">' + esc(t('aiConfirmOk')) + '</button></div></div>';
     if (ap.step === 'drift') return '<div class="ai-confirm is-warn" role="group" aria-labelledby="aiDriftQ"><p id="aiDriftQ"><b>' + esc(t('aiDriftQ', key)) + '</b></p>' +
       (ap.unknown ? '' : '<div class="dlg-ctx">' + esc(t('aiDriftNow')) + '</div><div class="ai-before">' + (ap.cur ? esc(String(ap.cur).slice(0, 1500)) : esc(t('aiBeforeEmpty'))) + '</div>') +
@@ -2556,7 +2618,7 @@ html.ai-fold { --aibar-h: 41px }
     return '';
   }
   function renderAiPanel(focusSel) {
-    var td = findTodo(S.aiPanel), a = aiOf(td); if (!a) return closeMsg();
+    var td = findTodo(S.aiPanel), a = aiView(td); if (!a) return closeMsg();
     if (isCode(a)) return renderCodePanel(td, a, focusSel);
     dlg.className = 'dlg';
     var kind = aiKindOf(a), st = a.status, ap = isApply(a), rv = inReview(a), res = a.result && a.result.text ? String(a.result.text).slice(0, 2000) : '';
@@ -2569,7 +2631,11 @@ html.ai-fold { --aibar-h: 41px }
     if (rv && ap && (step === 'confirm' || step === 'drift' || step === 'busy')) acts = '';  /* the in-panel confirm owns the choice */
     else if (rv && ap) acts = cx + '<button type="button" class="btn-sec" data-ai-act="redo">' + esc(t('aiRedo')) + '</button><button type="button" class="btn-sec" data-ai-act="accept">' + esc(t('aiAcceptHand')) + '</button>' +
       (!applyBlocked(td, a) && (!step || step === 'err') ? '<button type="button" class="btn-pri" data-ai-act="apply">' + esc(t('aiApply')) + '</button>' : '');
-    else if (rv) acts = cx + '<button type="button" class="btn-sec" data-ai-act="redo">' + esc(t('aiRedo')) + '</button><button type="button" class="btn-pri" data-ai-act="accept">' + esc(t('aiAccept')) + '</button>';
+    else if (rv) {
+      var wj = draftJiraOk(a, td) && !mcpOff() && !(S.aiDraft && S.aiDraft.id === td.id && S.aiDraft.step === 'busy');
+      acts = cx + '<button type="button" class="btn-sec" data-ai-act="redo">' + esc(t('aiRedo')) + '</button><button type="button" class="' + (wj ? 'btn-sec' : 'btn-pri') + '" data-ai-act="accept">' + esc(t('aiAccept')) + '</button>' +
+        (wj ? '<button type="button" class="btn-pri" data-ai-act="draft-apply">' + esc(t('aiWriteJira')) + '</button>' : '');
+    }
     else if (st === 'queued' || st === 'running') acts = cx;
     else if (st === 'error') acts = cx + '<button type="button" class="btn-pri" data-ai-act="retry">' + esc(t('aiRetry')) + '</button>';
     else acts = '<button type="button" class="btn-sec" data-close>' + esc(t('dlgClose')) + '</button>' + (canAI(td) ? '<button type="button" class="btn-pri" data-ai-req="' + esc(td.id) + '">' + esc(t('aiBtn')) + '</button>' : '');
@@ -2584,7 +2650,7 @@ html.ai-fold { --aibar-h: 41px }
         return '<li>' + (whenLabel(x && x.at) ? '<time>' + esc(whenLabel(x.at)) + '</time>' : '') + esc(x && x.text) + '</li>' }).join('') + '</ol>' +
       (st === 'error' && a.error ? '<p class="ai-err" role="alert">' + esc(t('aiErr', String(a.error).slice(0, 300))) + '</p>' : '') +
       (ap ? applyView(td, a, st) : res ? '<div class="ai-res-h"><span class="dlg-ctx">' + esc(L('AIR')[kind]) + '</span><button type="button" class="btn-sec ai-copy" data-copy aria-label="' + esc(t('aiCopyAria')) + '">' + esc(t('aiCopy')) + '</button></div>' +
-        '<div class="ai-result" id="aiResult">' + esc(res) + '</div><span class="ai-copied" role="status" aria-live="polite"></span>' : '') +
+        '<div class="ai-result" id="aiResult">' + esc(res) + '</div><span class="ai-copied" role="status" aria-live="polite"></span>' + draftBox(td, a) : '') +
       (src.length ? '<div class="dlg-ctx">' + esc(t('aiSources')) + '</div><ul class="ai-src">' + src.map(function (x) {
         return '<li><a href="' + esc(safeUrl(x.url)) + '" target="_blank" rel="noopener">' + esc(String(x.label || x.url).slice(0, 120)) + ' ↗</a></li>' }).join('') + '</ul>' : '') +
       (rv ? '<label class="ai-note-l" for="aiRedoNote">' + esc(t('aiRedoNote')) + '</label><textarea id="aiRedoNote" class="set-in" data-ai-note rows="2" maxlength="300">' + esc(S.aiForm ? S.aiForm.note : '') + '</textarea>' : '') +
@@ -2989,7 +3055,7 @@ html.ai-fold { --aibar-h: 41px }
   /* A worker update for the open task redraws the panel in place, keeping a half-typed note / edit. */
   function refreshAiPanel() {
     if ((S.dlgMode !== 'ai' && S.dlgMode !== 'req') || dlgBack.hidden) return;
-    var a = aiOf(findTodo(S.aiPanel));
+    var a = aiView(findTodo(S.aiPanel));
     if (!aiOn()) { closeMsg(); return }
     if (S.dlgMode === 'req') return;
     if (!a) { closeMsg(); return }
@@ -2999,7 +3065,8 @@ html.ai-fold { --aibar-h: 41px }
   function aiAction(kind) {
     var td = findTodo(S.aiPanel), a = aiOf(td); if (!a) return;
     if (isCode(a)) return codeAction(kind, td, a);
-    if (kind === 'apply' || kind === 'apply-ok' || kind === 'apply-force' || kind === 'apply-no') return applyAct(kind, td, a);
+    if (kind === 'draft-apply') return draftJira(td);
+    if (kind === 'apply' || kind === 'apply-ok' || kind === 'apply-force' || kind === 'apply-no') return applyAct(kind, td, aiView(td));
     var now = localIso(), next, verb;
     if (kind === 'accept' && inReview(a)) {
       next = Object.assign({}, a, { status: 'accepted', updatedBy: 'page' }); verb = 'snAiAccept';
@@ -3021,7 +3088,7 @@ html.ai-fold { --aibar-h: 41px }
     if (!isApply(a) || !inReview(a)) return;
     var id = td.id, after = norm(curAfter(a)), f = applyField(a);
     function show(st, sel) { S.aiApply = Object.assign({ id: id }, st); if (panelOpen(id)) renderAiPanel(sel) }
-    if (kind === 'apply-no') { S.aiApply = null; return renderAiPanel('[data-ai-act="apply"]') }
+    if (kind === 'apply-no') { var dr = draftOn(td); S.aiApply = null; if (dr) { S.aiDraft = null; S.aiLive = null } return renderAiPanel(dr ? '[data-ai-act="draft-apply"]' : '[data-ai-act="apply"]') }
     if (applyBlocked(td, a)) return renderAiPanel();
     if (!after) return show({ step: 'err', err: t('aiAfterEmpty') }, '#aiAfter');
     if (f === 'storyPoints' && !/^\d{1,3}(\.\d)?$/.test(after)) return show({ step: 'err', err: t('aiSpNum') }, '#aiAfter');
@@ -3037,7 +3104,7 @@ html.ai-fold { --aibar-h: 41px }
         S.aiLive = { id: id, cur: c.cur, html: c.html, unknown: c.unknown };
         if (c.html) return show({ step: 'media' });
         if (!force && (c.unknown || norm(c.cur) !== norm(a.result.proposed.before))) return show({ step: 'drift', cur: c.cur, unknown: !!c.unknown }, '[data-ai-act="apply-force"]');
-        return mcp.callTool('Atlassian', 'editJiraIssue', jiraEditIn(a, td, after)).then(function () { finishApply(td, aiOf(findTodo(id)) || a, after) }, function (e) { applyFail(id, e, true) });
+        return mcp.callTool('Atlassian', 'editJiraIssue', jiraEditIn(a, td, after)).then(function () { finishApply(td, aiView(findTodo(id)) || a, after) }, function (e) { applyFail(id, e, true) });
       }, function (e) { applyFail(id, e, false) });
     });
   }
@@ -3055,12 +3122,12 @@ html.ai-fold { --aibar-h: 41px }
   function finishApply(td, a, after) {
     var res = Object.assign({}, a.result, { proposed: Object.assign({}, a.result.proposed, { after: after }), appliedUrl: jiraBrowse(a, td) });
     var next = Object.assign({}, a, { status: 'applied', appliedAt: localIso(), updatedBy: 'page', result: res });
-    S.aiApply = null; if (S.aiForm) S.aiForm.after = null;
+    S.aiApply = null; S.aiDraft = null; if (S.aiForm) S.aiForm.after = null;
     write(td, { ai: next }, { kind: 'ai', verb: t('snAiApplied', applyKey(a, td)), title: td.title, noUndo: true });
     if (panelOpen(td.id)) renderAiPanel('.dlg-x');
   }
   function copyAi() {
-    var a = aiOf(findTodo(S.aiPanel)), txt = !a ? '' : isApply(a) ? (inReview(a) ? curAfter(a) : String(a.result.proposed.after || '')) : a.result && a.result.text ? String(a.result.text).slice(0, 2000) : ''; if (!txt) return;
+    var a = aiView(findTodo(S.aiPanel)), txt = !a ? '' : isApply(a) ? (inReview(a) ? curAfter(a) : String(a.result.proposed.after || '')) : a.result && a.result.text ? String(a.result.text).slice(0, 2000) : ''; if (!txt) return;
     function say(k) { S.lastCopy = k; var live = dlg.querySelector && dlg.querySelector('.ai-copied'); if (live) live.textContent = t(k) }
     function fallback() {
       try {

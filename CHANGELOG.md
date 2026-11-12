@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.5.2
+
+- **Write a Jira draft from the page.** A `jira_description` or `jira_ac` result requested as a draft (no proposal) now has a **Write to Jira** / **Ghi lên Jira** button for the owner, on a task with a Jira key. It reads the current description first (same read-only `getJiraIssue` call as the apply flow), builds the proposal (`jira_ac`: current description plus an `## Acceptance criteria` section, replacing an old one), then shows the same before/after confirm, which says when the current description will be replaced. After the click the page re-reads, checks for edits, writes the one field with your Atlassian connector and marks it `applied`. Descriptions with images or rich formatting stay copy-only. `jira_estimate` drafts are unchanged.
+- The draft's accept button is now **I'll copy it myself** / **Tôi tự copy** (it never wrote anything; it only marks the draft as used).
+- Used AI results stay reachable: the card keeps a clickable "✓ AI result used" chip that reopens the result read-only (text, Copy, sources). Cancelled requests stay non-clickable.
+
 ## 1.5.1
 
 - Scheduled digest no longer stops on a permission prompt for its own node/python/date commands. `daily-digest-todo` and `ai-worker` pre-approve them with `allowed-tools` (plus read-only `gh pr view` / `glab mr view` for the digest's MR check, `ArtifactData` and `PushNotification`), and both skills now run every shell command as one plain command with the absolute path written out (no variables, no `;` / `&&` / `|` chaining), so the pre-approval matches.
