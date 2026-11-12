@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.5.1
+
+- Scheduled digest no longer stops on a permission prompt for its own node/python/date commands. `daily-digest-todo` and `ai-worker` pre-approve them with `allowed-tools` (plus read-only `gh pr view` / `glab mr view` for the digest's MR check, `ArtifactData` and `PushNotification`), and both skills now run every shell command as one plain command with the absolute path written out (no variables, no `;` / `&&` / `|` chaining), so the pre-approval matches.
+
 ## 1.5.0
 
 **Jira boards and the Jira check.**

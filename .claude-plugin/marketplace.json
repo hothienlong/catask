@@ -11,7 +11,7 @@
       "name": "catask",
       "source": "./",
       "description": "catask (cat + task + ask) — Nothing slips through. / Không sót việc nào. Evening digest of your Microsoft Teams chats and Outlook mail/calendar: every ask, unanswered question and promise you made becomes a prioritized TODO list on a private Artifact page, with optional AI drafts and AI code tasks. Writes in Vietnamese or English.",
-      "version": "1.5.0",
+      "version": "1.5.1",
       "author": {
         "name": "Hồ Thiên Long"
       },
