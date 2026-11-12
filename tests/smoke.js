@@ -320,8 +320,8 @@ function aiApplyDemoTests(){
 /* ---- owner: page applies via the viewer's Atlassian connector (mcp) ---- */
 async function aiMcpAsync(){
   const J=__jira; let en=document.documentElement.lang==='en';
-  const base={id:'J',title:'TASK_J_jira',kind:'ask',from:'Jay (PM)',tier:'week',priority:'P2',source:'jira',url:'https://veepme.atlassian.net/browse/SF-3101',ref:{source:'jira',issueKey:'SF-3101'},status:'open',firstSeen:TODAY,plannedFor:add(1)};
-  const mkAi=(o)=>Object.assign({status:'needs_review',kind:'jira_description',instruction:'',note:'',context:'',mode:'apply',target:{system:'jira',issueKey:'SF-3101',field:'description',cloudId:'veepme.atlassian.net'},requestedAt:TODAY+'T10:00:00+07:00',steps:[],attempt:1,updatedBy:'worker',
+  const base={id:'J',title:'TASK_J_jira',kind:'ask',from:'Jay (PM)',tier:'week',priority:'P2',source:'jira',url:'https://example.atlassian.net/browse/SF-3101',ref:{source:'jira',issueKey:'SF-3101'},status:'open',firstSeen:TODAY,plannedFor:add(1)};
+  const mkAi=(o)=>Object.assign({status:'needs_review',kind:'jira_description',instruction:'',note:'',context:'',mode:'apply',target:{system:'jira',issueKey:'SF-3101',field:'description',cloudId:'example.atlassian.net'},requestedAt:TODAY+'T10:00:00+07:00',steps:[],attempt:1,updatedBy:'worker',
     result:{text:'note',proposed:{field:'description',before:'',after:'NEW DESC'}}},o||{});
   let Jt=S.allTodos.find(x=>x.id==='J'); if(!Jt){ Jt=JSON.parse(JSON.stringify(base)); S.allTodos.push(Jt); ownerTodos.push(Jt) }
   const reset=(o,mcp)=>{ Jt.ai=mkAi(o); S.mcpP=null; S.mcp=undefined; S.mcpBlocked=null; globalThis.__mcp=mcp===undefined?mcpMock:mcp; __calls.length=0; Object.assign(J,{desc:'',html:false,sp:null,editErr:null,readErr:null}); escD() };
@@ -332,15 +332,15 @@ async function aiMcpAsync(){
   // b) success
   reset(); d=await open();
   const peek=__calls[0];
-  ok(peek&&peek.srv==='Atlassian'&&peek.tool==='getJiraIssue'&&JSON.stringify(peek.inp)===JSON.stringify({cloudId:'veepme.atlassian.net',issueIdOrKey:'SF-3101',responseContentFormat:'markdown',view:'compact'})&&peek.opt&&peek.opt.cache===false,'review time: getJiraIssue read (fresh, compact markdown)');
+  ok(peek&&peek.srv==='Atlassian'&&peek.tool==='getJiraIssue'&&JSON.stringify(peek.inp)===JSON.stringify({cloudId:'example.atlassian.net',issueIdOrKey:'SF-3101',responseContentFormat:'markdown',view:'compact'})&&peek.opt&&peek.opt.cache===false,'review time: getJiraIssue read (fresh, compact markdown)');
   ok(/data-ai-act="apply"/.test(d),'mcp ok: apply button');
   dinA('data-ai-after','EDITED DESC'); dclick('data-ai-act','apply'); ok(__calls.length===1,'first click only shows the confirm (no call)');
   const n0=updates.length; dclick('data-ai-act','apply-ok'); await wait(30);
   const ed=__calls.filter(c=>c.tool==='editJiraIssue');
   ok(__calls[1]&&__calls[1].tool==='getJiraIssue','re-read right before applying');
-  ok(ed.length===1&&JSON.stringify(ed[0].inp)===JSON.stringify({cloudId:'veepme.atlassian.net',issueIdOrKey:'SF-3101',fields:{description:'EDITED DESC'},contentFormat:'markdown'}),'editJiraIssue gets only the description '+JSON.stringify(ed[0]&&ed[0].inp));
+  ok(ed.length===1&&JSON.stringify(ed[0].inp)===JSON.stringify({cloudId:'example.atlassian.net',issueIdOrKey:'SF-3101',fields:{description:'EDITED DESC'},contentFormat:'markdown'}),'editJiraIssue gets only the description '+JSON.stringify(ed[0]&&ed[0].inp));
   const w=updates.slice(n0).filter(x=>x[0]==='todos/J'); const wa=w.length&&w[w.length-1][1].ai;
-  ok(wa&&wa.status==='applied'&&wa.appliedAt&&wa.result.appliedUrl==='https://veepme.atlassian.net/browse/SF-3101'&&wa.result.proposed.after==='EDITED DESC'&&wa.updatedBy==='page','db: ai applied + appliedAt + appliedUrl + edited after');
+  ok(wa&&wa.status==='applied'&&wa.appliedAt&&wa.result.appliedUrl==='https://example.atlassian.net/browse/SF-3101'&&wa.result.proposed.after==='EDITED DESC'&&wa.updatedBy==='page','db: ai applied + appliedAt + appliedUrl + edited after');
   ok(!/data-undo/.test(els.snack.innerHTML),'owner apply: no Undo');
   ok(/class="ai-ok"/.test(D().innerHTML)&&/class="ai-chip ai-applied"/.test(D().innerHTML),'panel switches to applied');
   // c) tool_error
@@ -361,12 +361,12 @@ async function aiMcpAsync(){
   reset({result:{text:'n',proposed:{field:'description',before:'x',after:'y',beforeMedia:true}}}); d=await open();
   ok(!/data-ai-act="apply"/.test(d)&&__calls.length===0,'beforeMedia from worker: no apply, no read');
   // f) story points
-  reset({kind:'jira_estimate',target:{system:'jira',issueKey:'SF-3101',field:'storyPoints',cloudId:'veepme.atlassian.net'},result:{text:'why',proposed:{field:'storyPoints',before:'',after:'8'}}}); d=await open();
+  reset({kind:'jira_estimate',target:{system:'jira',issueKey:'SF-3101',field:'storyPoints',cloudId:'example.atlassian.net'},result:{text:'why',proposed:{field:'storyPoints',before:'',after:'8'}}}); d=await open();
   ok(__calls[0]&&__calls[0].inp.view==='evidence','story points read uses evidence view');
   dclick('data-ai-act','apply'); ok(D().innerHTML.includes(en?'Set the story points of SF-3101 to 8?':'Đặt story point của SF-3101 thành 8?'),'story points confirm text');
   dclick('data-ai-act','apply-ok'); await wait(30);
   const es=__calls.filter(c=>c.tool==='editJiraIssue')[0];
-  ok(es&&JSON.stringify(es.inp)===JSON.stringify({cloudId:'veepme.atlassian.net',issueIdOrKey:'SF-3101',additional_fields:{'Story Points':8}}),'editJiraIssue gets only Story Points '+JSON.stringify(es&&es.inp));
+  ok(es&&JSON.stringify(es.inp)===JSON.stringify({cloudId:'example.atlassian.net',issueIdOrKey:'SF-3101',additional_fields:{'Story Points':8}}),'editJiraIssue gets only Story Points '+JSON.stringify(es&&es.inp));
   // g) not_granted on read
   reset(); J.readErr={code:'not_granted',message:'x'}; d=await open();
   ok(S.mcpBlocked==='not_granted'&&!/data-ai-act="apply"/.test(d)&&d.includes(en?'Connect Atlassian on claude.ai':'Kết nối Atlassian trên claude.ai'),'not_granted: apply hidden, connect hint');
@@ -381,13 +381,13 @@ async function aiMcpAsync(){
   reset(dft()); J.desc='OLD DESC'; d=await open();
   ok(/data-ai-act="draft-apply"/.test(d)&&__calls.length===0,'owner draft: Write to Jira shown, no read on open');
   dclick('data-ai-act','draft-apply'); await wait(30); d=D().innerHTML;
-  ok(__calls.length===1&&__calls[0].tool==='getJiraIssue'&&JSON.stringify(__calls[0].inp)===JSON.stringify({cloudId:'veepme.atlassian.net',issueIdOrKey:'SF-3101',responseContentFormat:'markdown',view:'compact'})&&__calls[0].opt.cache===false,'draft: fresh getJiraIssue read like the apply flow');
+  ok(__calls.length===1&&__calls[0].tool==='getJiraIssue'&&JSON.stringify(__calls[0].inp)===JSON.stringify({cloudId:'example.atlassian.net',issueIdOrKey:'SF-3101',responseContentFormat:'markdown',view:'compact'})&&__calls[0].opt.cache===false,'draft: fresh getJiraIssue read like the apply flow');
   ok(/class="ai-confirm"/.test(d)&&d.includes('OLD DESC')&&d.includes(en?'will be fully replaced':'sẽ bị thay hoàn toàn')&&/data-ai-act="apply-ok"/.test(d),'draft confirm: shows current description + replace warning');
   const nd=updates.length; dclick('data-ai-act','apply-ok'); await wait(30);
   const ed2=__calls.filter(c=>c.tool==='editJiraIssue');
-  ok(__calls[1]&&__calls[1].tool==='getJiraIssue'&&ed2.length===1&&JSON.stringify(ed2[0].inp)===JSON.stringify({cloudId:'veepme.atlassian.net',issueIdOrKey:'SF-3101',fields:{description:'DRAFT DESC'},contentFormat:'markdown'}),'draft: re-read then editJiraIssue description only');
+  ok(__calls[1]&&__calls[1].tool==='getJiraIssue'&&ed2.length===1&&JSON.stringify(ed2[0].inp)===JSON.stringify({cloudId:'example.atlassian.net',issueIdOrKey:'SF-3101',fields:{description:'DRAFT DESC'},contentFormat:'markdown'}),'draft: re-read then editJiraIssue description only');
   const wd=updates.slice(nd).filter(x=>x[0]==='todos/J'); const wda=wd.length&&wd[wd.length-1][1].ai;
-  ok(wda&&wda.status==='applied'&&wda.appliedAt&&wda.result.appliedUrl==='https://veepme.atlassian.net/browse/SF-3101'&&wda.result.proposed.before==='OLD DESC'&&wda.result.proposed.after==='DRAFT DESC'&&wda.updatedBy==='page','draft: db ai applied + proposal recorded');
+  ok(wda&&wda.status==='applied'&&wda.appliedAt&&wda.result.appliedUrl==='https://example.atlassian.net/browse/SF-3101'&&wda.result.proposed.before==='OLD DESC'&&wda.result.proposed.after==='DRAFT DESC'&&wda.updatedBy==='page','draft: db ai applied + proposal recorded');
   ok(/class="ai-ok"/.test(D().innerHTML),'draft: panel switches to applied');
   // k) jira_ac draft merges into the current description, replacing the old AC section
   reset(dft({kind:'jira_ac',result:{text:'## Acceptance criteria\n- new one\n- new two'}})); J.desc='## Context\nx\n\n## Acceptance criteria\n- old\n\n## Notes\ny'; d=await open();
