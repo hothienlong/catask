@@ -8,7 +8,7 @@
    - `claude plugin marketplace add hothienlong/catask`
    - `claude plugin install catask@catask`
    - If the user's organization has catask in its claude.ai plugin library, use `claude plugin install catask@claudeai-organization-library` instead (it then updates by itself).
-2. Run `/catask:setup` (setup interview, digest schedule, optional auto-update; no digest yet). If the new commands don't load in the current session, ask the user to open a new session and type `/catask:setup`.
+2. Run `/catask:setup` (setup interview, digest schedule, optional auto-update; no digest yet). Newly installed plugins only load in the next session: if `/catask:setup` isn't available yet, find the installed file with `find ~/.claude/plugins -path '*catask*/commands/setup.md' -not -path '*/.trash/*'` (newest version), read it and follow it in the current session instead of asking the user to restart.
 3. The first digest runs at the scheduled time, or the user can say "evening digest" / "bản tin tối" to run one now. The first run publishes the user's private catask page and gives its link.
 
 ## Requirements

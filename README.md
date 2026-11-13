@@ -17,7 +17,7 @@ English · [Tiếng Việt](README.vi.md)
 Copy this into Claude Code (or the Code tab of the Claude desktop app):
 
 ```text
-Install the catask plugin for me: run `claude plugin marketplace add hothienlong/catask`, then `claude plugin install catask@catask` (if my organization has catask in its plugin library, use `claude plugin install catask@claudeai-organization-library` instead). Then run /catask:setup to set it up. If the new commands don't load in this session, tell me to open a new session and type /catask:setup.
+Install the catask plugin for me: run `claude plugin marketplace add hothienlong/catask`, then `claude plugin install catask@catask` (if my organization has catask in its plugin library, use `claude plugin install catask@claudeai-organization-library` instead). Then set it up right away: run /catask:setup. If that command isn't available yet in this session (new plugins load in the next session), find the installed setup file with `find ~/.claude/plugins -path '*catask*/commands/setup.md' -not -path '*/.trash/*'` (pick the newest version), read it and follow it now in this session. Don't ask me to open a new session for setup.
 ```
 
 ![catask — Today board (demo data)](docs/screenshots/hom-nay.png)
