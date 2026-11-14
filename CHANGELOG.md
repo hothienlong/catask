@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.7.0
+
+- **Watch mode for quiet chats** (canh gác). A middle tier between reading a chat fully and skipping it: `watchChats` are skimmed by a cheap model (`watchModel`, default `"haiku"`) that keeps only alarms in the window — @mentions, senders outside your organization, incident/urgent words (vi + en), open questions or decisions about your areas. When unsure it includes the message. Watch candidates carry `"via": "watch"` and are judged like any other.
+- **Cold chats** (`coldChatPolicy`, default `"watch"`; `coldAfterDays`, default 30): chats you haven't posted in for that long are watched (or skipped / read fully, per the policy). Judged from the fetched messages (kept per chat in `~/.catask/chat-activity.json`, no content); unknown = read fully. Order: key chats → excluded → watched → cold → full.
+- **Onboarding**: the skip-chats question now pre-suggests social/bonding chats by name and very large broadcast chats (up to 3 questions of 4), plus a role-aware question on quiet chats (watch recommended).
+- **Coverage**: one line with the full / watched / skipped chat counts.
+- **⚙ Settings**: *Watched chats* list (remove ✕), a cold-chat policy select and a days field, synced through `meta/settings`.
+- The page changed: after the update it is republished to the same URL; your link and data stay as they are.
+
 ## 1.6.0
 
 - **Cheaper chat reading** (`subagentModel`, default `"sonnet"`; also `"haiku"`, `"opus"`, `"inherit"` = same as the main run). The evening digest's Teams chat fan-out, the meeting-transcript read and the AI worker's chat read now spawn their subagents with the Agent tool's `model` parameter (omitted for `"inherit"` or when the parameter isn't available). These subagents only read and extract; todos, priority, dedupe, top 3 and done-detection stay on the main model. Sonnet keeps extraction quality at a fraction of the cost; Haiku is cheapest but may miss indirect asks. Older configs without the field use `"sonnet"` silently.

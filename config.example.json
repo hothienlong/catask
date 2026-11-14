@@ -25,6 +25,12 @@
   "excludeChats": [
     { "id": "19:example-social-chat@thread.v2", "topic": "Hội ăn trưa" }
   ],
+  "watchChats": [
+    { "id": "19:example-partner-chat@thread.v2", "topic": "Đối tác thanh toán" }
+  ],
+  "coldChatPolicy": "watch",
+  "coldAfterDays": 30,
+  "watchModel": "haiku",
   "vipPeople": [
     { "name": "Trần Thị B", "email": "truong.nhom@congty.com", "why": "Trưởng nhóm" }
   ],

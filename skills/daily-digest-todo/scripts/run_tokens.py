@@ -2,6 +2,7 @@
 """Token usage of recent digest runs, from Claude Code transcripts.
 
 Usage: python3 -I run_tokens.py [--days 14] [--title-prefix "Evening digest"] [--config PATH]
+                                [--include-ab] [--projects-dir DIR]
 
 Finds top-level sessions under ~/.claude/projects whose custom title starts with
 the prefix (default: either "Evening digest" or "Bản tin tối", the two task names
@@ -15,6 +16,10 @@ Each usage block is {"input", "cacheRead", "cacheWrite", "output"}.
 "equivInput" weights tokens by their relative price versus fresh input
 (cache read 0.1x, cache write 1.25x, output 5x) so runs can be compared.
 A run still in progress is reported with what it has logged so far ("partial": true).
+"kind" is "digest" for the real evening digest, "ab" for an A/B shadow run (title
+starting "catask A/B"; only listed with --include-ab, so the Cost tab never sees them).
+"byModel" = {"main": {model: usage}, "sub": {model: usage}}, from the per-call model.
+--projects-dir overrides ~/.claude/projects (tests).
 Dates/times use the timezone from ~/.catask/config.json (default Asia/Ho_Chi_Minh).
 """
 import json
@@ -63,6 +68,7 @@ def config_tz(cfg):
     except Exception:
         return timezone(timedelta(hours=float(cfg.get("utcOffsetHours", 7))))
 DEFAULT_PREFIXES = ("Evening digest", "Bản tin tối")
+AB_PREFIXES = ("catask A/B",)
 WEIGHTS = {"input": 1.0, "cacheRead": 0.1, "cacheWrite": 1.25, "output": 5.0}
 
 
@@ -77,7 +83,7 @@ def add_usage(acc, u):
     acc["output"] += u.get("output_tokens", 0) or 0
 
 
-def scan(path, acc, seen, meta, models=None):
+def scan(path, acc, seen, meta, models=None, by_model=None):
     with path.open(encoding="utf-8", errors="replace") as fh:
         for line in fh:
             if '"type"' not in line:
@@ -108,6 +114,60 @@ def scan(path, acc, seen, meta, models=None):
             if meta_calls is not None:
                 meta["calls"] = meta.get("calls", 0) + 1
             add_usage(acc, u)
+            if by_model is not None:
+                add_usage(by_model.setdefault(msg.get("model") or "unknown", empty()), u)
+
+
+def classify(title):
+    """'ab' for an A/B shadow run, 'digest' for a real one, None otherwise."""
+    title = title or ""
+    if title.startswith(AB_PREFIXES):
+        return "ab"
+    if title.startswith(DEFAULT_PREFIXES):
+        return "digest"
+    return None
+
+
+def collect_runs(tz, days=14, prefixes=DEFAULT_PREFIXES, root=None):
+    """Runs whose session title starts with one of `prefixes`, newest first."""
+    root = Path(root).expanduser() if root else ROOT
+    prefixes = tuple(prefixes)
+    cutoff = time.time() - days * 86400
+    runs = []
+    for path in root.glob("*/*.jsonl"):
+        try:
+            if path.stat().st_mtime < cutoff:
+                continue
+            head = path.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            continue
+        if not any('"customTitle":"' + p in head or '"customTitle": "' + p in head for p in prefixes):
+            continue
+        meta, main_acc, seen, main_models = {}, empty(), set(), {}
+        scan(path, main_acc, seen, meta, by_model=main_models)
+        if not meta.get("title", "").startswith(prefixes) or "first" not in meta:
+            continue
+        sub_acc, sub_files, sub_models, sub_by_model = empty(), sorted((path.parent / path.stem / "subagents").glob("*.jsonl")), {}, {}
+        for sf in sub_files:
+            scan(sf, sub_acc, seen, None, sub_models, sub_by_model)
+        total = {k: main_acc[k] + sub_acc[k] for k in main_acc}
+        first = datetime.fromisoformat(meta["first"].replace("Z", "+00:00")).astimezone(tz)
+        last = datetime.fromisoformat(meta["last"].replace("Z", "+00:00")).astimezone(tz)
+        runs.append({
+            "runId": path.stem, "title": meta.get("title", ""), "kind": classify(meta.get("title")),
+            "date": first.strftime("%Y-%m-%d"),
+            "start": first.strftime("%H:%M"), "end": last.strftime("%H:%M"),
+            "startIso": first.isoformat(), "endIso": last.isoformat(),
+            "minutes": max(1, round((last - first).total_seconds() / 60)),
+            "model": meta.get("model", ""), "calls": meta.get("calls", 0), "subagents": len(sub_files),
+            "subagentModels": sub_models,
+            "main": main_acc, "sub": sub_acc, "total": total,
+            "byModel": {"main": main_models, "sub": sub_by_model},
+            "equivInput": round(sum(total[k] * WEIGHTS[k] for k in total)),
+            "partial": time.time() - path.stat().st_mtime < 120,
+        })
+    runs.sort(key=lambda r: (r["date"], r["start"]), reverse=True)
+    return runs
 
 
 def main(argv):
@@ -117,40 +177,10 @@ def main(argv):
     tz = config_tz(load_config(argv))
     days = int(argv[argv.index("--days") + 1]) if "--days" in argv else 14
     prefixes = [argv[argv.index("--title-prefix") + 1]] if "--title-prefix" in argv else list(DEFAULT_PREFIXES)
-    cutoff = time.time() - days * 86400
-    runs = []
-    for path in ROOT.glob("*/*.jsonl"):
-        try:
-            if path.stat().st_mtime < cutoff:
-                continue
-            head = path.read_text(encoding="utf-8", errors="replace")
-        except OSError:
-            continue
-        if not any('"customTitle":"' + p in head or '"customTitle": "' + p in head for p in prefixes):
-            continue
-        meta, main_acc, seen = {}, empty(), set()
-        scan(path, main_acc, seen, meta)
-        if not meta.get("title", "").startswith(tuple(prefixes)) or "first" not in meta:
-            continue
-        sub_acc, sub_files, sub_models = empty(), sorted((path.parent / path.stem / "subagents").glob("*.jsonl")), {}
-        for sf in sub_files:
-            scan(sf, sub_acc, seen, None, sub_models)
-        total = {k: main_acc[k] + sub_acc[k] for k in main_acc}
-        first = datetime.fromisoformat(meta["first"].replace("Z", "+00:00")).astimezone(tz)
-        last = datetime.fromisoformat(meta["last"].replace("Z", "+00:00")).astimezone(tz)
-        runs.append({
-            "runId": path.stem, "date": first.strftime("%Y-%m-%d"),
-            "start": first.strftime("%H:%M"), "end": last.strftime("%H:%M"),
-            "minutes": max(1, round((last - first).total_seconds() / 60)),
-            "model": meta.get("model", ""), "calls": meta.get("calls", 0), "subagents": len(sub_files),
-            "subagentModels": sub_models,
-            "main": main_acc, "sub": sub_acc, "total": total,
-            "equivInput": round(sum(total[k] * WEIGHTS[k] for k in total)),
-            "partial": time.time() - path.stat().st_mtime < 120,
-        })
-    runs.sort(key=lambda r: (r["date"], r["start"]), reverse=True)
-    print(json.dumps(runs, ensure_ascii=False, indent=1))
-
+    if "--include-ab" in argv:
+        prefixes += list(AB_PREFIXES)
+    root = argv[argv.index("--projects-dir") + 1] if "--projects-dir" in argv else None
+    print(json.dumps(collect_runs(tz, days, prefixes, root), ensure_ascii=False, indent=1))
 
 if __name__ == "__main__":
     main(sys.argv[1:])

@@ -50,7 +50,7 @@ if (owner) window.claude={use:(k)=>Promise.resolve(k==='user'?{isOwner:()=>true}
   doc:(path)=>({onSnapshot:(cb)=>{const fire=()=>cb(path==='meta/settings'?{exists:!!settingsDoc,data:()=>JSON.parse(JSON.stringify(settingsDoc))}:{exists:true,data:()=>({displayName:'Test User',language:navLang,projects:[{id:'work',label:''}],signals:false})});snapByPath[path]=fire;snapCbs.push(fire)},
     update:(p)=>{updates.push([path,JSON.parse(JSON.stringify(p)),'update']);const o=ownerTodos.find(x=>'todos/'+x.id===path);if(o)Object.assign(o,JSON.parse(JSON.stringify(p)));return Promise.resolve()},
     set:(p)=>{updates.push([path,JSON.parse(JSON.stringify(p)),'set']);if(path==='meta/settings')settingsDoc=JSON.parse(JSON.stringify(p));return Promise.resolve()}})})};
-if (owner) settingsDoc={language:navLang,signals:false,storeQuotes:true,channels:['teamsChats','teamsChannelMentions','outlookMail','jiraMail','calendar'],workHours:{start:'09:00',end:'18:00',days:[1,2,3,4,5]},vipPeople:[{name:'Boss One',why:'lead'}],keyChats:[{id:'19:x@thread.v2',topic:'Mobile chat'}],excludeChats:[{id:'19:fun@thread.v2',topic:'Fun chat'}],keywords:['SF-'],role:'Engineer',currentWork:'lending',timezone:'Asia/Ho_Chi_Minh',updatedAt:'2026-11-08T10:00:00.000Z',updatedBy:'skill'};
+if (owner) settingsDoc={language:navLang,signals:false,storeQuotes:true,channels:['teamsChats','teamsChannelMentions','outlookMail','jiraMail','calendar'],workHours:{start:'09:00',end:'18:00',days:[1,2,3,4,5]},vipPeople:[{name:'Boss One',why:'lead'}],keyChats:[{id:'19:x@thread.v2',topic:'Mobile chat'}],excludeChats:[{id:'19:fun@thread.v2',topic:'Fun chat'}],watchChats:[{id:'19:quiet@thread.v2',topic:'Quiet chat'},'Partner room'],coldChatPolicy:'skip',coldAfterDays:45,keywords:['SF-'],role:'Engineer',currentWork:'lending',timezone:'Asia/Ho_Chi_Minh',updatedAt:'2026-11-08T10:00:00.000Z',updatedBy:'skill'};
 global.localStorage={getItem:()=>null,setItem(){}}; global.CSS={escape:s=>s};
 Object.defineProperty(globalThis,'navigator',{value:{language:navLang},configurable:true,writable:true});
 global.getComputedStyle=()=>({getPropertyValue:()=>''});
@@ -525,6 +525,13 @@ function demoSettingsUndo(){
   const nChat=S.setDraft.keyChats.length; pclick('data-set-rm','chat',{'data-i':0}); ok(S.setDraft.keyChats.length===nChat-1,'remove key chat');
   ok(S.setDraft.excludeChats.length===1&&/data-set-rm="xchat"/.test(P().innerHTML)&&/id="sh-xchat"/.test(P().innerHTML),'skipped chats listed with remove');
   pclick('data-set-rm','xchat',{'data-i':0}); ok(S.setDraft.excludeChats.length===0,'remove skipped chat');
+  { const wh=P().innerHTML; ok(S.setDraft.watchChats.length===1&&/id="sh-wchat"/.test(wh)&&/data-set-rm="wchat"/.test(wh)&&/Watched chats|Chat canh gác/.test(wh),'watched chats listed with remove');
+    ok(/data-set-cp/.test(wh)&&/<option value="watch" selected>/.test(wh)&&/data-set-cd[^>]*value="30"/.test(wh),'cold policy select + days shown (defaults watch / 30)') }
+  pclick('data-set-rm','wchat',{'data-i':0}); ok(S.setDraft.watchChats.length===0,'remove watched chat');
+  pchange('data-set-cp','',{value:'bogus'}); ok(S.setDraft.coldChatPolicy==='watch','coldChatPolicy: unknown value -> watch');
+  pchange('data-set-cp','',{value:'full'}); ok(S.setDraft.coldChatPolicy==='full','coldChatPolicy: select full');
+  pchange('data-set-cd','',{value:'0'}); ok(S.setDraft.coldAfterDays===30,'coldAfterDays: out of range -> 30');
+  pchange('data-set-cd','',{value:'14'}); ok(S.setDraft.coldAfterDays===14,'coldAfterDays: set 14');
   pclick('data-set-rm','kw',{'data-i':0}); ok(!S.setDraft.keywords.some(k=>k==='MOB-'),'remove keyword chip');
   /* Jira boards: switch, tick on/off, add (uppercased, trailing dash dropped), dedupe, bad key, remove */
   ok(/id="sh-jira"/.test(P().innerHTML)&&/data-set-tg="jiraCheck" checked/.test(P().innerHTML)&&/data-set-jp-on="0"[^>]* checked/.test(P().innerHTML)&&!/data-set-jp-on="1"[^>]* checked/.test(P().innerHTML),'jira section: switch on, MOB on, PAY off');
@@ -603,7 +610,7 @@ function ownerSettingsUndo(){
     pclick('data-set-lang',other); ok(btnLabel()===(other==='en'?'⚙ Settings':'⚙ Cài đặt'),'owner: language preview applies immediately');
     pclick('data-set-save'); await wait(30);
     const w=updates.filter(x=>x[0]==='meta/settings'&&x[2]==='set').pop();
-    ok(w&&w[1].updatedBy==='page'&&/^\d{4}-\d\d-\d\dT/.test(w[1].updatedAt)&&w[1].language===other&&w[1].workHours.end==='18:30'&&w[1].channels.length===5&&w[1].vipPeople[0].name==='Boss One'&&w[1].keyChats[0].id==='19:x@thread.v2'&&w[1].excludeChats[0].id==='19:fun@thread.v2'&&w[1].timezone==='Asia/Ho_Chi_Minh'&&!('email' in w[1])&&!('displayName' in w[1])&&w[1].storeQuotes===true&&w[1].signals===false&&w[1].role==='Engineer'&&w[1].currentWork==='lending','owner save writes meta/settings '+JSON.stringify(w&&w[1]));
+    ok(w&&w[1].updatedBy==='page'&&/^\d{4}-\d\d-\d\dT/.test(w[1].updatedAt)&&w[1].language===other&&w[1].workHours.end==='18:30'&&w[1].channels.length===5&&w[1].vipPeople[0].name==='Boss One'&&w[1].keyChats[0].id==='19:x@thread.v2'&&w[1].excludeChats[0].id==='19:fun@thread.v2'&&w[1].watchChats[0].id==='19:quiet@thread.v2'&&w[1].watchChats[1]==='Partner room'&&w[1].coldChatPolicy==='skip'&&w[1].coldAfterDays===45&&w[1].timezone==='Asia/Ho_Chi_Minh'&&!('email' in w[1])&&!('displayName' in w[1])&&w[1].storeQuotes===true&&w[1].signals===false&&w[1].role==='Engineer'&&w[1].currentWork==='lending','owner save writes meta/settings '+JSON.stringify(w&&w[1]));
     const pw=updates.filter(x=>x[0]==='meta/profile').pop(); ok(pw&&pw[1].language===other&&pw[2]==='update','owner: language change also updates meta/profile.language');
     ok(!S.setOpen&&els.status.textContent.startsWith(other==='en'?'Saved. Takes effect from the next digest.':'Đã lưu. Áp dụng từ bản tin tới.'),'owner: saved toast, drawer closed');
     settingsDoc=Object.assign({},settingsDoc,{keywords:['SF-','LATER-'],updatedBy:'skill'}); snapByPath['meta/settings']();
@@ -613,6 +620,7 @@ function ownerSettingsUndo(){
     ok(S.settings.keyChats.length===3&&S.settings.keyChats[0]==='Mobile squad'&&S.settings.keyChats[1]==='Named only'&&S.settings.keyChats[2].id==='19:y@thread.v2'&&S.settings.excludeChats[0]==='19:zz@thread.v2'&&S.settings.excludeChats[1]==='Lunch <crew>','owner: string chat entries tolerated '+JSON.stringify(S.settings.keyChats));
     openSet(); const sh=P().innerHTML;
     ok(S.settings.subagentModel==='inherit'&&/<option value="inherit" selected>/.test(sh),'owner: inherit subagentModel kept and shown');
+    ok(sh.includes('Quiet chat')&&sh.includes('Partner room')&&/data-set-rm="wchat"/.test(sh)&&/<option value="skip" selected>/.test(sh)&&/data-set-cd[^>]*value="45"/.test(sh),'owner: watched chats + cold policy shown from meta/settings');
     ok(sh.includes('Mobile squad')&&sh.includes('Named only')&&sh.includes('Y chat')&&sh.includes('19:zz@thread.v2')&&sh.includes('Lunch &lt;crew&gt;')&&!sh.includes('Lunch <crew>'),'owner: string chat entries shown (escaped) as labels');
     pclick('data-set-rm','xchat',{'data-i':1}); ok(S.setDraft.excludeChats.length===1&&S.setDraft.excludeChats[0]==='19:zz@thread.v2','owner: remove string skipped chat');
     pclick('data-set-save'); await wait(30);
