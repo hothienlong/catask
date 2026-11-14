@@ -885,6 +885,8 @@ html.ai-fold { --aibar-h: 41px }
       secChat: 'Chat theo dõi', chatEmpty: 'Chưa có chat nào.', chatHint: 'Thêm chat bằng cách gõ "cập nhật hồ sơ" với Claude (trang không tự tìm được mã chat).',
       secXChat: 'Chat bỏ qua', xchatEmpty: 'Không bỏ qua chat nào.', xchatHint: 'Các chat này không bao giờ được đọc (vd nhóm tán gẫu, gắn kết). Chat vừa theo dõi vừa bỏ qua thì vẫn được đọc. Thêm chat bằng cách gõ "cập nhật hồ sơ" với Claude.',
       secKw: 'Từ khoá', kwLabel: 'Từ khoá mới', kwPh: 'VD: MOB-, tên dự án', kwEmpty: 'Chưa có từ khoá.', kwHint: 'Mã ticket, tên dự án, tên tính năng. Có thể gõ nhiều từ, cách nhau bằng dấu phẩy.',
+      secSm: 'Model đọc chat', smSonnet: 'Sonnet — khuyên dùng', smHaiku: 'Haiku — rẻ nhất, có thể bỏ sót', smOpus: 'Opus — đắt nhất', smInherit: 'Như phiên chính (inherit)',
+      smHint: 'Model cho các subagent đọc chat Teams trong bản tin tối. Việc đánh giá, ưu tiên và ghi todo luôn do model chính làm. Haiku có thể bỏ sót lời nhờ gián tiếp.',
       secJira: 'Bảng Jira', jiraCheck: 'Kiểm tra ticket Jira trong bản tin tối', jiraCheckHint: 'Chỉ đọc các ticket gắn với việc đang mở và đã đổi từ bản tin trước, bằng connector Atlassian của chính bạn. Không bao giờ ghi lên Jira.',
       jpKey: 'Mã dự án', jpName: 'Tên (không bắt buộc)', jpPh: 'VD: MOB', jpEmpty: 'Chưa có bảng nào. Bản tin tạm dùng tiền tố trong từ khoá (VD MOB-).',
       jpHint: 'Để nhận ra mã ticket trơn như MOB-123 trong chat và mail. Bỏ tick để tạm bỏ qua một bảng.', jpOn: 'Theo dõi {0}', errJpKey: 'Mã dự án gồm chữ in hoa và số, bắt đầu bằng chữ, ít nhất 2 ký tự (VD MOB).',
@@ -1141,6 +1143,8 @@ html.ai-fold { --aibar-h: 41px }
       secChat: 'Key chats', chatEmpty: 'No chats yet.', chatHint: 'Add a chat by saying "update my profile" to Claude (the page can’t look up chat ids).',
       secXChat: 'Skipped chats', xchatEmpty: 'No chats skipped.', xchatHint: 'These chats are never read (e.g. social or team-bonding groups). A chat that is also a key chat is still read. Add one by saying "update my profile" to Claude.',
       secKw: 'Keywords', kwLabel: 'New keyword', kwPh: 'e.g. MOB-, a project name', kwEmpty: 'No keywords yet.', kwHint: 'Ticket prefixes, project or feature names. Separate several with commas.',
+      secSm: 'Chat-reading model', smSonnet: 'Sonnet — recommended', smHaiku: 'Haiku — cheapest, may miss asks', smOpus: 'Opus — most expensive', smInherit: 'Same as the main run (inherit)',
+      smHint: 'Model for the subagents that read your Teams chats in the evening digest. Judging, prioritizing and writing todos always stay on the main model. Haiku may miss indirect asks.',
       secJira: 'Jira boards', jiraCheck: 'Check Jira tickets in the evening digest', jiraCheckHint: 'Reads only tickets linked to your open tasks that changed since the last digest, with your own Atlassian connector. Never writes to Jira.',
       jpKey: 'Project key', jpName: 'Name (optional)', jpPh: 'e.g. MOB', jpEmpty: 'No boards yet. Until then the digest uses the prefixes in your keywords (e.g. MOB-).',
       jpHint: 'Used to recognise bare ticket keys like MOB-123 in chats and mail. Untick a board to skip it for now.', jpOn: 'Watch {0}', errJpKey: 'A project key is capital letters and digits, starting with a letter, at least 2 long (e.g. MOB).',
@@ -2037,9 +2041,11 @@ html.ai-fold { --aibar-h: 41px }
         '<span class="track"><span class="fill" style="width:' + Math.max(2, Math.round(100 * v / max)) + '%"></span></span>' +
         '<span class="val">' + fmtTok(v) + (qd != null ? ' <span>· ' + esc(t('pctWeek', (qd >= 0 ? '+' : '') + qd)) + '</span>' : '') + '</span></div>';
     }).join('') + '</div>';
+    /* subagentModels ({model: calls}) from run_tokens.py; older runs don't have it. */
+    function subModels(r) { var m = r.subagentModels && typeof r.subagentModels === 'object' ? Object.keys(r.subagentModels) : []; return m.length ? ' <small>· ' + esc(m.map(function (k) { return k.replace('claude-', '') }).join(', ')) + '</small>' : '' }
     var rows = runs.map(function (r) {
       var x = r.total || {};
-      return '<tr><td>' + esc(dm(r.date) + ' ' + r.start) + (r.partial ? ' <span style="color:var(--soon)">' + esc(t('running')) + '</span>' : '') + '</td><td>' + (r.minutes || '') + '</td><td>' + esc(String(r.model || '').replace('claude-', '')) + '</td><td>' + (r.calls || 0) + '</td><td>' + (r.subagents || 0) + '</td>' +
+      return '<tr><td>' + esc(dm(r.date) + ' ' + r.start) + (r.partial ? ' <span style="color:var(--soon)">' + esc(t('running')) + '</span>' : '') + '</td><td>' + (r.minutes || '') + '</td><td>' + esc(String(r.model || '').replace('claude-', '')) + '</td><td>' + (r.calls || 0) + '</td><td>' + (r.subagents || 0) + subModels(r) + '</td>' +
         '<td>' + fmtTok(x.cacheRead) + '</td><td>' + fmtTok(x.cacheWrite) + '</td><td>' + fmtTok((x.input || 0)) + '</td><td>' + fmtTok(x.output) + '</td><td><b>' + fmtTok(r.equivInput) + '</b></td>' +
         '<td>' + (r.weeklyBefore != null ? r.weeklyBefore + '% → ' + (r.weeklyAfter != null ? r.weeklyAfter + '%' : '?') : '<span class="z">–</span>') + '</td></tr>';
     }).join('');
@@ -3200,13 +3206,16 @@ html.ai-fold { --aibar-h: 41px }
      the next digest run merges it into config.json. Identity, projects and limits stay in the config. */
   var CHANNELS = ['teamsChats', 'teamsChannelMentions', 'outlookMail', 'jiraMail', 'calendar'];
   var HM = /^([01]\d|2[0-3]):[0-5]\d$/;
+  /* subagentModel: the model of the chat-reading subagents (anything else → sonnet, the default). */
+  var SUBM = ['sonnet', 'haiku', 'opus', 'inherit'];
+  function cleanSubM(v) { return SUBM.indexOf(v) >= 0 ? v : 'sonnet' }
   var setBack = document.getElementById('setBack'), setPanel = document.getElementById('setPanel'), setBtn = document.getElementById('setBtn');
   setBack.hidden = true;
   function str(v, n) { return String(v == null ? '' : v).trim().slice(0, n) }
   function uniq(list, key) { var seen = {}; return list.filter(function (x) { var k = key(x).toLowerCase(); if (!k || seen[k]) return false; seen[k] = 1; return true }) }
   function defSettings() {
     return { language: PROFILE.language === 'en' || PROFILE.language === 'vi' ? PROFILE.language : LANG, signals: PROFILE.signals === true, aiAgent: PROFILE.aiAgent === true, storeQuotes: true, crossSessionDone: true,
-      channels: CHANNELS.slice(), workHours: { start: '09:00', end: '18:00', days: [1, 2, 3, 4, 5] }, vipPeople: [], keyChats: [], excludeChats: [], keywords: [], role: '', currentWork: '', devMode: false, aiRunMode: 'runner', repos: [], digestTime: null, jiraCheck: true, jiraProjects: [] };
+      channels: CHANNELS.slice(), workHours: { start: '09:00', end: '18:00', days: [1, 2, 3, 4, 5] }, vipPeople: [], keyChats: [], excludeChats: [], keywords: [], role: '', currentWork: '', devMode: false, aiRunMode: 'runner', repos: [], digestTime: null, jiraCheck: true, jiraProjects: [], subagentModel: 'sonnet' };
   }
   /* Jira boards: {key (project key, e.g. MOB), name, enabled}. Used by the digest to spot bare keys and to scope the Jira check. */
   var JPKEY = /^[A-Z][A-Z0-9]+$/;
@@ -3257,7 +3266,8 @@ html.ai-fold { --aibar-h: 41px }
       role: str(o.role, 80), currentWork: str(o.currentWork, 300),
       digestTime: HM.test(o.digestTime || '') ? o.digestTime : null,
       devMode: o.devMode === true, aiRunMode: o.aiRunMode === 'desktop' ? 'desktop' : 'runner', repos: cleanRepos(o.repos),
-      jiraCheck: o.jiraCheck !== false, jiraProjects: cleanJira(o.jiraProjects)
+      jiraCheck: o.jiraCheck !== false, jiraProjects: cleanJira(o.jiraProjects),
+      subagentModel: cleanSubM(o.subagentModel)
     };
   }
   /* A stored doc: editable fields plus who/when wrote it and the read-only time zone. */
@@ -3330,6 +3340,10 @@ html.ai-fold { --aibar-h: 41px }
     h += sec('kw', 'secKw', chipList(d.keywords.map(function (k) { return [k] }), 'kw', 'kwEmpty', ro) +
       (ro ? '' : '<div class="set-row"><label class="set-field">' + esc(t('kwLabel')) + '<input class="set-in" data-set-in="kw" maxlength="200" autocomplete="off" placeholder="' + esc(t('kwPh')) + '" value="' + esc(S.setIn.kw) + '"></label>' +
         '<button type="button" class="set-add" data-set-add="kw">' + esc(t('add')) + '</button></div>') + errLine(E.kw) + '<p class="set-hint">' + esc(t('kwHint')) + '</p>');
+    /* inherit is offered only when the config already holds it, so the page never drops it. */
+    var smOpts = d.subagentModel === 'inherit' ? SUBM : SUBM.slice(0, 3), smKey = { sonnet: 'smSonnet', haiku: 'smHaiku', opus: 'smOpus', inherit: 'smInherit' };
+    h += sec('sm', 'secSm', '<label class="set-field wide"><select class="set-in" data-set-sm aria-labelledby="sh-sm"' + dis + '>' + smOpts.map(function (m) {
+      return '<option value="' + m + '"' + (d.subagentModel === m ? ' selected' : '') + '>' + esc(t(smKey[m])) + '</option>' }).join('') + '</select></label><p class="set-hint">' + esc(t('smHint')) + '</p>');
     h += sec('jira', 'secJira', '<label class="set-switch"><span><b>' + esc(t('jiraCheck')) + '</b><span class="set-hint">' + esc(t('jiraCheckHint')) + '</span></span>' +
       '<input type="checkbox" role="switch" class="sw" data-set-tg="jiraCheck"' + (d.jiraCheck ? ' checked' : '') + dis + '></label>' + jiraList(d.jiraProjects, ro) +
       (ro ? '' : '<div class="set-row"><label class="set-field">' + esc(t('jpKey')) + '<input class="set-in" data-set-in="jpKey" maxlength="20" autocomplete="off" autocapitalize="characters" placeholder="' + esc(t('jpPh')) + '" value="' + esc(S.setIn.jpKey) + '"></label>' +
@@ -3731,6 +3745,7 @@ html.ai-fold { --aibar-h: 41px }
     }
     if ((v = g('data-set-wh'))) { d.workHours[v] = String(el.value || ''); delete S.setErr.time; renderHowto(); renderSettings(); return }
     if (g('data-set-dauto') != null) { d.digestTime = el.checked ? null : autoDigest(d.workHours.end); renderHowto(); renderSettings('[data-set-dauto]'); return }
+    if (g('data-set-sm') != null) { d.subagentModel = cleanSubM(el.value); updateSetFoot(); return }
     if (g('data-set-dtime') != null) { if (HM.test(el.value || '')) d.digestTime = el.value; renderHowto(); renderSettings('[data-set-dtime]'); return }
     if (g('data-set-repo') === 'group') { var gr = (d.repos || [])[+g('data-i')]; if (gr && gr.group !== el.value) { gr.group = String(el.value || 'khac'); renderSettings() } return }
     if (g('data-set-jp-on') != null) { var jp = (d.jiraProjects || [])[+g('data-set-jp-on')]; if (jp) jp.enabled = !!el.checked; renderSettings(); return }
@@ -4070,11 +4085,11 @@ html.ai-fold { --aibar-h: 41px }
         timeline: [{ time: '08:50', end: '11:30', minutes: 160, kind: 'ai', title: c.ai4, project: 'app-mobile' }, { time: '14:00', end: '15:00', minutes: 60, kind: 'ai', title: c.ai5, project: 'website' }, { time: '15:00', kind: 'done', title: c.tl3 }, { time: '16:00', end: '17:10', minutes: 70, kind: 'ai', title: c.ai6, project: 'app-mobile' }] })
     ];
     var runs = [0, 1, 2].map(function (i) { var d = addDays(TODAY, -i), cr = 2100000 - i * 180000, cw = 480000 + i * 30000, out = 21000 - i * 1500;
-      return { runId: 'demo-' + i, date: d, start: minHm(hmMin(dT) + 3 + i), end: minHm(hmMin(dT) + 24 + i), minutes: 21 + i, model: 'claude-opus-5-5', calls: 16 - i, subagents: 2, total: { input: 40, cacheRead: cr, cacheWrite: cw, output: out }, equivInput: Math.round(40 + cr * .1 + cw * 1.25 + out * 5), weeklyBefore: 30 + i * 3, weeklyAfter: 32 + i * 3 } });
+      return { runId: 'demo-' + i, date: d, start: minHm(hmMin(dT) + 3 + i), end: minHm(hmMin(dT) + 24 + i), minutes: 21 + i, model: 'claude-opus-5-5', calls: 16 - i, subagents: 2, subagentModels: { 'claude-sonnet-4-5': 24 - i }, total: { input: 40, cacheRead: cr, cacheWrite: cw, output: out }, equivInput: Math.round(40 + cr * .1 + cw * 1.25 + out * 5), weeklyBefore: 30 + i * 3, weeklyAfter: 32 + i * 3 } });
     var settings = { language: LANG, signals: false, aiAgent: true, storeQuotes: true, crossSessionDone: true, channels: CHANNELS.slice(), workHours: { start: '09:00', end: '18:00', days: [1, 2, 3, 4, 5] },
       vipPeople: [{ name: c.rabbit.replace(/\s*\(.*\)\s*$/, ''), why: c.setVipWhy }], keyChats: [{ id: 'demo-chat-1', topic: c.teamMobile }, { id: 'demo-chat-2', topic: c.teamPay }], excludeChats: [{ id: 'demo-chat-9', topic: c.teamFun }],
       keywords: c.setKw.slice(), role: c.setRole, currentWork: c.setWork, devMode: true, repos: [Object.assign({}, DREPO)],
-      jiraCheck: true, jiraProjects: [{ key: 'MOB', name: c.setJpMob, enabled: true }, { key: 'PAY', name: c.setJpPay, enabled: false }], timezone: 'Asia/Ho_Chi_Minh', updatedBy: 'skill' };
+      jiraCheck: true, jiraProjects: [{ key: 'MOB', name: c.setJpMob, enabled: true }, { key: 'PAY', name: c.setJpPay, enabled: false }], subagentModel: 'sonnet', timezone: 'Asia/Ho_Chi_Minh', updatedBy: 'skill' };
     return { todos: todos, days: days, runs: runs, settings: settings };
   }
   function startDemo(reasonKey) {

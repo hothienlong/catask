@@ -196,6 +196,7 @@ Mẫu: [`config.example.json`](config.example.json).
 | `aiRunMode` | `"runner"` | Cách chạy việc code: `"runner"` (MCP `catask-runner` trên máy, qua trang) hoặc `"desktop"` (scheduled task của app desktop, ~2 phút/lần) |
 | `runner` | không có | Tuỳ chọn `{claudePath, allowedTools, extraPath}` cho MCP `catask-runner` trên máy ([`runner/README.md`](runner/README.md)) |
 | `subagentChatsPerAgent` | `5` | Số chat mỗi subagent đọc |
+| `subagentModel` | `"sonnet"` | Model cho các subagent đọc chat (`"sonnet"`, `"haiku"`, `"opus"`, `"inherit"` = giống phiên chính). Sonnet đọc và trích tin gần như ngang Opus mà rẻ hơn nhiều; Haiku rẻ nhất nhưng có thể bỏ sót lời nhờ gián tiếp, ngầm ý; Opus/inherit đắt nhất. Việc đánh giá và ghi todo luôn do model chính làm. Sửa được trong ⚙ Cài đặt |
 | `maxChats` | `40` | Số chat tối đa quét mỗi lần |
 | `skipChatsOverMembers` | `40` | Bỏ qua chat đông hơn mức này (trừ khi bạn bị tag) |
 | `channels` | đủ cả năm | Nguồn cần đọc: `teamsChats`, `teamsChannelMentions`, `outlookMail`, `jiraMail`, `calendar`. Nguồn bị bỏ qua được ghi trong phần độ phủ |

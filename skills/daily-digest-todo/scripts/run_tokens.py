@@ -8,7 +8,9 @@ the prefix (default: either "Evening digest" or "Bản tin tối", the two task 
 the README suggests), sums the usage of every assistant call (main session + its
 subagents, each API message counted once), and prints a JSON list, newest first:
   {"runId", "date", "start", "end", "minutes", "model", "calls", "subagents",
-   "main": {...}, "sub": {...}, "total": {...}, "equivInput"}
+   "subagentModels", "main": {...}, "sub": {...}, "total": {...}, "equivInput"}
+"subagentModels" maps each model the subagents ran on to its API call count
+(e.g. {"claude-sonnet-4-5": 42}); {} when the run had no subagents.
 Each usage block is {"input", "cacheRead", "cacheWrite", "output"}.
 "equivInput" weights tokens by their relative price versus fresh input
 (cache read 0.1x, cache write 1.25x, output 5x) so runs can be compared.
@@ -75,7 +77,7 @@ def add_usage(acc, u):
     acc["output"] += u.get("output_tokens", 0) or 0
 
 
-def scan(path, acc, seen, meta):
+def scan(path, acc, seen, meta, models=None):
     with path.open(encoding="utf-8", errors="replace") as fh:
         for line in fh:
             if '"type"' not in line:
@@ -100,6 +102,8 @@ def scan(path, acc, seen, meta):
             if not u or mid in seen:
                 continue
             seen.add(mid)
+            if models is not None and msg.get("model") and not msg["model"].startswith("<"):
+                models[msg["model"]] = models.get(msg["model"], 0) + 1
             meta_calls = meta if meta is not None else None
             if meta_calls is not None:
                 meta["calls"] = meta.get("calls", 0) + 1
@@ -128,9 +132,9 @@ def main(argv):
         scan(path, main_acc, seen, meta)
         if not meta.get("title", "").startswith(tuple(prefixes)) or "first" not in meta:
             continue
-        sub_acc, sub_files = empty(), sorted((path.parent / path.stem / "subagents").glob("*.jsonl"))
+        sub_acc, sub_files, sub_models = empty(), sorted((path.parent / path.stem / "subagents").glob("*.jsonl")), {}
         for sf in sub_files:
-            scan(sf, sub_acc, seen, None)
+            scan(sf, sub_acc, seen, None, sub_models)
         total = {k: main_acc[k] + sub_acc[k] for k in main_acc}
         first = datetime.fromisoformat(meta["first"].replace("Z", "+00:00")).astimezone(tz)
         last = datetime.fromisoformat(meta["last"].replace("Z", "+00:00")).astimezone(tz)
@@ -139,6 +143,7 @@ def main(argv):
             "start": first.strftime("%H:%M"), "end": last.strftime("%H:%M"),
             "minutes": max(1, round((last - first).total_seconds() / 60)),
             "model": meta.get("model", ""), "calls": meta.get("calls", 0), "subagents": len(sub_files),
+            "subagentModels": sub_models,
             "main": main_acc, "sub": sub_acc, "total": total,
             "equivInput": round(sum(total[k] * WEIGHTS[k] for k in total)),
             "partial": time.time() - path.stat().st_mtime < 120,

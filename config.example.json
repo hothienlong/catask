@@ -15,6 +15,7 @@
   "signals": false,
   "aiAgent": false,
   "subagentChatsPerAgent": 5,
+  "subagentModel": "sonnet",
   "maxChats": 40,
   "skipChatsOverMembers": 40,
   "channels": ["teamsChats", "teamsChannelMentions", "outlookMail", "jiraMail", "calendar"],

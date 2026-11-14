@@ -72,6 +72,7 @@ function demoTests(){
   ok(!/Chép|Copy|data-copy/.test(noCpId(joined+els.howtoGrid.innerHTML)), 'no Chép/Copy buttons (besides copy-task-id)');
   ok(/data-view="demo-2"/.test(out['theo-nguoi']), 'View message button in People');
   ok(/class="flag"/.test(out['hom-nay']), 'VIP/key-chat flags render');
+  ok(/<td>2 <small>· sonnet-4-5<\/small><\/td>/.test(out['chi-phi']), 'cost: subagent column shows subagentModels');
   // people tab mark done + undo
   go('theo-nguoi'); change('demo-2',true);
   let td=S.allTodos.find(x=>x.id==='demo-2'); ok(td.status==='done'&&td.doneAt===TODAY&&td.movedBy==='user'&&td.prevStatus==='open','people: mark done');
@@ -425,11 +426,15 @@ async function aiOwnerAsync(){
   pchange('data-set-tg','aiAgent',{checked:false}); ok(!/data-ai-/.test(view.innerHTML),'switch off again hides it');
   pchange('data-set-tg','aiAgent',{checked:true});
   ok(/data-set-tg="jiraCheck" checked/.test(P().innerHTML)&&/No boards yet|Chưa có bảng nào/.test(P().innerHTML),'owner: jira defaults (check on, no boards)');
+  { const sp=P().innerHTML; ok(/id="sh-sm"/.test(sp)&&/data-set-sm/.test(sp)&&/value="sonnet"/.test(sp)&&/value="haiku"/.test(sp)&&/value="opus"/.test(sp)&&/Chat-reading model|Model đọc chat/.test(sp),'owner: chat-reading model select in settings') }
+  pchange('data-set-sm','',{value:'bogus'}); ok(S.setDraft.subagentModel==='sonnet','subagentModel: unknown value -> sonnet');
+  pchange('data-set-sm','',{value:'haiku'}); ok(S.setDraft.subagentModel==='haiku','subagentModel: select haiku');
   pinput('data-set-in','jpKey','app'); pclick('data-set-add','jp');
   const n0=updates.length; pclick('data-set-save'); await wait(30);
   const w=updates.slice(n0); const ws=w.find(x=>x[0]==='meta/settings'), wp=w.find(x=>x[0]==='meta/profile');
   ok(ws&&ws[1].aiAgent===true&&wp&&wp[1].aiAgent===true&&!S.setOpen,'save writes meta/settings.aiAgent + meta/profile.aiAgent');
   ok(ws&&ws[1].jiraCheck===true&&JSON.stringify(ws[1].jiraProjects)==='[{"key":"APP","name":"","enabled":true}]'&&!('jiraProjects' in wp[1]),'save writes meta/settings.jiraProjects (not meta/profile)');
+  ok(ws&&ws[1].subagentModel==='haiku'&&!('subagentModel' in wp[1]),'save writes meta/settings.subagentModel (not meta/profile)');
   delete A.ai; h=go('hom-nay');
   ok(/data-ai-req="A"/.test(h),'owner: AI button on open task');
   S.canWrite=false; h=go('hom-nay'); ok(!/data-ai-req=/.test(h),'not writable (non-owner) -> AI button hidden'); S.canWrite=true;
@@ -493,6 +498,7 @@ function demoSettingsUndo(){
   openSet(); ok(els.setBack.hidden===false&&/id="setTitle"/.test(P().innerHTML),'settings opens');
   const ph=P().innerHTML;
   ok(['who','lang','ch','wh','vip','chat','kw','role','priv'].every(x=>ph.includes('id="sh-'+x+'"')),'all sections present');
+  ok(/<option value="sonnet" selected>/.test(ph)&&!/value="inherit"/.test(ph)&&(en?ph.includes('Sonnet — recommended'):ph.includes('Sonnet — khuyên dùng')),'demo: chat-reading model = sonnet, no inherit option');
   ok(/data-set-save disabled/.test(ph),'save disabled when nothing changed');
   ok(ph.includes('Asia/Ho_Chi_Minh')&&ph.includes(en?'update my profile':'cập nhật hồ sơ'),'identity read-only with hint');
   ok(en?!VI.test(ph):!/\b(Settings|Save|Cancel|Language|Working hours|Keywords|Privacy|Important people|Key chats|Add|Remove)\b/.test(ph),'panel i18n: no other-language UI strings');
@@ -603,9 +609,10 @@ function ownerSettingsUndo(){
     settingsDoc=Object.assign({},settingsDoc,{keywords:['SF-','LATER-'],updatedBy:'skill'}); snapByPath['meta/settings']();
     ok(S.settings.keywords.includes('LATER-'),'owner: snapshot refreshes settings while closed');
     /* hand-edited config: string / id-less chat entries are kept, shown by name, removable, saved back as is */
-    settingsDoc=Object.assign({},settingsDoc,{keyChats:['  Mobile squad ',{topic:'Named only'},{id:'19:y@thread.v2',topic:'Y chat'},null,''],excludeChats:['19:zz@thread.v2','Lunch <crew>'],updatedBy:'skill'}); snapByPath['meta/settings']();
+    settingsDoc=Object.assign({},settingsDoc,{subagentModel:'inherit',keyChats:['  Mobile squad ',{topic:'Named only'},{id:'19:y@thread.v2',topic:'Y chat'},null,''],excludeChats:['19:zz@thread.v2','Lunch <crew>'],updatedBy:'skill'}); snapByPath['meta/settings']();
     ok(S.settings.keyChats.length===3&&S.settings.keyChats[0]==='Mobile squad'&&S.settings.keyChats[1]==='Named only'&&S.settings.keyChats[2].id==='19:y@thread.v2'&&S.settings.excludeChats[0]==='19:zz@thread.v2'&&S.settings.excludeChats[1]==='Lunch <crew>','owner: string chat entries tolerated '+JSON.stringify(S.settings.keyChats));
     openSet(); const sh=P().innerHTML;
+    ok(S.settings.subagentModel==='inherit'&&/<option value="inherit" selected>/.test(sh),'owner: inherit subagentModel kept and shown');
     ok(sh.includes('Mobile squad')&&sh.includes('Named only')&&sh.includes('Y chat')&&sh.includes('19:zz@thread.v2')&&sh.includes('Lunch &lt;crew&gt;')&&!sh.includes('Lunch <crew>'),'owner: string chat entries shown (escaped) as labels');
     pclick('data-set-rm','xchat',{'data-i':1}); ok(S.setDraft.excludeChats.length===1&&S.setDraft.excludeChats[0]==='19:zz@thread.v2','owner: remove string skipped chat');
     pclick('data-set-save'); await wait(30);

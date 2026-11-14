@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.6.0
+
+- **Cheaper chat reading** (`subagentModel`, default `"sonnet"`; also `"haiku"`, `"opus"`, `"inherit"` = same as the main run). The evening digest's Teams chat fan-out, the meeting-transcript read and the AI worker's chat read now spawn their subagents with the Agent tool's `model` parameter (omitted for `"inherit"` or when the parameter isn't available). These subagents only read and extract; todos, priority, dedupe, top 3 and done-detection stay on the main model. Sonnet keeps extraction quality at a fraction of the cost; Haiku is cheapest but may miss indirect asks. Older configs without the field use `"sonnet"` silently.
+- The chat-reading brief now says: when unsure whether a message is an ask, question, promise or done-evidence, include it (with Vietnamese indirect-ask examples), so a cheaper model doesn't drop things.
+- **⚙ Settings**: a *Chat-reading model* select (Sonnet — recommended / Haiku — cheapest / Opus — most expensive), synced through `meta/settings`.
+- **Cost tab**: runs record `subagentModels` (API calls per model across the run's subagents, from `run_tokens.py`), shown next to the subagent count.
+- The page changed: after the update it is republished to the same URL; your link and data stay as they are.
+
 ## 1.5.2
 
 - **Write a Jira draft from the page.** A `jira_description` or `jira_ac` result requested as a draft (no proposal) now has a **Write to Jira** / **Ghi lên Jira** button for the owner, on a task with a Jira key. It reads the current description first (same read-only `getJiraIssue` call as the apply flow), builds the proposal (`jira_ac`: current description plus an `## Acceptance criteria` section, replacing an old one), then shows the same before/after confirm, which says when the current description will be replaced. After the click the page re-reads, checks for edits, writes the one field with your Atlassian connector and marks it `applied`. Descriptions with images or rich formatting stay copy-only. `jira_estimate` drafts are unchanged.

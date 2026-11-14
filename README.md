@@ -196,6 +196,7 @@ Example: [`config.example.json`](config.example.json).
 | `aiRunMode` | `"runner"` | How code tasks start: `"runner"` (local `catask-runner` MCP, via the page) or `"desktop"` (Claude desktop scheduled task every ~2 min) |
 | `runner` | absent | Optional `{claudePath, allowedTools, extraPath}` for the local `catask-runner` MCP ([`runner/README.md`](runner/README.md)) |
 | `subagentChatsPerAgent` | `5` | Chats read per subagent |
+| `subagentModel` | `"sonnet"` | Model for the chat-reading subagents (`"sonnet"`, `"haiku"`, `"opus"`, `"inherit"` = same as the main run). Sonnet ≈ same quality for extraction at much lower cost; Haiku is cheapest but may miss implicit or indirect asks; Opus/inherit cost the most. Judging and writing todos always stay on the main model. Also in ⚙ Settings |
 | `maxChats` | `40` | Max chats scanned per run |
 | `skipChatsOverMembers` | `40` | Skip chats bigger than this (unless you're tagged) |
 | `channels` | all five | Sources to read: `teamsChats`, `teamsChannelMentions`, `outlookMail`, `jiraMail`, `calendar`. Skipped sources are listed in the coverage notes |
