@@ -11,10 +11,15 @@ mode) it loads the real <state>/<date>.json and compares the todos:
     digest's NEW todos (carried false); a shadow todo that matches a real carried
     one is counted apart, not as an extra;
   - priority agreement on matched pairs.
-Cost: the real digest run and the shadow run of that date are found in the local
-Claude Code transcripts (run_tokens.py logic; shadow sessions are titled
-"catask A/B ..."), tokens are split main vs subagents per model, and priced per
-1M tokens (input/output/cache read; cache write = input x 1.25):
+Cost: the real digest run is found in the local Claude Code transcripts with
+run_tokens.py logic. Each shadow file is matched to its own shadow session: a
+top-level transcript whose first prompt says "Unattended A/B shadow run for
+catask" and whose prompt carries `shadow <model> <date>` (fallback: title
+"catask A/B · <Model> ..." with the date, then closest start to startedAt).
+Its cost = main transcript + every subagents/**/*.jsonl, deduped by
+(message.id, requestId), each call priced by its own model. Tokens are split main
+vs subagents per model, and priced per 1M tokens (input/output/cache read;
+cache write = input x 1.25):
   opus 4/20/0.20, sonnet 2/10/0.10, haiku 0.10/0.50/0.01 (model ids matched by substring).
 Quota: 5-hour and weekly % deltas from the shadow file, and from the real digest
 JSON when it has weeklyBefore/weeklyAfter (else "n/a"). Quota % is 1%-granular
@@ -208,6 +213,112 @@ def pick_run(runs, kind, date, near):
     return cand[0]
 
 
+SHADOW_MARK = "Unattended A/B shadow run for catask"
+SHADOW_ARGS = re.compile(r"\bshadow (haiku|sonnet|opus) (\d{4}-\d{2}-\d{2})\b")
+
+
+def _prompt_text(content):
+    """Text the user typed (string or text blocks); '' for tool results."""
+    if isinstance(content, str):
+        return content
+    if isinstance(content, list):
+        return "\n".join(b.get("text", "") for b in content
+                         if isinstance(b, dict) and b.get("type") == "text")
+    return ""
+
+
+def _scan_usage(path, seen, by_model, meta=None):
+    with path.open(encoding="utf-8", errors="replace") as fh:
+        for line in fh:
+            try:
+                rec = json.loads(line)
+            except ValueError:
+                continue
+            if not isinstance(rec, dict):
+                continue
+            t = rec.get("type")
+            if meta is not None:
+                if t == "custom-title":
+                    meta["title"] = rec.get("customTitle") or meta.get("title")
+                elif t == "user" and not rec.get("isMeta"):
+                    txt = _prompt_text((rec.get("message") or {}).get("content"))
+                    if txt:
+                        meta.setdefault("firstPrompt", txt)
+                        if "args" not in meta:
+                            m = SHADOW_ARGS.search(txt)
+                            if m:
+                                meta["args"] = (m.group(1), m.group(2))
+                if rec.get("timestamp"):
+                    meta.setdefault("first", rec["timestamp"])
+            if t != "assistant":
+                continue
+            msg = rec.get("message") or {}
+            u = msg.get("usage")
+            if not u:
+                continue
+            key = (msg.get("id"), rec.get("requestId"))
+            if key in seen:
+                continue
+            seen.add(key)
+            acc = by_model.setdefault(msg.get("model") or "unknown",
+                                      {"input": 0, "cacheRead": 0, "cacheWrite": 0, "output": 0})
+            acc["input"] += u.get("input_tokens", 0) or 0
+            acc["cacheRead"] += u.get("cache_read_input_tokens", 0) or 0
+            acc["cacheWrite"] += u.get("cache_creation_input_tokens", 0) or 0
+            acc["output"] += u.get("output_tokens", 0) or 0
+
+
+def shadow_sessions(root, since_days):
+    """Top-level sessions started by the unattended A/B shadow prompt."""
+    import time
+    root = Path(root).expanduser()
+    cutoff = time.time() - since_days * 86400
+    out = []
+    for path in root.glob("*/*.jsonl"):
+        try:
+            if path.stat().st_mtime < cutoff:
+                continue
+            with path.open(encoding="utf-8", errors="replace") as fh:
+                if SHADOW_MARK not in fh.read():
+                    continue
+        except OSError:
+            continue
+        meta, seen, main = {}, set(), {}
+        _scan_usage(path, seen, main, meta)
+        if SHADOW_MARK not in meta.get("firstPrompt", ""):
+            continue
+        sub = {}
+        sub_dir = path.parent / path.stem / "subagents"
+        for sf in sorted(sub_dir.rglob("*.jsonl")) if sub_dir.is_dir() else []:
+            _scan_usage(sf, seen, sub)
+        out.append({"runId": path.stem, "title": meta.get("title") or "",
+                    "args": meta.get("args"), "startIso": meta.get("first"),
+                    "byModel": {"main": main, "sub": sub}})
+    return out
+
+
+def pick_shadow(sessions, date, model, started):
+    """The shadow session of (date, model): prompt args, else title + date, else time."""
+    model = (model or "").lower()
+    exact = [s for s in sessions if s.get("args") == (model, date)]
+    if not exact:
+        exact = [s for s in sessions if not s.get("args")
+                 and s["title"].lower().startswith(f"catask a/b · {model}") and date in s["title"]]
+    if not exact:
+        exact = [s for s in sessions if not s.get("args")
+                 and s["title"].lower().startswith(f"catask a/b · {model}")]
+    if not exact:
+        return None
+    t = parse_iso(started)
+    if not t or len(exact) == 1:
+        return exact[0]
+
+    def dist(s):
+        a = parse_iso(s.get("startIso"))
+        return abs((t - a).total_seconds()) if a else float("inf")
+    return min(exact, key=dist)
+
+
 def run_cost(run):
     if not run:
         return None
@@ -275,7 +386,7 @@ def build(state, projects_dir, cfg_path):
             m = AB_NAME.match(p.name)
             if m:
                 files.append((m.group(1), m.group(2), p))
-    rows, runs = [], []
+    rows, runs, shadows = [], [], []
     if files:
         try:
             rt = load_run_tokens()
@@ -285,10 +396,11 @@ def build(state, projects_dir, cfg_path):
             tz = rt.config_tz(rt.load_config(argv))
             oldest = min(d for d, _, _ in files)
             days = (datetime.now().date() - datetime.strptime(oldest, "%Y-%m-%d").date()).days + 3
-            runs = rt.collect_runs(tz, max(days, 3), list(rt.DEFAULT_PREFIXES) + list(rt.AB_PREFIXES), projects_dir)
+            runs = rt.collect_runs(tz, max(days, 3), list(rt.DEFAULT_PREFIXES), projects_dir)
+            shadows = shadow_sessions(projects_dir or rt.ROOT, max(days, 3))
         except Exception as e:  # cost is best-effort
             print(f"(cost lookup failed: {e})", file=sys.stderr)
-            runs = []
+            runs, shadows = [], []
     for date, model, path in files:
         sf = read_json(path) or {}
         real = read_json(state / f"{date}.json")
@@ -298,7 +410,7 @@ def build(state, projects_dir, cfg_path):
         re_todos = [t for t in re_todos if isinstance(t, dict)]
         cmp = compare_todos(re_todos, sh_todos)
         real_run = pick_run(runs, "digest", date, (real or {}).get("generatedAt"))
-        ab_run = pick_run(runs, "ab", date, sf.get("startedAt"))
+        ab_run = pick_shadow(shadows, date, sf.get("model") or model, sf.get("startedAt"))
         rows.append({
             "date": date, "model": sf.get("model") or model, "hasReal": real is not None,
             "candidates": sf.get("candidates"), "cmp": cmp,
