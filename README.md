@@ -10,7 +10,7 @@ English · [Tiếng Việt](README.vi.md)
 
 [![Watch the 58-second demo](docs/video/catask-demo-poster.jpg)](https://github.com/hothienlong/catask/releases/download/demo-video/catask-demo.mp4)
 
-<sub>▶ 58-second demo (demo data only, with sound). Click to download and watch (16 MB).</sub>
+<sub>▶ 58-second demo (demo data only, with sound). Click to download and watch (17 MB).</sub>
 
 ## 🤖 Install with Claude
 

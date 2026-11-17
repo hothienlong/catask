@@ -10,7 +10,7 @@
 
 [![Xem clip demo 58 giây](docs/video/catask-demo-vi-poster.jpg)](https://github.com/hothienlong/catask/releases/download/demo-video/catask-demo-vi.mp4)
 
-<sub>▶ Clip demo 58 giây (chỉ dùng dữ liệu demo, có tiếng). Bấm để tải về xem (16 MB).</sub>
+<sub>▶ Clip demo 58 giây (chỉ dùng dữ liệu demo, có tiếng). Bấm để tải về xem (17 MB).</sub>
 
 ## 🤖 Cài bằng Claude
 
