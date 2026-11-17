@@ -45,6 +45,7 @@
   "jiraCheck": true,
   "storeQuotes": true,
   "crossSessionDone": true,
+  "catchUp": true,
   "devMode": false,
   "aiRunMode": "runner",
   "repos": [

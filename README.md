@@ -55,6 +55,7 @@ Install the catask plugin for me: run `claude plugin marketplace add hothienlong
   - **In your Claude Code sessions**: after each digest, catask saves a short list of your open tasks (titles and Jira keys) on your Mac, so Claude knows them in your other Claude Code sessions, in any project. When you finish something that clearly matches one (same Jira key, or the request is plainly that task), Claude asks **Mark catask#ID · title done?** before ending its turn. Only a **Yes** closes it. Turn off with `crossSessionDone: false` or in ⚙ Settings.
   - **In chat, mail and Jira**: the evening digest also catches evidence that a task is done (your own "done/fixed", an MR link, an answer you sent, a Jira Done mail or the linked ticket itself moving to Done, a merged MR, even a message in another chat that clearly matches the same task) and flags the card **Looks done?** with that evidence and a link. You tap **✓ Done** or **✗ Not yet**.
   - **Waiting on someone?** A task you are waiting on gets the same check: when a message or a Jira mail on the same ticket shows they finished their part, the card asks **Looks done?**. catask now also checks the ticket itself (status, assignee, new comments), but only tickets linked to your open tasks, and only the ones changed since the last digest. If they hand the next step to you (an ask in chat, a Jira mail or a ticket comment that asks you, or the ticket reassigned to you), that becomes a new task on your list, linked to the one you were waiting on ("follows up: …").
+- 🔄 **Catch-up after a failed run**: if the evening digest fails (network down, `ENOTFOUND`) or never runs (app closed), the next Claude Code session you open notices it and, once the network is up, starts the scheduled digest again (at most once an hour, 3 times per missed evening). Nothing is lost: the window starts at the last successful digest. Turn off with `catchUp: false`; an optional `catask catch-up` scheduled task does it without opening Claude ([`schedule-prompt.md`](skills/daily-digest-todo/schedule-prompt.md)).
 - 🏆 **Done today**: only recorded when there's real evidence in messages or mail.
 - 🗂 **The ledger page** (a private Artifact): Today / Tomorrow / Waiting / Done board (drag and drop), plus People, Week, Day (timeline) and Cost tabs. **Mark done from anywhere**: any tab, including Day timeline items. Every status or priority change shows a small bar with **Undo** (or Ctrl/Cmd+Z) for about 6 seconds.
 - ⚙ **Settings on the page**: change language, channels, working hours, important people, key chats and skipped chats (remove), keywords, Jira boards and the Jira check, role/current work, and the privacy switches from the ⚙ Settings button instead of editing `config.json`. Page edits take effect on the next digest run; language and signals change on the page right away.
@@ -215,6 +216,7 @@ Example: [`config.example.json`](config.example.json).
 | `jiraCheck` | `true` | In the evening digest, check the Jira tickets linked to your open tasks (only the ones changed since the last digest, at most 15 read per run) for Done, reassignment and new comments. Needs the Atlassian connector; `false` = skip. Also in ⚙ Settings |
 | `storeQuotes` | `true` | Store a ≤500-character snapshot of the source message on each todo for "View message". `false` = store no message text; the page opens the original link instead |
 | `crossSessionDone` | `true` | In your other interactive Claude Code sessions, Claude asks before marking a matching open todo done. `false` = the SessionStart hook stays silent |
+| `catchUp` | `true` | When the last scheduled digest failed or was missed, the next Claude Code session starts it again once online. `false` = off |
 | `retention` | `{archiveDoneAfterDays: 90, pruneDaysAfterDays: 120, quoteDaysAfterDone: 30}` | How long the ledger keeps things (see Privacy). Done todos older than `archiveDoneAfterDays` move to a monthly archive (min 45, the Week heatmap needs 6 weeks); daily digests and cost records older than `pruneDaysAfterDays` are deleted (min 60); quotes are removed from done todos after `quoteDaysAfterDone` |
 | `settingsSyncedAt` | `null` | Written by the skill: when the page's ⚙ Settings were last merged into this file. Don't edit |
 | `onboardingPending` | `false` | `true` = the config was written without the full setup interview (e.g. migrated from an older setup). The next run you start yourself asks only the missing questions, then sets it to `false`; scheduled runs just leave a reminder in the coverage notes |
@@ -277,7 +279,7 @@ runner/
   selftest.mjs             # node runner/selftest.mjs
 hooks/
   hooks.json               # SessionStart: list open todos in your other sessions
-  catask-context.mjs       # reads ~/.catask/open-todos.json
+  catask-context.mjs       # reads ~/.catask/open-todos.json, flags a missed digest
   selftest.mjs             # node hooks/selftest.mjs
 ```
 

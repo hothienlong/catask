@@ -214,7 +214,8 @@ function startTask(args) {
   const fd = fs.openSync(log, 'a');
   fs.writeSync(fd, `# catask-runner ${startedAt}\n# ${claude} ${argv.map((a) => JSON.stringify(a)).join(' ')}\n# prompt (stdin): ${prompt}\n\n`);
 
-  const env = { ...process.env, PATH: childPath(cfg, claude) };
+  // CATASK_RUNNER tells the plugin's SessionStart hook not to ask this headless run for a digest catch-up.
+  const env = { ...process.env, PATH: childPath(cfg, claude), CATASK_RUNNER: '1' };
   // A nested claude refuses to start inside another Claude Code session; this run is independent.
   for (const k of Object.keys(env)) if (k === 'CLAUDECODE' || k === 'CLAUDE_CODE_ENTRYPOINT' || k.startsWith('CLAUDE_CODE_SSE')) delete env[k];
 

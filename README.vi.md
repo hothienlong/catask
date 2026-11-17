@@ -55,6 +55,7 @@ Install the catask plugin for me: run `claude plugin marketplace add hothienlong
   - **Trong các phiên Claude Code**: sau mỗi bản tin, catask lưu trên máy bạn một danh sách ngắn các việc đang mở (tiêu đề và mã Jira), nên Claude biết các việc đó trong những phiên Claude Code khác của bạn, ở bất kỳ project nào. Khi bạn làm xong việc khớp rõ (cùng mã Jira, hoặc yêu cầu chính là việc đó), Claude hỏi **Đánh dấu xong catask#ID · tiêu đề?** trước khi kết thúc lượt. Chỉ khi bạn chọn **Có** mới đóng. Tắt bằng `crossSessionDone: false` hoặc trong ⚙ Cài đặt.
   - **Trong chat, mail và Jira**: bản tin tối cũng bắt bằng chứng việc đã xong (bạn nhắn "xong/đã fix", link MR, bạn đã trả lời, mail Jira chuyển Done hoặc chính ticket gắn với việc đã sang Done, MR đã merge, kể cả tin ở chat khác nếu khớp rõ đúng việc đó) rồi gắn lên thẻ **Có vẻ đã xong?** kèm bằng chứng và link. Bạn bấm **✓ Xong** hoặc **✗ Chưa**.
   - **Đang chờ người khác?** Việc bạn đang chờ cũng được kiểm như vậy: khi tin nhắn hoặc mail Jira của đúng ticket đó cho thấy họ đã xong phần của họ, thẻ hỏi **Có vẻ đã xong?**. Giờ catask còn tự xem chính ticket đó (trạng thái, người được giao, bình luận mới), nhưng chỉ các ticket gắn với việc đang mở của bạn, và chỉ ticket đã đổi từ bản tin trước. Nếu họ chuyển bước tiếp theo sang bạn (nhờ trong chat, mail Jira hay bình luận trên ticket hỏi bạn, hoặc ticket được giao lại cho bạn), việc đó thành một việc mới trong danh sách của bạn, gắn với việc bạn đang chờ ("tiếp theo của: …").
+- 🔄 **Chạy bù khi lỗi**: nếu bản tin tối lỗi (mất mạng, `ENOTFOUND`) hoặc không chạy (app tắt), phiên Claude Code tiếp theo bạn mở sẽ phát hiện và, khi có mạng, tự chạy lại scheduled task bản tin (tối đa 1 lần/giờ, 3 lần cho mỗi tối bị lỡ). Không mất gì: khung giờ bắt đầu từ bản tin thành công gần nhất. Tắt bằng `catchUp: false`; muốn chạy bù mà không cần mở Claude thì thêm scheduled task `catask catch-up` ([`schedule-prompt.md`](skills/daily-digest-todo/schedule-prompt.md)).
 - 🏆 **Đã xong hôm nay**: chỉ ghi khi có bằng chứng thật trong tin nhắn/mail.
 - 🗂 **Trang catask** (Artifact riêng tư): bảng Hôm nay / Mai / Đang chờ / Xong (kéo thả được), tab Theo người, Tuần, Ngày (dòng thời gian), Chi phí. **Đánh dấu xong ở mọi nơi**: tab nào cũng được, kể cả mục trên dòng thời gian tab Ngày; mỗi lần đổi trạng thái hay mức ưu tiên đều hiện thanh nhỏ có nút **Hoàn tác** (hoặc Ctrl/Cmd+Z) trong khoảng 6 giây.
 - ⚙ **Cài đặt ngay trên trang**: đổi ngôn ngữ, kênh theo dõi, giờ làm, người quan trọng, chat theo dõi và chat bỏ qua (bỏ bớt), từ khoá, bảng Jira và công tắc kiểm tra Jira, vai trò/việc đang làm và hai công tắc riêng tư bằng nút ⚙ Cài đặt, khỏi sửa `config.json`. Thay đổi trên trang áp dụng từ bản tin tới; ngôn ngữ và tín hiệu đổi trên trang ngay.
@@ -215,6 +216,7 @@ Mẫu: [`config.example.json`](config.example.json).
 | `jiraCheck` | `true` | Trong bản tin tối, kiểm tra các ticket Jira gắn với việc đang mở (chỉ ticket đã đổi từ bản tin trước, đọc tối đa 15 ticket mỗi lần) xem đã Done, được giao lại hay có bình luận mới. Cần connector Atlassian; `false` = bỏ qua. Cũng có trong ⚙ Cài đặt |
 | `storeQuotes` | `true` | Lưu đoạn trích ≤500 ký tự của tin gốc trên mỗi việc cho nút "Xem tin". `false` = không lưu nội dung tin nào; trang mở thẳng link gốc |
 | `crossSessionDone` | `true` | Ở các phiên Claude Code khác, Claude hỏi trước khi đánh dấu xong việc đang mở khớp với việc bạn vừa làm. `false` = hook SessionStart im lặng |
+| `catchUp` | `true` | Khi bản tin theo lịch lỗi hoặc bị lỡ, phiên Claude Code kế tiếp tự chạy lại khi có mạng. `false` = tắt |
 | `retention` | `{archiveDoneAfterDays: 90, pruneDaysAfterDays: 120, quoteDaysAfterDone: 30}` | catask giữ dữ liệu bao lâu (xem phần Riêng tư). Việc xong quá `archiveDoneAfterDays` ngày được chuyển vào kho lưu trữ theo tháng (tối thiểu 45, vì bản đồ nhiệt tab Tuần cần 6 tuần); bản tin ngày và bản ghi chi phí quá `pruneDaysAfterDays` ngày bị xoá (tối thiểu 60); trích dẫn bị xoá khỏi việc đã xong sau `quoteDaysAfterDone` ngày |
 | `settingsSyncedAt` | `null` | Skill tự ghi: lần cuối gộp ⚙ Cài đặt trên trang vào file này. Đừng sửa tay |
 | `onboardingPending` | `false` | `true` = config được tạo mà chưa qua đủ buổi phỏng vấn (ví dụ chuyển từ bản cài cũ). Lần chạy tiếp theo do bạn tự gọi sẽ chỉ hỏi những câu còn thiếu rồi đặt lại thành `false`; lần chạy theo lịch chỉ để lại lời nhắc trong phần độ phủ |
@@ -277,7 +279,7 @@ runner/
   selftest.mjs             # node runner/selftest.mjs
 hooks/
   hooks.json               # SessionStart: list open todos in your other sessions
-  catask-context.mjs       # reads ~/.catask/open-todos.json
+  catask-context.mjs       # reads ~/.catask/open-todos.json, flags a missed digest
   selftest.mjs             # node hooks/selftest.mjs
 ```
 

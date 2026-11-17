@@ -29,6 +29,7 @@ Where this file shows example phrases, they come in pairs (vi / en). Use the one
   - `config.json`: the user's settings (Step 0).
   - `artifact-url.txt`: the URL of the user's catask page.
   - `YYYY-MM-DD.json` per run (the digest data). The JSON from earlier runs is how the time window is found.
+  - `catchup.json`: catch-up attempts for a missed digest slot (written only by `scripts/digest-status.mjs --claim`, see [Catch-up](#catch-up-after-a-failed-or-missed-run)).
 
 ## Step 0 — Config and connector check
 
@@ -121,6 +122,7 @@ Where this file shows example phrases, they come in pairs (vi / en). Use the one
    - `jiraCheck` [`true`]: the evening digest checks the Jira tickets linked to open todos (Step 2b), read-only, when the Atlassian connector is available. `false` skips it. Also in ⚙ Settings.
    - `storeQuotes` [`true`]: keep a short snapshot of the source message on each todo for the page's "View message" (Step 5).
    - `crossSessionDone` [`true`]: in the user's other interactive Claude Code sessions (any project), the plugin's SessionStart hook lists the open todos so Claude can **ask** "Mark catask#ID · title done?" when the user finishes matching work there (Step 5.3c3). `false` turns the hook silent. Also in ⚙ Settings (Privacy).
+   - `catchUp` [`true`]: when the last scheduled digest failed or never ran, the plugin's SessionStart hook has Claude start the scheduled task again in the next session (see [Catch-up](#catch-up-after-a-failed-or-missed-run)). `false` turns it off. Not on the page; edit config.json.
    - `retention` [`{archiveDoneAfterDays: 90, pruneDaysAfterDays: 120, quoteDaysAfterDone: 30}`]: how long the catask database keeps things (Step 5.3, Retention). Minimums: `archiveDoneAfterDays` ≥ 45 (the Week heatmap needs 6 weeks of done todos), `pruneDaysAfterDays` ≥ 60; a smaller value is raised to the minimum silently. A missing field or key uses its default.
    - `pluginDir` [absent]: absolute path of the installed catask plugin, written by [Install the runner](#install-the-runner-catask-runner); synced to `meta/settings`.
    - `artifactUrl` [`null`]: the catask page URL (same as `artifact-url.txt`). Written by the skill when it publishes the page and synced into `meta/settings`; never edited on the page.
@@ -138,7 +140,7 @@ Where this file shows example phrases, they come in pairs (vi / en). Use the one
 
 0. **Cost baseline (optional):** look for `mcp__ccd_session_mgmt__get_usage` via ToolSearch. If it exists and returns status "ok", note the `Weekly · all models` percentUsed as `weeklyBefore`. If the tool is missing or fails, set `weeklyBefore: null` and carry on; cost tracking is a nice-to-have.
 1. `get_me` → the user's name/email. Compare with `config.json` and use the connector's values if they differ (mention it in coverage).
-2. Find the latest previous `~/.catask/*.json` (ignore `config.json`). Window start = that file's `generatedAt` (so Monday covers Fri evening + weekend, and a skipped day is not lost). If none exists, start = today 00:00 local. Cap the window at 4 days back. Window end = now.
+2. Find the latest previous `~/.catask/*.json` (ignore `config.json`). Window start = that file's `generatedAt` (so Monday covers Fri evening + weekend, and a skipped day is not lost). If none exists, start = today 00:00 local. Cap the window at 4 days back. Window end = now. A catch-up run (after a failed or missed slot, see [Catch-up](#catch-up-after-a-failed-or-missed-run)) is an ordinary run: the same window rule covers the missed evening, so nothing is lost unless the gap is longer than 4 days.
 3. Times from Graph are UTC; convert to `config.timezone` before comparing or displaying.
 
 ## Step 2 — Gather (read-only)
@@ -491,6 +493,17 @@ Triggers: (a) automatically at the end of developer onboarding, when `devMode` b
 4. **CLI login check** (the runner starts `claude -p`): run `claude -p "reply OK"` with a 60 s timeout and the `CLAUDECODE`, `CLAUDE_CODE_ENTRYPOINT` and `CLAUDE_CODE_SSE*` env vars removed (e.g. `env -u CLAUDECODE -u CLAUDE_CODE_ENTRYPOINT …`). Output containing "OK" → logged in. An auth/login error → tell the user the one thing AI can't do: open Terminal, run `claude`, type `/login`. Never try to log in for them. Timeout → report it as "couldn't check".
 5. **Selftest**: `node <dir of runner>/selftest.mjs` (never starts a real run).
 6. **Report** a 4-row table in `language`: desktop config (added / already set / failed + backup path), Claude Code (added / already there / skipped), login (OK / needs `/login` / couldn't check), selftest (passed / failed + the failing line). Then: vi "Thoát hẳn app Claude (⌘Q) rồi mở lại để app nạp runner." / en "Quit the Claude app completely (⌘Q) and reopen it so it loads the runner." (AI can't restart the app.)
+
+## Catch-up after a failed or missed run
+
+The Claude desktop scheduler does not retry a run that started and then failed (e.g. 19:06 → 21:04 "API Error: Can't reach the API server (ENOTFOUND)"), and a run can also be skipped (app closed, Mac off). catask recovers by itself:
+
+1. **Detect** (plugin SessionStart hook, `hooks/catask-context.mjs`, every Claude Code session outside the plugin repo, read-only): `scripts/digest-status.mjs` computes the last **slot** (effective digest time on `workHours.days`, in `config.timezone`) and compares it with the newest `generatedAt` of `~/.catask/YYYY-MM-DD.json`. The slot counts as **missed** only when no digest was written since it, it is more than 1 h old (a healthy run may still be going; `generatedAt` is written at the end), and fewer than 3 attempts were made for it, the last one more than 1 h ago. Silent when `catchUp` is false, before the first digest, and inside headless `catask-runner` runs (`CATASK_RUNNER=1`).
+2. **Claim**: the hook tells Claude to run `node <plugin-dir>/scripts/digest-status.mjs --claim` first. It re-checks, checks that `api.anthropic.com` resolves (ENOTFOUND is the usual failure), and records the attempt in `~/.catask/catchup.json`; `granted: false` → do nothing. This is the guard: at most one start per slot per hour, 3 per slot, only online. A new slot starts with fresh attempts.
+3. **Run**: Claude loads the scheduled-tasks tools, finds the task whose title starts with `Bản tin tối` / `Evening digest`, checks `list_task_runs` (a run with status `running` → stop), then `run_scheduled_task`. The catch-up is the user's own scheduled task with its stored prompt, model and approvals, so it costs and behaves like a normal evening run and shows in the Cost tab. Claude says so in one line and continues with what the user asked. Without the scheduled-tasks tools it only tells the user they can say "bản tin tối" / "evening digest".
+4. **Inside the catch-up run** nothing is special: Step 1's window starts at the last successful `generatedAt`. Its own SessionStart hook stays silent (the claim is < 1 h old).
+
+The catch-up happens when the next Claude session starts after the network is back (an interactive one, or any scheduled task such as the optional **catask catch-up** check in `schedule-prompt.md`). `node <plugin-dir>/scripts/digest-status.mjs` prints the current state (`ok`, `pending`, `missed`, `cooldown`, `gave-up`, `off`, `no-digest`) without writing anything.
 
 ## When the user asks interactively
 

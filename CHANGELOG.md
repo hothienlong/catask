@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.10.0
+
+- **Catch-up after a failed or missed evening digest.** The Claude desktop scheduler does not retry a run that started and failed (e.g. 19:06 → 21:04 "Can't reach the API server (ENOTFOUND)"), so nothing ran until the next evening. Now the plugin's SessionStart hook checks, in every Claude Code session, whether the last digest slot (digest time on your working days, in your time zone) has a digest written after it. If not (and the slot is over 1 h old), Claude claims the slot with `scripts/digest-status.mjs --claim` (online only, at most once an hour and 3 times per slot), checks the task isn't already running, and starts the scheduled digest again with `run_scheduled_task`, telling you in one line. The window starts at the last successful digest, so the catch-up loses nothing (4-day cap).
+- New config field `catchUp` (default `true`); `false` turns it off. Attempts are kept in `~/.catask/catchup.json`.
+- Optional `catask catch-up` scheduled task (prompt in `skills/daily-digest-todo/schedule-prompt.md`) for a catch-up without opening Claude.
+- `catask-runner` marks its headless runs (`CATASK_RUNNER=1`) so they never start a catch-up.
+- `node scripts/digest-status.mjs` prints the state (`ok`, `pending`, `missed`, `cooldown`, `gave-up`, …) without writing anything.
+
 ## 1.9.0
 
 - **Set and change a task's due date on the page.** Every open card has a due chip (📅 date, or "+ Due date" when there is none); click it to pick a date or clear it. The "View message" dialog has the same date field. Both are undoable. A date you set is stored with `dueBy: "user"` and labelled by the page (Today / Tomorrow / Wed Nov 19); the evening digest never overrides it.
