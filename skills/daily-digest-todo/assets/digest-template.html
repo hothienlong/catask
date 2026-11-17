@@ -207,7 +207,7 @@ a { color: var(--accent) }
   function open(url) { return url ? '<a class="open-link" href="' + esc(url) + '" target="_blank" rel="noopener">' + esc(T.open) + '</a>' : '' }
   function who(kind, w) { return (T.WHO[kind] || T.WHO.ask)(w ? '<b>' + esc(w) + '</b>' : '') }
 
-  var todos = D.todos || [], done = D.done || [], byId = {};
+  var todos = (D.todos || []).filter(function (t) { return !t.following }), done = D.done || [], byId = {};
   todos.forEach(function (t) { byId[t.id] = t });
   var cnt = { now: 0, week: 0, watch: 0 }; todos.forEach(function (t) { cnt[t.tier] = (cnt[t.tier] || 0) + 1 });
 

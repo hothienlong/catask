@@ -56,7 +56,7 @@ Object.defineProperty(globalThis,'navigator',{value:{language:navLang},configura
 global.getComputedStyle=()=>({getPropertyValue:()=>''});
 const scripts=[...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(m=>m[1]);
 // The page calls window.__cataskTestHook (when defined) with its state, so this works on the minified build too.
-window.__cataskTestHook=function(h){ globalThis.S=h.S; globalThis.__sig=h.setSignals };
+window.__cataskTestHook=function(h){ globalThis.S=h.S; globalThis.__sig=h.setSignals; globalThis.__applyProj=h.applyProj };
 eval(scripts[0]); if(!globalThis.S){ console.log('FAIL page did not call __cataskTestHook'); process.exit(1) }
 const view=els.view;
 function go(tab){ location.hash='#'+tab; winL.hashchange(); return view.innerHTML }
@@ -628,6 +628,27 @@ function ownerSettingsUndo(){
     ok(ws&&ws[1].keyChats[0]==='Mobile squad'&&ws[1].keyChats[2].id==='19:y@thread.v2'&&ws[1].excludeChats.length===1&&ws[1].excludeChats[0]==='19:zz@thread.v2','owner: string chat entries saved back as is');
   });
 }
+function followTests(){
+  const lanesOf=h=>(h.split('<div class="board">')[1]||'');
+  const railOf=h=>(h.split('<aside class="rail')[1]||'').split('</aside>')[0];
+  let h=go('hom-nay');
+  ok(/class="block follow"/.test(railOf(h)) && /data-follow-take="demo-18"/.test(railOf(h)) && /data-follow-drop="demo-19"/.test(railOf(h)),'following: rail block lists demo-18/19 with take/drop');
+  ok(!/data-id="demo-18"/.test(lanesOf(h)) && !/data-id="demo-19"/.test(lanesOf(h)),'following: not in the task lanes');
+  ok(!S.todos.some(x=>x.following),'following: kept out of S.todos (counts, stats, people, week)');
+  ok(railOf(h).includes(navLang==='vi'?'Gấu Trúc đang lo':'Pat Panda has it') && railOf(h).includes(navLang==='vi'?'Chưa rõ ai nhận':'No owner yet'),'following: owner / no-owner line');
+  ok(railOf(h).includes(navLang==='vi'?'còn 2 ngày':'2 days left'),'following: days-left from lastSeen');
+  click('[data-follow-take]','data-follow-take','demo-18');
+  let a=S.allTodos.find(x=>x.id==='demo-18');
+  ok(a.following===null && a.status==='open' && a.plannedFor===TODAY && a.tier==='week' && a.priority==='P2' && a.movedBy==='user','following: take turns it into a task');
+  h=view.innerHTML; ok(/data-id="demo-18"/.test(lanesOf(h)) && !/data-follow-take="demo-18"/.test(railOf(h)),'following: taken task moves to lanes');
+  click('[data-follow-drop]','data-follow-drop','demo-19');
+  let b=S.allTodos.find(x=>x.id==='demo-19');
+  ok(b.status==='done' && b.following && b.following.state==='dismissed' && b.movedBy==='user','following: drop closes it as dismissed');
+  h=view.innerHTML; ok(!/demo-19/.test(h),'following: dropped item gone everywhere (no Done lane)');
+  ok(!/class="block follow"/.test(railOf(h)),'following: block hidden when empty');
+  b.status='open'; b.doneAt=null; b.following={owner:'',matched:[],lastSeen:add(-5),state:'open'}; __applyProj(); h=go('hom-nay');
+  ok(!/demo-19/.test(h),'following: hidden 5 days after last seen');
+}
 function navHtml(){ return html.split('<nav class="tabs"')[1].split('</nav>')[0] }
 function demoEntryChecks(){
   const nav=navHtml(), how=html.split('id="howto"')[1].split('</section>')[0];
@@ -642,7 +663,7 @@ function demoEntryChecks(){
 }
 globalThis.__chain=[];
 setTimeout(()=>{ snapCbs.forEach(f=>f()); setTimeout(()=>{
-  if(owner) ownerTests(); else { demoTests(); aiDemoTests(); aiFormTests(); aiApplyDemoTests() }
+  if(owner) ownerTests(); else { demoTests(); followTests(); aiDemoTests(); aiFormTests(); aiApplyDemoTests() }
   if(owner) { ownerSettingsUndo(); aiOwnerTests(); globalThis.__chain.push(aiMcpAsync) } else demoSettingsUndo();
   const fin=()=>{ demoEntryChecks(); console.log(fails?`${fails} FAILED`:'ALL PASS'); process.exit(fails?1:0) };
   setTimeout(async()=>{ for(const f of globalThis.__chain) await f(); if(globalThis.__echoCheck) globalThis.__echoCheck(fin); else fin() },40)},10)},20);

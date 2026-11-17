@@ -86,6 +86,28 @@ def check_ref(where, t, errs):
             errs.append(f"{where}.ref.{k} is too long ({len(v)} chars); ids only")
 
 
+DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+
+
+def check_following(where, t, errs):
+    """Someone else's work shown in the page's "Following" block: owner name, matched terms, last seen, state."""
+    f = t.get("following")
+    if f is None:
+        return
+    if not isinstance(f, dict):
+        errs.append(f"{where}.following must be an object or null")
+        return
+    if not isinstance(f.get("owner", ""), str):
+        errs.append(f"{where}.following.owner must be a name or \"\"")
+    m = f.get("matched", [])
+    if not (isinstance(m, list) and all(isinstance(x, str) and x for x in m)):
+        errs.append(f"{where}.following.matched must be a list of short terms")
+    if not (isinstance(f.get("lastSeen"), str) and DATE.match(f["lastSeen"])):
+        errs.append(f"{where}.following.lastSeen must be YYYY-MM-DD")
+    if f.get("state", "open") not in ("open", "dismissed", "expired"):
+        errs.append(f"{where}.following.state must be open, dismissed or expired")
+
+
 def validate(d):
     errs = []
     for k in ("date", "dateLabel", "weekday", "todos"):
@@ -119,6 +141,7 @@ def validate(d):
             errs.append(f"todos[{i}].followsUp must be the id of the original todo")
         if isinstance(t.get("followsUp"), str) and t["followsUp"] == t.get("id"):
             errs.append(f"todos[{i}].followsUp can't point at itself")
+        check_following(f"todos[{i}]", t, errs)
         check_signals(f"todos[{i}]", t.get("signals"), errs)
         if t.get("id") in ids:
             errs.append(f"duplicate todo id {t.get('id')}")
@@ -128,9 +151,12 @@ def validate(d):
     for i, x in enumerate(d.get("done", [])):
         if not x.get("title"):
             errs.append(f"done[{i}] missing title")
+    follow_ids = {t.get("id") for t in d.get("todos", []) if isinstance(t.get("following"), dict)}
     for tid in d.get("top3", []):
         if tid not in ids:
             errs.append(f"top3 references unknown todo id {tid}")
+        elif tid in follow_ids:
+            errs.append(f"top3 can't include a following item ({tid}); it isn't the user's task")
     sug = d.get("suggested", [])
     if not isinstance(sug, list) or not all(isinstance(x, str) and x for x in sug):
         errs.append("suggested must be a list of todo ids (strings)")

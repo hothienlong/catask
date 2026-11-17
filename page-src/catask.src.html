@@ -136,6 +136,10 @@ a { color: var(--accent) }
 .mini:first-of-type { border-top: 0; padding-top: 0 }
 .mini .when { font-weight: 600; color: var(--accent); font-variant-numeric: tabular-nums; margin-right: 6px }
 .mini .sm { color: var(--soft); font-size: 12.5px }
+.follow .fl-t { font-weight: 600; line-height: 1.3 }
+.follow .fl-act { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 5px }
+.follow .fl-left { margin-left: auto; color: var(--soft); font-size: 11.5px }
+.follow .fl-more { margin-top: 6px; padding: 0; border: 0; background: none; color: var(--accent); font: 600 12.5px var(--text); cursor: pointer }
 .board { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); min-height: 0 }
 .lane { min-width: 0; display: flex; flex-direction: column; min-height: 0; padding: 16px 14px 0; border-right: 1px solid var(--rule); transition: background .15s }
 .lane:last-child { border-right: 0; padding-right: 0 }
@@ -822,6 +826,7 @@ html.ai-fold { --aibar-h: 41px }
       first: 'Làm trước', top3Empty: 'Ba việc ưu tiên đã xong hết.',
       meetings: 'Lịch họp', prep: 'Chuẩn bị: {0}', noMeetings: 'Không có lịch họp.',
       highlights: 'Tin nổi bật', noHighlights: 'Không có tin đáng chú ý.',
+      following: 'Đang theo dõi', followHint: 'Việc của người khác, bạn chỉ cần biết. Không tính vào việc cần làm.', followOwner: '{0} đang lo', followNoOwner: 'Chưa rõ ai nhận', followMatched: 'khớp: {0}', followLeft: 'còn {0} ngày', followLastDay: 'ẩn sau hôm nay', followMore: '+ {0} mục khác', followLess: 'Thu gọn', followClaim: 'Nhận', followDrop: 'Bỏ', followClaimAria: 'Nhận việc này: {0}', followDropAria: 'Bỏ theo dõi: {0}', snFollowClaim: 'Đã chuyển vào việc của bạn', snFollowDrop: 'Đã bỏ theo dõi',
       fromDigest: 'Từ bản tin hôm nay', olderDone: '{0} việc xong những ngày trước nằm ở tab Tuần.', dropHere: 'Kéo việc vào đây khi xong.',
       emptyToday: 'Không còn việc cho hôm nay.', emptyTomorrow: function (l) { return 'Chưa dời việc nào sang ' + l.toLowerCase() + '.' }, emptyWaiting: 'Không chờ ai.',
       oweAria: 'Lọc theo chiều nợ', oweAll: 'Tất cả', oweMine: 'Tôi nợ', oweTheirs: 'Nợ tôi',
@@ -1083,6 +1088,7 @@ html.ai-fold { --aibar-h: 41px }
       first: 'Do first', top3Empty: 'All three priorities are done.',
       meetings: 'Meetings', prep: 'Prep: {0}', noMeetings: 'No meetings.',
       highlights: 'Highlights', noHighlights: 'Nothing notable.',
+      following: 'Following', followHint: 'Someone else’s work you only need to know about. Not counted as your tasks.', followOwner: '{0} has it', followNoOwner: 'No owner yet', followMatched: 'matches: {0}', followLeft: function (n) { return plural(n, 'day', 'days') + ' left' }, followLastDay: 'hides after today', followMore: function (n) { return '+ ' + n + ' more' }, followLess: 'Show less', followClaim: 'Take it', followDrop: 'Drop', followClaimAria: 'Take this on: {0}', followDropAria: 'Stop following: {0}', snFollowClaim: 'Moved to your tasks', snFollowDrop: 'Stopped following',
       fromDigest: 'From today’s digest', olderDone: function (n) { return plural(n, 'task', 'tasks') + ' finished on earlier days are in the Week tab.' }, dropHere: 'Drag tasks here when they’re done.',
       emptyToday: 'Nothing left for today.', emptyTomorrow: function (l) { return 'Nothing moved to ' + l + ' yet.' }, emptyWaiting: 'Not waiting on anyone.',
       oweAria: 'Filter by who owes whom', oweAll: 'All', oweMine: 'I owe', oweTheirs: 'Owed to me',
@@ -1298,7 +1304,7 @@ html.ai-fold { --aibar-h: 41px }
   var S = { proj: (function () { try { return localStorage.getItem('proj-filter') || '' } catch (e) { return '' } })(), allTodos: [], owe: (function () { try { return localStorage.getItem('owe-filter') || 'all' } catch (e) { return 'all' } })(), runs: [], todos: [], days: [], dayPick: null, aiOnly: (function () { try { return localStorage.getItem('ai-only') === '1' } catch (e) { return false } })(), stripManual: (function () { try { return localStorage.getItem('ai-strip') || null } catch (e) { return null } })(), runner: {}, loaded: false, canWrite: true, ownerDemo: false,
     settings: null, setExists: false, setOpen: false, setDraft: null, setBase: null, setIn: { vipName: '', vipWhy: '', kw: '' }, setErr: {}, setExt: false, setSaving: false, baseLang: null };
   /* Test seam for tests/smoke.js: a no-op on the real page (nothing defines the hook there). */
-  if (typeof window.__cataskTestHook === 'function') window.__cataskTestHook({ S: S, setSignals: function (v) { PROFILE.signals = v } });
+  if (typeof window.__cataskTestHook === 'function') window.__cataskTestHook({ S: S, setSignals: function (v) { PROFILE.signals = v }, applyProj: function () { applyProj() } });
   var view = document.getElementById('view'), statusEl = document.getElementById('status');
   var db = null;
 
@@ -1593,7 +1599,18 @@ html.ai-fold { --aibar-h: 41px }
   function projOn(g) { return S.demo || curProj() === 'all' || curProj() === g }
   /* Day-level wins and highlights come from the default (work) sources. */
   function wins(d) { return d && projOn(DEF()) ? (d.done || []) : [] }
-  function applyProj() { S.todos = S.allTodos.filter(function (td) { return projOn(todoProj(td)) }) }
+  /* "Following": someone else's work the digest thinks the user should know about (todo.following set).
+     Kept out of every task view (lanes, top 3, counts, stats); shown only in the rail block, and hidden
+     FOLLOW_DAYS after it was last seen. Take it (following: null) turns it into a normal task. */
+  var FOLLOW_DAYS = 4;
+  function isFollow(td) { return !!(td && td.following && typeof td.following === 'object') }
+  function followLast(td) { var f = td.following || {}; return String(f.lastSeen || td.firstSeen || TODAY).slice(0, 10) }
+  function followOn(td) { return isFollow(td) && td.status !== 'done' && (td.following.state || 'open') === 'open' && diff(TODAY, followLast(td)) <= FOLLOW_DAYS }
+  function applyProj() {
+    var mine = S.allTodos.filter(function (td) { return projOn(todoProj(td)) });
+    S.todos = mine.filter(function (td) { return !isFollow(td) });
+    S.follow = mine.filter(followOn).sort(function (a, b) { return followLast(b).localeCompare(followLast(a)) || String(b.firstSeen || '').localeCompare(String(a.firstSeen || '')) });
+  }
   function projOptions() {
     var seen = {}; seen[DEF()] = 1;
     S.allTodos.forEach(function (td) { seen[todoProj(td)] = 1 });
@@ -1791,6 +1808,21 @@ html.ai-fold { --aibar-h: 41px }
     });
     S.stripIO = list;
   }
+  function followBlock() {
+    var fl = S.follow || []; if (!fl.length) return '';
+    var shown = S.followAll ? fl : fl.slice(0, 2);
+    return '<section class="block follow"><h2 class="label" title="' + esc(t('followHint')) + '">' + esc(t('following')) + '<span class="n">' + fl.length + '</span></h2>' +
+      shown.map(function (td) {
+        var f = td.following, left = FOLLOW_DAYS - diff(TODAY, followLast(td)), m = (f.matched || []).filter(Boolean).slice(0, 3);
+        var who = f.owner ? t('followOwner', String(f.owner).replace(/\s*\(.*\)\s*$/, '')) : t('followNoOwner');
+        return '<div class="mini fl" data-id="' + esc(td.id) + '"><div class="fl-t">' + titleLink(td) + '</div>' +
+          '<div class="sm">' + esc([who, m.length ? t('followMatched', m.join(', ')) : ''].filter(Boolean).join(' · ')) + '</div>' +
+          '<div class="fl-act"><button type="button" class="sug-btn yes" data-follow-take="' + esc(td.id) + '" aria-label="' + esc(t('followClaimAria', td.title)) + '">' + esc(t('followClaim')) + '</button>' +
+          '<button type="button" class="sug-btn no" data-follow-drop="' + esc(td.id) + '" aria-label="' + esc(t('followDropAria', td.title)) + '">' + esc(t('followDrop')) + '</button>' +
+          open(td.url) + '<span class="fl-left">' + esc(left > 0 ? t('followLeft', left) : t('followLastDay')) + '</span></div></div>';
+      }).join('') +
+      (fl.length > 2 ? '<button type="button" class="fl-more" data-follow-more aria-expanded="' + !!S.followAll + '">' + esc(S.followAll ? t('followLess') : t('followMore', fl.length - 2)) + '</button>' : '') + '</section>';
+  }
   function renderToday() {
     var ld = latestDay(), byId = {};
     S.todos.forEach(function (td) { byId[td.id] = td });
@@ -1809,7 +1841,7 @@ html.ai-fold { --aibar-h: 41px }
     rail += '<section class="block"><h2 class="label">' + esc(t('highlights')) + '<span class="n">' + hl.length + '</span></h2>' +
       (hl.length ? hl.map(function (x, i) { var s = signals(x.signals, 'h' + i);
         return '<div class="mini"><div style="font-weight:600">' + esc(x.title) + '</div><div class="sm">' + esc(x.summary) + '</div><div class="meta">' + s.tags + open(x.url) + '</div>' + s.notes + '</div>' }).join('')
-        : '<div class="empty">' + esc(t('noHighlights')) + '</div>') + '</section></aside>';
+        : '<div class="empty">' + esc(t('noHighlights')) + '</div>') + '</section>' + followBlock() + '</aside>';
 
     var nl = nextLabel();
     /* "N tasks look done" chip (top of the Today lane, like "AI tasks only" in Done): filters the open lanes
@@ -2076,7 +2108,7 @@ html.ai-fold { --aibar-h: 41px }
   function scrollBoxes() { return view.querySelectorAll ? [].slice.call(view.querySelectorAll('.scroll')) : [] }
   function boxKey(el, i) { var l = el.closest && el.closest('[data-lane]'); return l ? 'lane:' + l.getAttribute('data-lane') : 'i:' + i }
   function winY() { var se = document.scrollingElement || document.documentElement || {}; return window.pageYOffset || window.scrollY || se.scrollTop || 0 }
-  var FOCUS_ATTRS = ['data-strip-tg', 'data-strip-sum', 'data-pri', 'data-check', 'data-view', 'data-ai-req', 'data-ai-open', 'data-cp-id', 'data-ai-only', 'data-sug-only', 'data-sug-yes', 'data-sug-no', 'data-move', 'data-owe', 'data-day'];
+  var FOCUS_ATTRS = ['data-strip-tg', 'data-strip-sum', 'data-pri', 'data-check', 'data-view', 'data-ai-req', 'data-ai-open', 'data-cp-id', 'data-ai-only', 'data-sug-only', 'data-sug-yes', 'data-sug-no', 'data-follow-take', 'data-follow-drop', 'data-follow-more', 'data-move', 'data-owe', 'data-day'];
   function focusSel(a) {
     for (var i = 0; i < FOCUS_ATTRS.length; i++) {
       var v = a.getAttribute ? a.getAttribute(FOCUS_ATTRS[i]) : null; if (v == null) continue;
@@ -2164,13 +2196,15 @@ html.ai-fold { --aibar-h: 41px }
   var AI_UNDO = ['ai', 'updatedAt'];
   /* A "looks done?" answer also restores the suggestion on undo. */
   var SUG_UNDO = UNDO_FIELDS.concat(['suggestDone', 'suggestRejectedAt']);
+  var FOLLOW_UNDO = UNDO_FIELDS.concat(['following', 'tier']);
   function snapOf(td, fields) { var o = {}; fields.forEach(function (k) { o[k] = td[k] === undefined ? null : td[k] }); return o }
   function write(td, patch, msg, inPlace) {
     if (!S.demo && (!db || !S.canWrite)) { toast(t('ownerOnly'), true); render(); return }
-    var fields = 'ai' in patch ? AI_UNDO : 'suggestDone' in patch ? SUG_UNDO : UNDO_FIELDS;
+    var fields = 'ai' in patch ? AI_UNDO : 'suggestDone' in patch ? SUG_UNDO : 'following' in patch ? FOLLOW_UNDO : UNDO_FIELDS;
     var act = { id: td.id, fields: fields, snap: snapOf(td, fields), mode: 'ai' in patch ? 'ai' : inPlace ? 'pri' : 'full' };
     if (!S.demo) patch.updatedAt = new Date().toISOString();
     Object.assign(td, patch);
+    if ('following' in patch) applyProj();
     if (inPlace) inPlace();
     else if (act.mode === 'ai') render();
     else { render(); var el = view.querySelector && view.querySelector('.card[data-id="' + CSS.escape(td.id) + '"]'); if (el) el.classList.add('enter') }
@@ -2189,6 +2223,7 @@ html.ai-fold { --aibar-h: 41px }
     var td = findTodo(a.id); if (!td) return;
     var patch = {}; a.fields.forEach(function (k) { patch[k] = a.snap[k] });
     Object.assign(td, patch);
+    if ('following' in patch) applyProj();
     if (a.mode === 'pri') updatePriBadges(td); else render();
     snackShow({ kind: 'undone', verb: t('undoneMsg') }, null);
     if (S.demo || !db) return;
@@ -2271,6 +2306,16 @@ html.ai-fold { --aibar-h: 41px }
     var td = findTodo(id); if (!td || !sugOf(td)) return;
     if (yes) { setDone(id, true); return }
     write(td, { suggestDone: null, suggestRejectedAt: new Date().toISOString(), movedBy: 'user' }, { kind: 'no', verb: t('snSugNo'), title: td.title });
+  }
+  /* Take it: becomes a normal task for today. Drop: closed quietly (status done, but still a "following"
+     doc, so it never shows in Done, stats or wins); the digest deletes it at retention time. */
+  function followAnswer(id, take) {
+    var td = findTodo(id); if (!followOn(td)) return;
+    if (take) {
+      write(td, { following: null, tier: 'week', priority: td.priorityBy === 'user' ? td.priority : 'P2', status: 'open', plannedFor: TODAY, movedBy: 'user' }, { kind: 'move', verb: t('snFollowClaim'), title: td.title });
+      return;
+    }
+    write(td, { following: Object.assign({}, td.following, { state: 'dismissed', at: localIso() }), status: 'done', doneAt: TODAY, prevStatus: td.status || 'open', movedBy: 'user' }, { kind: 'no', verb: t('snFollowDrop'), title: td.title });
   }
   function move(id, where) {
     var td = findTodo(id); if (!td || lane(td) === where) return;
@@ -3805,6 +3850,9 @@ html.ai-fold { --aibar-h: 41px }
     if (ao1) { S.aiOnly = !S.aiOnly; try { localStorage.setItem('ai-only', S.aiOnly ? '1' : '0') } catch (err) {} render(); return }
     var sy = e.target.closest('[data-sug-yes]'); if (sy) { sugAnswer(sy.getAttribute('data-sug-yes'), true); return }
     var sn = e.target.closest('[data-sug-no]'); if (sn) { sugAnswer(sn.getAttribute('data-sug-no'), false); return }
+    var fy = e.target.closest('[data-follow-take]'); if (fy) { followAnswer(fy.getAttribute('data-follow-take'), true); return }
+    var fn = e.target.closest('[data-follow-drop]'); if (fn) { followAnswer(fn.getAttribute('data-follow-drop'), false); return }
+    if (e.target.closest('[data-follow-more]')) { S.followAll = !S.followAll; render(); return }
     if (e.target.closest('[data-sug-only]')) { S.sugOnly = !S.sugOnly; render(); return }
     var m = e.target.closest('[data-move]'); if (m) { move(m.dataset.id, m.dataset.move); return }
     var pr = e.target.closest('[data-pri]'); if (pr) { e.preventDefault(); cyclePri(pr.getAttribute('data-pri')); return }
@@ -3922,6 +3970,7 @@ html.ai-fold { --aibar-h: 41px }
       t4: ['Cập nhật ước lượng cho 3 ticket sprint mới', 'Thỏ Trắng cần số để chốt kế hoạch sprint.'],
       t5: ['Chờ Cáo Nhỏ chốt nội dung thông báo lỗi', 'Tôi đã hỏi thứ hai, Cáo Nhỏ hẹn "để chị xem".'],
       t6: ['Chờ Gấu Trúc gửi tài liệu API mới', 'Gấu Trúc hẹn gửi trong hôm nay.'],
+      t18: ['Badge xác minh chỉ còn 2 trạng thái', 'Cáo Nhỏ chốt bỏ trạng thái hết hạn; Gấu Trúc đang sửa.'], t19: ['Đổi giờ chốt đối soát thanh toán sang 22:00', 'Nhóm Payment bàn trong chat, chưa ai nhận.'],
       t7: ['Chuẩn bị demo tính năng ví cho buổi họp sáng mai', 'Buổi demo 10:00 với cả nhóm sản phẩm.'],
       t8: ['Sửa lỗi hiển thị số dư khi mất mạng', 'Sóc Nâu: "fix nhanh quá, cảm ơn nha!"'],
       q8: 'Fix nhanh quá, mình test lại thấy số dư hiện đúng khi mất mạng rồi, cảm ơn nha!',
@@ -3976,6 +4025,7 @@ html.ai-fold { --aibar-h: 41px }
       t4: ['Update estimates for 3 new sprint tickets', 'Ruby needs the numbers to lock the sprint plan.'],
       t5: ['Waiting on Finn to finalize the error message copy', 'I asked on Monday; Finn said "let me take a look".'],
       t6: ['Waiting on Pat for the new API docs', 'Pat said they’d send them today.'],
+      t18: ['Verification badge down to 2 states', 'Finn dropped the expired state; Pat is on it.'], t19: ['Move the payment reconciliation cut-off to 22:00', 'Discussed in the Payment chat, no owner yet.'],
       t7: ['Prepare the wallet feature demo for tomorrow morning', 'The 10:00 demo is with the whole product team.'],
       t8: ['Fix the balance display when offline', 'Sam: "that was a fast fix, thanks!"'],
       q8: 'That was a fast fix! I retested and the balance shows correctly offline now. Thanks!',
@@ -4057,6 +4107,8 @@ html.ai-fold { --aibar-h: 41px }
         ai: { status: 'running', kind: 'summary', note: '', readSource: true, requestedAt: TODAY + 'T18:05:00+07:00', startedAt: TODAY + 'T18:12:00+07:00', attempt: 1, updatedBy: 'worker',
           steps: [{ at: TODAY + 'T18:12:00+07:00', text: c.aiS4 }, { at: TODAY + 'T18:13:00+07:00', text: c.aiS5 }] } }),
       mk(5, { title: c.t5[0], url: 'https://teams.microsoft.com/', kind: 'followup', from: c.fox, tier: 'watch', priority: 'P3', status: 'waiting', firstSeen: addDays(TODAY, -5), sourceLabel: c.teamProduct, why: c.t5[1], quote: q(c.fox, '14:20', c.q5) }),
+      mk(18, { title: c.t18[0], kind: 'ask', from: c.fox, tier: 'watch', priority: 'P3', sourceLabel: c.teamProduct, why: c.t18[1], following: { owner: c.panda, matched: ['eKYC'], lastSeen: TODAY, state: 'open' } }),
+      mk(19, { title: c.t19[0], kind: 'ask', from: c.rabbit, tier: 'watch', priority: 'P3', sourceLabel: c.teamPay, why: c.t19[1], firstSeen: addDays(TODAY, -2), following: { owner: '', matched: ['payment'], lastSeen: addDays(TODAY, -2), state: 'open' } }),
       mk(6, { title: c.t6[0], kind: 'followup', from: c.panda, tier: 'watch', status: 'waiting', sourceLabel: c.teamMobile, why: c.t6[1] }),
       mk(7, { title: c.t7[0], kind: 'prep', from: '', tier: 'now', priority: 'P2', sourceLabel: c.calendar, source: 'calendar', why: c.t7[1] }),
       mk(9, { title: c.t9[0], url: 'https://example.atlassian.net/browse/MOB-2048', ref: { source: 'jira', issueKey: 'MOB-2048' }, kind: 'ask', from: c.rabbit, tier: 'week', priority: 'P2', plannedFor: N, source: 'jira', sourceLabel: 'Jira', why: c.t9[1],
@@ -4113,7 +4165,7 @@ html.ai-fold { --aibar-h: 41px }
   function startDemo(reasonKey) {
     /* Demo follows the viewer's browser language, never the owner's profile. */
     setProfile(DEMO_PROFILE); setLang(navLang());
-    var d = demoData(); S.demo = true; S.todos = d.todos; S.allTodos = d.todos; S.days = d.days; S.runs = d.runs; S.loaded = true; clearTimeout(timer);
+    var d = demoData(); S.demo = true; S.allTodos = d.todos; applyProj(); S.days = d.days; S.runs = d.runs; S.loaded = true; clearTimeout(timer);
     if (S.setOpen) closeSettings(false);
     S.settings = normSettings(d.settings); S.setExists = true;
     applyStatic();

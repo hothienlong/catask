@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.8.0
+
+- **Following / Đang theo dõi**: someone else's work that touches your areas (a group ask or decision about your `focusAreas`/`keywords`/`currentWork` where you're not @mentioned or named) is no longer a `watch` todo. The digest stores it as a todo with `following: {owner, matched, lastSeen, state}`, and the page shows it in a new block in the Today rail, under Highlights: who has it, why you see it (the matched terms), days left, and **Take it** / **Drop** (both undoable). It is kept out of the lanes, top 3, counts and stats.
+- Items hide 4 days after they were last seen; the digest closes them as `expired`. Take it turns one into an ordinary task for today. Drop closes it as `dismissed`. Dropped or expired items are deleted (not archived) at retention.
+- Migration: on the next run, open `watch` todos that are plainly someone else's work become following items, unless you moved or re-prioritised them on the page.
+- `watch` now means only your own low-urgency items (waiting on others, promises with no date).
+- `render.py` validates `following` and rejects a following item in `top3`. The offline digest leaves following items out.
+- The page changed: after the update it is republished to the same URL; your link and data stay as they are.
+
 ## 1.7.0
 
 - **Watch mode for quiet chats** (canh gác). A middle tier between reading a chat fully and skipping it: `watchChats` are skimmed by a cheap model (`watchModel`, default `"haiku"`) that keeps only alarms in the window — @mentions, senders outside your organization, incident/urgent words (vi + en), open questions or decisions about your areas. When unsure it includes the message. Watch candidates carry `"via": "watch"` and are judged like any other.

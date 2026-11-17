@@ -6,7 +6,7 @@ allowed-tools: Bash(node:*), Bash(python3:*), Bash(date:*), Bash(gh pr view:*), 
 
 # Daily digest + TODO (Teams + Outlook)
 
-The user often misses or forgets asks buried in chats and mail. The whole point of this skill is the **TODO list**: every thing someone expects the user to do, every question waiting on the user, every promise the user made. Highlights are secondary context. A missed TODO is the costly failure; a slightly noisy list is cheap. When unsure whether something is the user's to do, put it in the `watch` tier rather than dropping it.
+The user often misses or forgets asks buried in chats and mail. The whole point of this skill is the **TODO list**: every thing someone expects the user to do, every question waiting on the user, every promise the user made. Highlights are secondary context. A missed TODO is the costly failure; a slightly noisy list is cheap. When unsure whether something is the user's to do, keep it as a **following** item (someone else's work the user should know about, Step 3) rather than dropping it.
 
 ## Output language
 
@@ -211,9 +211,16 @@ A TODO is something **the user** is expected to do. Look for (examples in either
 - **Review/approve/test requests**: MR/PR review, test build, QA bug report pointing at the user's feature.
 - **Meeting prep** for tomorrow.
 
-Not TODOs: FYI and status updates, jokes and banter, asks clearly aimed at someone else, group-wide "hey all" / "mn ơi" asks where the user is not singled out (put those in `watch` only if they plausibly concern `focusAreas` or `keywords`).
+Not TODOs: FYI and status updates, jokes and banter, asks clearly aimed at someone else, group-wide "hey all" / "mn ơi" asks where the user is not singled out (keep those as **following** items, below, only if they plausibly concern `focusAreas`, `keywords` or `currentWork`).
 
-**Is it the user's?** Use `config.role` and `config.currentWork` as context: an ask that touches what the user is working on now (same feature, screen, ticket or sprint) is much more likely the user's, even in a group chat without an @mention; an ask about another team's area is less likely. A group ask that mentions a `keywords` entry (e.g. a ticket prefix like "MOB-") is at least `watch`, never dropped.
+**Is it the user's?** Use `config.role` and `config.currentWork` as context: an ask that touches what the user is working on now (same feature, screen, ticket or sprint) is much more likely the user's, even in a group chat without an @mention; an ask about another team's area is less likely. A group ask that mentions a `keywords` entry (e.g. a ticket prefix like "MOB-") is at least a following item, never dropped.
+
+**Following (someone else's work, not a TODO).** An ask, decision or open question that touches the user's areas (`focusAreas`, `keywords`, `currentWork`) but that the user is **not** expected to act on: it is addressed or assigned to someone else, or to the group with nobody singled out, and the user is not @mentioned or named. Example: the PO asks the group to drop a badge state on the user's feature and a teammate hands the fix to another dev. Write it as a todo with a `following` object, so the page shows it in the **Following / Đang theo dõi** block and keeps it out of every task list, count and stat:
+- `following: {owner, matched, lastSeen, state: "open"}`: `owner` = the person who has it (display name, as written in the chat; `""` when nobody took it yet); `matched` = 1–3 short terms that explain why the user sees it (the `focusAreas`/`keywords` it hit, in their own wording, e.g. `["lending", "eKYC"]`); `lastSeen` = the date (`YYYY-MM-DD`, `config.timezone`) of the newest in-window message about it.
+- Other fields as for a todo: a short title stating the thing (not a verb aimed at the user: vi "Badge xác minh chỉ còn 2 trạng thái" / en "Verification badge down to 2 states"), `why` (who decided what, who is on it), `from` = who raised it, `kind: "ask"` (or `question`), `tier: "watch"`, `priority: "P3"`, `url`, `ref`, `quote` as usual.
+- Never in `top3`, `suggested` or `done`; no `suggestDone`, no Jira-check new todos (`followsUp`) from it. It may still be the source of a `highlights` entry when it is a notable decision.
+- **It becomes the user's** (later message @mentions or names the user about it, assigns it to the user, or the user says they'll do it) → an ordinary todo: `following: null`, with the normal kind, tier and priority.
+- When unsure whether an ask is the user's or someone else's: if the user is @mentioned or named, it's a TODO; otherwise it's following.
 
 **Exception to the group-ask rule**: company-wide asks from HR/Admin/IT (KPI, reviews, health checks, forms, surveys) and action items a meeting recap gives to "all / everyone / các nhóm / mọi người" **do** apply to the user. They are real TODOs (usually `kind: "deadline"`), not `watch`.
 
@@ -225,7 +232,7 @@ Not TODOs: FYI and status updates, jokes and banter, asks clearly aimed at someo
 **Tiering**:
 - `now`: due today/tomorrow, blocking someone (QA blocked, prod issue), or a direct question from a manager/PO waiting more than half a day.
 - `week`: has a date this week, or a direct ask with no date.
-- `watch`: waiting on others, group asks touching `focusAreas` or `keywords`, the user's promises with no clear urgency.
+- `watch`: the user's own items with no clear urgency: waiting on others, the user's promises with no date. (Someone else's work touching the user's areas is a following item, above, not a `watch` todo.)
 
 **Priority (P0–P3) = criticality, separate from the tier.** `tier` says *when* (urgency); `priority` says *how much it matters if it slips*. Keep the tier and lane logic above exactly as is, and set `priority` on every todo:
 
@@ -271,7 +278,7 @@ Write each TODO as a concrete action starting with a verb (vi: "Trả lời ch�
 - `review`, `deadline`, `prep`
 - `followup`: the user is waiting on them. `from` = who the user is waiting for, shown as vi "Tôi đang chờ Gấu Trúc" / en "I'm waiting on Pat".
 
-**top3**: pick the 3 TODOs the user should do first tomorrow morning: sort the open todos with the comparator above, and where it still leaves a tie, prefer the one where someone is blocked waiting on the user.
+**top3**: pick the 3 TODOs the user should do first tomorrow morning (never a following item): sort the open todos with the comparator above, and where it still leaves a tie, prefer the one where someone is blocked waiting on the user.
 
 ## Step 3b — Done today
 
@@ -337,6 +344,12 @@ Pick 3–8 things worth knowing even when they aren't the user's tasks: decision
              "quote": {"from": "Sóc Nâu", "time": "16:42 06/11", "text": "Em ơi check giúp chị mã lỗi đăng nhập trên build 1.4 nhé, QA đang chờ",
                        "at": "2026-11-06T19:03:00+07:00"},
              "ref": {"source": "teams", "chatId": "19:abc@thread.v2", "messageId": "1762425720000"},
+             "signals": []},
+            {"id": "t9", "title": "Badge xác minh chỉ còn 2 trạng thái", "why": "Chị PO chốt bỏ trạng thái hết hạn; anh Hiếu giao Thái sửa.",
+             "from": "Ngọc Vũ", "kind": "ask", "source": "teams", "sourceLabel": "Lending x CusApp", "url": "https://...",
+             "due": "", "dueLabel": "", "tier": "watch", "priority": "P3", "vip": false, "keyChat": false, "carried": false, "ageDays": 0,
+             "project": "work", "ref": {"source": "teams", "chatId": "19:def@thread.v2", "messageId": "1762425800000"},
+             "following": {"owner": "Thái Huỳnh", "matched": ["lending", "eKYC"], "lastSeen": "2026-11-06", "state": "open"},
              "signals": []}],
   "suggested": ["ids of open todos that look done this run (suggestDone written; the user confirms on the page)"],
   "done": [{"title": "Đã ...", "evidence": "...", "time": "14:10", "source": "teams", "sourceLabel": "...", "url": "..."}],
@@ -349,7 +362,7 @@ Pick 3–8 things worth knowing even when they aren't the user's tasks: decision
 
 (Times in the example are illustrative: the window runs from the previous run to now, at whatever the user's digest time is.)
 
-`suggested` replaces the old `resolved` list (pre-1.1); write `[]` when there are none. Keep todo ids stable across days for carried items (reuse the old id). Use ids like `2026-11-06-t1` so they never collide across days. When there's no date, leave `due` and `dueLabel` as `""`. For new todos, `carried: false` and `ageDays: 0`. Optional: `jiraKey` (Step 3) and `followsUp` (the id of the open todo this one came out of, Step 2b.5); the page shows "tiếp theo của …" / "follows up: …" for it. `priority` is one of `P0`–`P3` (Step 3); `vip` and `keyChat` are booleans.
+`suggested` replaces the old `resolved` list (pre-1.1); write `[]` when there are none. Keep todo ids stable across days for carried items (reuse the old id). Use ids like `2026-11-06-t1` so they never collide across days. When there's no date, leave `due` and `dueLabel` as `""`. For new todos, `carried: false` and `ageDays: 0`. Optional: `following` (Step 3, someone else's work; `render.py` rejects one in `top3`), `jiraKey` (Step 3) and `followsUp` (the id of the open todo this one came out of, Step 2b.5); the page shows "tiếp theo của …" / "follows up: …" for it. `priority` is one of `P0`–`P3` (Step 3); `vip` and `keyChat` are booleans.
 
 `quote` (only when `config.storeQuotes` is not `false`; omit it otherwise) is a snapshot of the message that created the todo, for the page's "View message" / "Xem tin":
 - `text`: ≤ 500 chars, HTML stripped, in the message's original language (never translated). Cut at a word boundary and end with "…" if longer.
@@ -385,11 +398,18 @@ Pick 3–8 things worth knowing even when they aren't the user's tasks: decision
         - `status`: `"waiting"` for `followup`, else `"open"`
         - `plannedFor`: today for tier `now` and for `followup`, else the next working day
         - `doneAt: null`, `updatedAt`
-      - **Existing open todo seen again** → `update` only the content fields: title, why, tier, priority, vip, keyChat, quote, ref, jiraKey, due, dueLabel, signals, url, sourceLabel, updatedAt. Exception: if the doc has `priorityBy: "user"`, leave `priority` out of the update. Never touch `status`, `plannedFor`, `firstSeen`, `doneAt`, `movedBy`, `prevStatus`, `priorityBy` or `suggestRejectedAt`; those are the user's. `suggestDone` is written only by the suggestion rules below. A todo with no `priority` yet gets one now (migration). A todo with no `ref` yet gets one when the source is known.
+      - **Existing open todo seen again** → `update` only the content fields: title, why, tier, priority, vip, keyChat, quote, ref, jiraKey, due, dueLabel, signals, url, sourceLabel, following, updatedAt. Exception: if the doc has `priorityBy: "user"`, leave `priority` out of the update. Never touch `status`, `plannedFor`, `firstSeen`, `doneAt`, `movedBy`, `prevStatus`, `priorityBy` or `suggestRejectedAt`; those are the user's. `suggestDone` is written only by the suggestion rules below. A todo with no `priority` yet gets one now (migration). A todo with no `ref` yet gets one when the source is known.
       - **`ai` is never the digest's**: the page's "Hand to AI" button and the `ai-worker` skill own `todos/<id>.ai`. Never write, clear or copy `ai` in any update, set or archive item, and never use it as evidence. A new todo has no `ai` field. **One exception, merged MRs** (below).
       - **Open AI merge requests** (`kind: "code"` todos with `ai.status: "mr_open"` and `ai.result.mr.url`; skip if there are none): check each MR's state **read-only** — `glab mr view <iid> --repo <url's project> --output json` (or `-R`), `gh pr view <url> --json state,mergedAt`, or the GitLab MCP; run CLIs with `git -C <repo.path>` context when needed, never anything that writes. If **merged** → pinned `update` of `{suggestDone: {at: now, evidence: vi "MR <KEY> đã merge" / en "MR <KEY> merged", url: <MR url>, source: "other", sourceLabel: "GitLab" or "GitHub"}, ai: {...the complete ai object, status: "applied", appliedAt: now, updatedBy: "skill"}, updatedAt}` (the merge really happened, so `ai` moves to `applied`; the todo stays open until the user confirms, and the page's ✓ then records `doneBy: "ai+user"`). Don't touch `status`, `doneAt` or `movedBy`, don't list it in `done`; list its id in `suggested`. Skip the `suggestDone` part when the no-repeat rule above says so (still move `ai` to `applied`). If **closed without merge** → leave it, add one coverage line. Open → leave it. If no CLI/MCP can read it, skip silently (one coverage line at most).
       - **Looks done by evidence** (Step 3 resolved check: the user said done, an MR link, an answered question, a Jira Done/Resolved mail, the same thing closed in another chat) → pinned `update` of `{suggestDone: {at: now ISO, evidence: "one line in language", url, source, sourceLabel}, updatedAt}` only, unless the no-repeat rule above says skip. Never write `status`, `doneAt` or `movedBy`, and don't list it in `done`; list its id in `suggested`. Leave `ai` exactly as it is.
       - **Jira check** (Step 2b; skip when it didn't run) → for every candidate in 2b.3's list, `jiraCheckedAt` (merged into that todo's other update in this batch, else its own pinned `update` of `{jiraCheckedAt}` only, no `updatedAt`, so it doesn't count as a content change). Its `suggestDone` writes follow the rule above (`source: "jira"`); its new todos are `set` like any new todo, with `followsUp`.
+      - **Following items** (todos with a `following` object; Step 3):
+        - New → `set` like a new todo, with `status: "open"`, `plannedFor`: today, and the `following` object.
+        - Seen again (new in-window messages about it) → `update` `following.lastSeen` (and `owner`/`matched` if they changed) plus the content fields, as for any open todo.
+        - Became the user's (Step 3) → `update` `{following: null, kind, tier, priority, plannedFor: today, updatedAt}` (pinned). Skip `priority` when `priorityBy: "user"`.
+        - **Expired**: still `following.state: "open"`, no `status: "done"`, and `following.lastSeen` more than 4 days before today (the page hides it after the same 4 days) → `update` `{status: "done", doneAt: today, following: {...the same object, state: "expired"}, updatedAt}` (pinned). This is not the skill closing a task: following items are not the user's tasks. Never list it in `done`.
+        - The page writes the user's answers: **Take it** sets `following: null` (it is now an ordinary todo, never turn it back into a following item); **Drop** sets `status: "done"` with `following.state: "dismissed"`. Never reopen or re-create a dropped or expired item from the same thread; only a later message that makes it the user's (Step 3) brings it back, as a new ordinary todo.
+        - **Migration** (once per open todo, from plugin 1.8.0): an open todo with `tier: "watch"`, no `following`, no `movedBy`/`priorityBy` of `"user"`/`"page"`, whose source shows it is someone else's work by the Step 3 rule (the user not @mentioned or named, owner someone else or nobody) → `update` it with a `following` object (`lastSeen`: the newest source message's date, else its `firstSeen`). The expiry rule then applies on the same run. When unsure, leave it as a todo.
       - **The user marked it done on the page** → it stays done (never reopen; a leftover `suggestDone` on a done todo is ignored).
       - **Quotes off** (`storeQuotes: false`) → for every open todo that still has a `quote`, `update` `{quote: null}`. The page then opens the original link directly.
       - **Quote cleanup** (every run) → for done todos whose `doneAt` is more than `retention.quoteDaysAfterDone` (default 30) days ago and that still have a `quote`, `update` `{quote: null}`, batched with the rest. Archiving and pruning old docs is the separate **Retention** step (3c2), run after this batch.
@@ -399,7 +419,8 @@ Pick 3–8 things worth knowing even when they aren't the user's tasks: decision
 
    c2. **Retention** (every run, after all the writes above; skip on the first run). Keeps the database small: the page loads every `todos` doc on open. Dates are compared in `config.timezone`; A = `retention.archiveDoneAfterDays` (default 90, min 45), P = `retention.pruneDaysAfterDays` (default 120, min 60).
       - **Dry run first.** From the `todos` list already read (3a/3c), and one `list` each of `days` and `runs`, collect:
-        - **Archive candidates**: todos with `status == "done"` and `doneAt` more than A days before today. Never an open or waiting todo, however old. Skip (this run only) a todo the user touched lately: `updatedAt` within the last 7 days and `movedBy` or `priorityBy` is `"user"` or `"page"`.
+        - **Following leftovers**: todos with a `following` object and `status == "done"` (dropped or expired) whose `doneAt` is more than 30 days before today → **delete** them (pinned), never archive: they were never the user's tasks.
+        - **Archive candidates**: todos with `status == "done"`, no `following` object, and `doneAt` more than A days before today. Never an open or waiting todo, however old. Skip (this run only) a todo the user touched lately: `updatedAt` within the last 7 days and `movedBy` or `priorityBy` is `"user"` or `"page"`.
         - **Prune candidates**: `days/<date>` docs with `date` more than P days before today, and `runs/<runId>` docs whose run date is more than P days ago. Never touch `meta/*` or `archive/*`.
         - **Cap**: if todo deletes + day/run deletes > 200, keep only the 200 oldest (by `doneAt` / date) and leave the rest for the next run.
         - Do the dry run before Step 5.1/5.3b if you can, so the coverage line below can go into the JSON and `days/<date>` with the planned counts.
@@ -409,7 +430,7 @@ Pick 3–8 things worth knowing even when they aren't the user's tasks: decision
       - **Coverage line** (only when N > 0 or M > 0; N = done todos archived, M = `days` docs removed; DD/MM = the archive cut-off date): vi "Dọn sổ: lưu trữ N việc xong (trước DD/MM), xoá M bản tin ngày cũ" / en "Ledger cleanup: archived N done tasks (before DD/MM), removed M old daily digests". If the actual counts differ from what was written in 5.1/5.3b (failure, version mismatch), `update` `days/<date>.coverage` (pinned) and the local JSON with the real counts.
       - The local `~/.catask/YYYY-MM-DD.json` files stay on disk; retention never deletes them.
 
-   c3. **Open-todo cache** (every run, last; also when `crossSessionDone` is false, so turning it back on works at once). Write `~/.catask/open-todos.json` = `{generatedAt: now ISO, artifactUrl, todos: [{id, title, jiraKey?, person?, url?}]}`: only todos with `status` not `"done"` after this run's writes, sorted with the Step 3 comparator, cap 40. `jiraKey` from `ref.issueKey`, the todo's `jiraKey`, or a key in the title/url. Titles, names and links only: never `why`, quotes, message text or emails. The plugin's SessionStart hook (`hooks/catask-context.mjs`) reads it in the user's other interactive Claude Code sessions, stays silent when the file is older than 3 days or `crossSessionDone` is `false`, and tells Claude to ask (AskUserQuestion) before marking a matching todo done; on Yes that session writes the done fields itself with `ArtifactData`, or appends to `pending-done.json` (step a2).
+   c3. **Open-todo cache** (every run, last; also when `crossSessionDone` is false, so turning it back on works at once). Write `~/.catask/open-todos.json` = `{generatedAt: now ISO, artifactUrl, todos: [{id, title, jiraKey?, person?, url?}]}`: only todos with `status` not `"done"` and no `following` object after this run's writes, sorted with the Step 3 comparator, cap 40. `jiraKey` from `ref.issueKey`, the todo's `jiraKey`, or a key in the title/url. Titles, names and links only: never `why`, quotes, message text or emails. The plugin's SessionStart hook (`hooks/catask-context.mjs`) reads it in the user's other interactive Claude Code sessions, stays silent when the file is older than 3 days or `crossSessionDone` is `false`, and tells Claude to ask (AskUserQuestion) before marking a matching todo done; on Yes that session writes the done fields itself with `ArtifactData`, or appends to `pending-done.json` (step a2).
 
    d. **First run** (or `artifact-url.txt` missing, or its URL no longer opens). **Publishing the page is required**: the first run is not finished until the user's catask page exists and they have its link. Never end a first run without it, even when the digest itself is done, a file looks too big to read, or you'd rather "not publish what you haven't read" (read it as below instead). The only exception: the `Artifact` tool is unavailable or the publish is refused; then say exactly why (the error), that the digest JSON was saved, and how to retry: vi "Nói \"bản tin tối\" lại để tạo trang" / en "Say \"evening digest\" again to create the page".
       - **Read every file you publish first, in chunks** (the rule: read the files you didn't write before publishing them). They are, all under `<skill-dir>/assets/`:
