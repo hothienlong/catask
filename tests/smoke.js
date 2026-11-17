@@ -64,7 +64,7 @@ function change(id,checked){ view.L.change.forEach(f=>f({target:{getAttribute:k=
 function click(sel,attr,val){ const t={getAttribute:k=>k===attr?val:null,dataset:{}}; view.L.click.forEach(f=>f({preventDefault(){},target:{closest:s=>s===sel?t:null}})) }
 const all=()=>[...html.matchAll(/x/g)];
 function demoTests(){
-  const tabs=['hom-nay','theo-nguoi','tuan','ngay','chi-phi'], out={};
+  const tabs=['hom-nay','theo-nguoi','tuan','lich','ngay','chi-phi'], out={};
   for(const tb of tabs){ out[tb]=go(tb); ok(out[tb].length>200, `${navLang} ${tb} renders (${out[tb].length})`) }
   const joined=Object.values(out).join('');
   ok(/class="pri p0"/.test(out['hom-nay']) && /class="pri p1"/.test(out['hom-nay']) && /class="pri p2"/.test(out['hom-nay']) && /class="pri p3"/.test(out['hom-nay']), 'P0..P3 badges on Today');
@@ -649,6 +649,27 @@ function followTests(){
   b.status='open'; b.doneAt=null; b.following={owner:'',matched:[],lastSeen:add(-5),state:'open'}; __applyProj(); h=go('hom-nay');
   ok(!/demo-19/.test(h),'following: hidden 5 days after last seen');
 }
+function dueCalTests(){
+  const dc=(attr,id,val)=>view.L.change.forEach(f=>f({target:{getAttribute:k=>k===attr?id:null,value:val}}));
+  let h=go('hom-nay');
+  ok(/data-due-edit="demo-7"/.test(h),'due: card has a due chip (set/edit)');
+  click('[data-due-edit]','data-due-edit','demo-7'); h=view.innerHTML;
+  ok(/data-due-input="demo-7"/.test(h),'due: chip opens a date input');
+  const tgt=add(3); dc('data-due-input','demo-7',tgt);
+  let td=S.allTodos.find(x=>x.id==='demo-7');
+  ok(td.due===tgt&&td.dueBy==='user'&&td.dueLabel===''&&!/data-due-input/.test(view.innerHTML),'due: picking a date saves due + dueBy user');
+  click('[data-due-edit]','data-due-edit','demo-7'); click('[data-due-clear]','data-due-clear','demo-7');
+  ok(td.due===''&&td.dueBy==='user','due: clear removes the due date');
+  h=go('lich');
+  ok(/class="cal mode-week"/.test(h)&&(h.match(/data-cal-day="/g)||[]).length===7,'cal: week view has 7 days');
+  ok(/class="cal-it k-due/.test(h)&&/class="cal-it k-plan/.test(h),'cal: due and planned tasks render');
+  ok(!/data-id="demo-19"/.test(h),'cal: following items are not on the calendar');
+  click('[data-cal-mode]','data-cal-mode','month'); h=view.innerHTML;
+  ok(/class="cal mode-month"/.test(h)&&(h.match(/data-cal-day="/g)||[]).length===42&&(h.match(/class="cal-wh"/g)||[]).length===7,'cal: month view is a 6x7 grid');
+  click('[data-cal-nav]','data-cal-nav','1'); click('[data-cal-nav]','data-cal-nav','0');
+  ok(S.calAt===TODAY,'cal: Today button returns to today');
+  click('[data-cal-mode]','data-cal-mode','week');
+}
 function navHtml(){ return html.split('<nav class="tabs"')[1].split('</nav>')[0] }
 function demoEntryChecks(){
   const nav=navHtml(), how=html.split('id="howto"')[1].split('</section>')[0];
@@ -663,7 +684,7 @@ function demoEntryChecks(){
 }
 globalThis.__chain=[];
 setTimeout(()=>{ snapCbs.forEach(f=>f()); setTimeout(()=>{
-  if(owner) ownerTests(); else { demoTests(); followTests(); aiDemoTests(); aiFormTests(); aiApplyDemoTests() }
+  if(owner) ownerTests(); else { demoTests(); followTests(); dueCalTests(); aiDemoTests(); aiFormTests(); aiApplyDemoTests() }
   if(owner) { ownerSettingsUndo(); aiOwnerTests(); globalThis.__chain.push(aiMcpAsync) } else demoSettingsUndo();
   const fin=()=>{ demoEntryChecks(); console.log(fails?`${fails} FAILED`:'ALL PASS'); process.exit(fails?1:0) };
   setTimeout(async()=>{ for(const f of globalThis.__chain) await f(); if(globalThis.__echoCheck) globalThis.__echoCheck(fin); else fin() },40)},10)},20);

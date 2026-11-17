@@ -163,6 +163,60 @@ a { color: var(--accent) }
 .warn-chip { font-size: 11px; font-weight: 600; padding: 0 7px; line-height: 18px; border-radius: 999px; white-space: nowrap }
 .w-over { background: var(--over-wash); color: var(--over) } .w-soon { background: var(--soon-wash); color: var(--soon) } .w-nudge { background: var(--accent-wash); color: var(--accent) }
 .due { color: var(--accent); font-weight: 600 }
+.due-btn { border: 0; background: none; padding: 0; cursor: pointer; font: inherit; color: var(--accent); font-weight: 600 }
+.due-btn.add { color: var(--faint); font-weight: 500 }
+.due-btn:hover { text-decoration: underline }
+.due-edit { display: inline-flex; gap: 6px; align-items: center }
+.due-edit input, .dlg-due input { font: 500 12.5px var(--text); padding: 2px 6px; border: 1px solid var(--rule); border-radius: 7px; background: var(--lift); color: var(--ink); color-scheme: light dark }
+.due-edit button, .dlg-due button { border: 0; background: none; color: var(--accent); cursor: pointer; font: 600 12px var(--text); padding: 0 }
+.dlg-due { display: flex; gap: 8px; align-items: center; margin: 10px 0 2px; font-size: 13px; color: var(--soft) }
+.cal { padding: 14px 0 28px }
+.cal-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 12px }
+.cal-bar h2 { font: 800 18px var(--display); margin: 0 6px; color: var(--ink) }
+.cal-nav { border: 1px solid var(--rule); background: var(--lift); color: var(--ink); border-radius: 999px; padding: 4px 12px; font: 600 13px var(--text); cursor: pointer }
+.cal-nav:hover { background: var(--hover) }
+.cal-bar .seg { margin: 0 0 0 auto; position: static }
+.cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); border: 1px solid var(--rule); border-radius: 14px; overflow: hidden; background: var(--lift) }
+.cal-wh { padding: 6px 8px; font: 700 12px var(--text); color: var(--soft); border-bottom: 1px solid var(--rule); border-right: 1px solid var(--rule); background: var(--hover) }
+.cal-day { min-width: 0; border-right: 1px solid var(--rule); border-bottom: 1px solid var(--rule); padding: 6px; display: flex; flex-direction: column; gap: 4px }
+.cal-wh:nth-child(7n), .cal-day:nth-child(7n) { border-right: 0 }
+.mode-week .cal-day { min-height: 340px }
+.mode-month .cal-day { min-height: 108px }
+.cal-day.today { background: var(--accent-wash) }
+.cal-day.out { opacity: .45 }
+.cal-day.drop { outline: 2px dashed var(--accent); outline-offset: -4px }
+.cal-dh { font: 700 12px var(--text); color: var(--soft); margin-bottom: 2px }
+.cal-day.today .cal-dh { color: var(--accent) }
+.cal-it { display: flex; gap: 5px; align-items: baseline; font-size: 12px; line-height: 1.3; padding: 3px 6px; border-radius: 7px; background: var(--hover); border-left: 3px solid var(--accent); min-width: 0; cursor: grab }
+.cal-it .ci-t { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.mode-week .cal-it .ci-t { white-space: normal; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical }
+.cal-it .ci-p, .cal-it .ci-time { flex: none; font: 700 10px var(--text); color: var(--soft); font-variant-numeric: tabular-nums }
+.cal-it.p0 { border-left-color: var(--over) }
+.cal-it.p1 { border-left-color: var(--soon) }
+.cal-it.p3 { border-left-color: var(--faint) }
+.cal-it.over { background: var(--over-wash) }
+.cal-it.k-plan { background: transparent; border: 1px dashed var(--faint); border-left: 3px solid var(--faint) }
+.cal-it.k-done { opacity: .55; cursor: default }
+.cal-it.k-done .ci-t { text-decoration: line-through }
+.cal-it.k-meet { background: transparent; border-left-color: var(--soft); cursor: default }
+.cal-it.dragging { opacity: .4 }
+.cal-more { border: 0; background: none; color: var(--accent); font: 600 12px var(--text); padding: 0 6px; cursor: pointer; text-align: left }
+.cal-leg { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 10px; font-size: 12px; color: var(--soft) }
+.cal-leg i { display: inline-block; width: 14px; height: 10px; border-radius: 3px; vertical-align: -1px; margin-right: 5px; background: var(--hover); border-left: 3px solid var(--accent) }
+.cal-leg i.lg-over { background: var(--over-wash); border-left-color: var(--over) }
+.cal-leg i.lg-plan { background: transparent; border: 1px dashed var(--faint); border-left: 3px solid var(--faint) }
+.cal-leg i.lg-done { opacity: .55 }
+.cal-leg i.lg-meet { background: transparent; border-left-color: var(--soft) }
+.cal-hint { margin-left: auto }
+@media (max-width: 760px) {
+  .mode-week .cal-grid { grid-template-columns: 1fr }
+  .mode-week .cal-day { min-height: 0; border-right: 0 }
+  .mode-month .cal-day { min-height: 70px; padding: 3px }
+  .mode-month .cal-it { font-size: 10.5px; padding: 2px 4px }
+  .mode-month .cal-it .ci-p { display: none }
+  .cal-bar .seg { margin-left: 0 }
+  .cal-hint { margin-left: 0 }
+}
 .open-link { color: var(--accent); text-decoration: none; font-weight: 600 }
 .open-link:hover { text-decoration: underline }
 .moves { display: flex; gap: 4px; flex-wrap: wrap; max-height: 0; overflow: hidden; opacity: 0; transition: max-height .2s var(--ease), opacity .2s }
@@ -733,6 +787,7 @@ html.ai-fold { --aibar-h: 41px }
     <a href="#hom-nay" data-tab="hom-nay" data-i18n="tabToday"></a>
     <a href="#theo-nguoi" data-tab="theo-nguoi" data-i18n="tabPeople"></a>
     <a href="#tuan" data-tab="tuan" data-i18n="tabWeek"></a>
+    <a href="#lich" data-tab="lich" data-i18n="tabCal"></a>
     <a href="#ngay" data-tab="ngay" data-i18n="tabDay"></a>
     <a href="#chi-phi" data-tab="chi-phi" data-i18n="tabCost"></a>
     <span class="seg proj-seg" id="projBar" role="group" data-i18n-aria="projAria" aria-label="" hidden></span>
@@ -774,7 +829,9 @@ html.ai-fold { --aibar-h: 41px }
       brand: 'catask', slogan: 'Không sót việc nào.', mastTop: 'Về đầu trang',
       kickerOwner: function (n) { return n || '' },
       kickerDigest: 'bản tin {0} lúc {1}', kickerNone: 'chưa có bản tin',
-      tabsAria: 'Các mục', tabToday: 'Hôm nay', tabPeople: 'Theo người', tabWeek: 'Tuần', tabDay: 'Ngày', tabCost: 'Chi phí',
+      tabsAria: 'Các mục', tabToday: 'Hôm nay', tabPeople: 'Theo người', tabWeek: 'Tuần', tabCal: 'Lịch', tabDay: 'Ngày', tabCost: 'Chi phí',
+      dueAdd: '+ Hạn', dueEditAria: 'Đặt hạn: {0}', dueClear: 'Xoá hạn', dueCancel: 'Huỷ', dueLblToday: 'Hôm nay', dueLblTomorrow: 'Mai', dlgDue: 'Hạn', snDue: 'Hạn mới: {0}', snDueClear: 'Đã xoá hạn',
+      calWeek: 'Tuần', calMonth: 'Tháng', calToday: 'Hôm nay', calPrev: 'Trước', calNext: 'Sau', calMonthTitle: function (m, y) { return 'Tháng ' + m + '/' + y }, calMore: '+{0} nữa', calLegDue: 'Có hạn', calLegOver: 'Quá hạn', calLegPlan: 'Dự kiến làm (chưa có hạn)', calLegDone: 'Đã xong', calLegMeet: 'Họp', calHint: 'Kéo task sang ngày khác để đổi hạn.', calAria: 'Lịch',
       projAria: 'Lọc theo dự án', infoBtn: 'ⓘ Cách hoạt động', demoBtn: 'Xem bản demo', demoBack: '\u2190 Về catask của tôi',
       demoHint: 'Dữ liệu mẫu, đúng như người khác thấy khi mở link này. Thử tick, kéo thả, hoàn tác thoải mái — không lưu gì.',
       howtoAria: 'Cách catask hoạt động', howtoClose: 'Đóng', loading: 'Đang mở catask…',
@@ -1033,7 +1090,9 @@ html.ai-fold { --aibar-h: 41px }
       brand: 'catask', slogan: 'Nothing slips through.', mastTop: 'Back to top',
       kickerOwner: function (n) { return n || '' },
       kickerDigest: 'digest {0} at {1}', kickerNone: 'no digest yet',
-      tabsAria: 'Sections', tabToday: 'Today', tabPeople: 'People', tabWeek: 'Week', tabDay: 'Day', tabCost: 'Cost',
+      tabsAria: 'Sections', tabToday: 'Today', tabPeople: 'People', tabWeek: 'Week', tabCal: 'Calendar', tabDay: 'Day', tabCost: 'Cost',
+      dueAdd: '+ Due date', dueEditAria: 'Set due date: {0}', dueClear: 'Clear', dueCancel: 'Cancel', dueLblToday: 'Today', dueLblTomorrow: 'Tomorrow', dlgDue: 'Due', snDue: 'Due {0}', snDueClear: 'Due date cleared',
+      calWeek: 'Week', calMonth: 'Month', calToday: 'Today', calPrev: 'Previous', calNext: 'Next', calMonthTitle: function (m, y) { return MON_EN[m - 1] + ' ' + y }, calMore: '+{0} more', calLegDue: 'Due', calLegOver: 'Overdue', calLegPlan: 'Planned (no due date)', calLegDone: 'Done', calLegMeet: 'Meeting', calHint: 'Drag a task to another day to change its due date.', calAria: 'Calendar',
       projAria: 'Filter by project', infoBtn: 'ⓘ How it works', demoBtn: 'View demo', demoBack: '\u2190 Back to my catask',
       demoHint: 'Sample data, exactly what others see when they open this link. Tick, drag and undo freely — nothing is saved.',
       howtoAria: 'How catask works', howtoClose: 'Close', loading: 'Opening catask…',
@@ -1670,7 +1729,7 @@ html.ai-fold { --aibar-h: 41px }
   function card(td) {
     var w = warn(td), s = signals(td.signals, td.id), isDone = td.status === 'done', p = person(td);
     var meta = [warnChip(w)];
-    if (td.dueLabel && !(w && w.lvl === 'over')) meta.push('<span class="due">' + esc(td.dueLabel) + '</span>');
+    meta.push(dueCtl(td, w));
     if (isDone) meta.push(byAiBadge(td));
     meta.push('<span>' + esc(srcLabel(td.source)) + (td.sourceLabel ? ' · ' + esc(td.sourceLabel) : '') + '</span>');
     var moves = lanes().filter(function (l) { return l[0] !== lane(td) }).map(function (l) {
@@ -1684,6 +1743,33 @@ html.ai-fold { --aibar-h: 41px }
       '<div class="moves">' + moves + '</div></article>';
   }
   function sortTodos(list) { return list.slice().sort(cmpTodo) }
+  /* Due date: the skill writes due + a localized dueLabel; a date the user picks on the page (dueBy: "user")
+     gets its label from the date, and the evening digest never overrides it. */
+  function dueText(td) {
+    var d = dueOf(td); if (!d) return td.dueLabel || '';
+    if (td.dueLabel && td.dueBy !== 'user') return td.dueLabel;
+    var n = diff(d, TODAY); return n === 0 ? t('dueLblToday') : n === 1 ? t('dueLblTomorrow') : wds(d) + ' ' + dm(d);
+  }
+  function dueCtl(td, w) {
+    var txt = dueText(td), id = esc(td.id);
+    if (td.status === 'done') return txt ? '<span class="due">' + esc(txt) + '</span>' : '';
+    if (S.dueEdit === td.id) return '<span class="due-edit"><input type="date" data-due-input="' + id + '" value="' + esc(dueOf(td)) + '" aria-label="' + esc(t('dueEditAria', td.title)) + '">' +
+      (dueOf(td) ? '<button type="button" data-due-clear="' + id + '">' + esc(t('dueClear')) + '</button>' : '') + '<button type="button" data-due-cancel>' + esc(t('dueCancel')) + '</button></span>';
+    if (w && w.lvl === 'over' && dueOf(td)) txt = dm(dueOf(td));
+    return '<button type="button" class="due due-btn' + (txt ? '' : ' add') + '" data-due-edit="' + id + '" aria-label="' + esc(t('dueEditAria', td.title)) + '">' + (txt ? '&#x1F4C5; ' + esc(txt) : esc(t('dueAdd'))) + '</button>';
+  }
+  function setDue(id, val) {
+    var td = findTodo(id); S.dueEdit = null;
+    if (!td) { render(); return }
+    val = /^\d{4}-\d{2}-\d{2}$/.test(val || '') ? val : '';
+    if (val === dueOf(td) && (td.dueBy === 'user' || !val)) { render(); return }
+    write(td, { due: val, dueLabel: '', dueBy: 'user' }, { kind: 'move', verb: val ? t('snDue', wds(val) + ' ' + dm(val)) : t('snDueClear'), title: td.title });
+  }
+  function dueEdit(id) {
+    S.dueEdit = id; render();
+    var inp = view.querySelector && view.querySelector('[data-due-input]');
+    if (inp) { try { inp.focus(); if (inp.showPicker) inp.showPicker() } catch (e) {} }
+  }
   /* "Looks done?": the evening digest leaves {suggestDone: {at, evidence, url, source, sourceLabel}} instead of
      closing a task. Shown only on open tasks; ✓ closes it like a tick, ✗ records suggestRejectedAt. */
   function sugOf(td) { var g = td && td.status !== 'done' ? td.suggestDone : null; return g && typeof g === 'object' && g.evidence ? g : null }
@@ -2032,6 +2118,78 @@ html.ai-fold { --aibar-h: 41px }
     view.innerHTML = '<div class="week">' + left + right + '</div>';
   }
 
+  /* ---------- tab: Calendar ----------
+     Week (Mon–Sun) or month grid. Open tasks sit on their due date (or, with none, on the planned day, dashed),
+     done tasks on doneAt (faded), meetings from the digests. Dragging a task to another day sets its due date. */
+  function calLoad() {
+    if (!S.calMode) { var m = 'week'; try { m = localStorage.getItem('cal-mode') || 'week' } catch (e) {} S.calMode = m === 'month' ? 'month' : 'week' }
+    if (!S.calAt) S.calAt = TODAY;
+  }
+  function calSetMode(m) { S.calMode = m === 'month' ? 'month' : 'week'; try { localStorage.setItem('cal-mode', S.calMode) } catch (e) {} render() }
+  function calNav(n) {
+    calLoad();
+    if (!n) S.calAt = TODAY;
+    else if (S.calMode === 'week') S.calAt = addDays(S.calAt, 7 * n);
+    else { var p = parse(S.calAt); S.calAt = iso(new Date(p.getFullYear(), p.getMonth() + n, 1)) }
+    render();
+  }
+  function calTasks() {
+    var by = {}, ord = { due: 0, plan: 1, done: 2 };
+    S.todos.forEach(function (td) {
+      var d, k;
+      if (td.status === 'done') { d = String(td.doneAt || '').slice(0, 10); k = 'done' }
+      else if (dueOf(td)) { d = dueOf(td); k = 'due' }
+      else { d = td.plannedFor && td.plannedFor > TODAY ? td.plannedFor : TODAY; k = 'plan' }
+      if (/^\d{4}-\d{2}-\d{2}$/.test(d || '')) (by[d] = by[d] || []).push({ td: td, k: k });
+    });
+    Object.keys(by).forEach(function (d) { by[d].sort(function (a, b) { return ord[a.k] - ord[b.k] || cmpTodo(a.td, b.td) }) });
+    return by;
+  }
+  function calMeetings() {
+    var out = {}, seen = {};
+    if (!projOn(DEF())) return out;
+    function add(d, m) {
+      if (!m || !m.title || !/^\d{4}-\d{2}-\d{2}$/.test(d || '')) return;
+      var k = d + '|' + (m.time || '') + '|' + m.title; if (seen[k]) return; seen[k] = 1;
+      (out[d] = out[d] || []).push({ time: String(m.time || ''), title: String(m.title) });
+    }
+    (S.days || []).forEach(function (x) {
+      if (!x || !x.date) return;
+      (x.timeline || []).forEach(function (e) { if (e && e.kind === 'meeting') add(x.date, e) });
+      (x.meetings || []).forEach(function (m) { add(nextWork(x.date), m) });
+    });
+    Object.keys(out).forEach(function (d) { out[d].sort(function (a, b) { return a.time.localeCompare(b.time) }) });
+    return out;
+  }
+  function calItem(x) {
+    var td = x.td, p = prio(td), over = x.k === 'due' && dueOf(td) < TODAY;
+    return '<div class="cal-it k-' + x.k + ' ' + p.toLowerCase() + (over ? ' over' : '') + '"' + (x.k !== 'done' ? ' draggable="true"' : '') + ' data-id="' + esc(td.id) + '" title="' + esc(td.title + ' · ' + person(td)) + '">' +
+      '<span class="ci-p">' + p + '</span><span class="ci-t">' + titleLink(td) + '</span></div>';
+  }
+  function calMeet(m) { return '<div class="cal-it k-meet"><span class="ci-time">' + esc(m.time) + '</span><span class="ci-t">' + esc(m.title) + '</span></div>' }
+  function renderCal() {
+    calLoad();
+    var mode = S.calMode, at = S.calAt, ap = parse(at), start, n, title;
+    if (mode === 'week') { start = monday(at); n = 7; title = dm(start) + ' – ' + dm(addDays(start, 6)) }
+    else { start = monday(iso(new Date(ap.getFullYear(), ap.getMonth(), 1))); n = 42; title = t('calMonthTitle', ap.getMonth() + 1, ap.getFullYear()) }
+    var tasks = calTasks(), meets = calMeetings(), cells = '';
+    for (var i = 0; i < n; i++) {
+      var d = addDays(start, i), items = (meets[d] || []).map(calMeet).concat((tasks[d] || []).map(calItem)), more = '';
+      if (mode === 'month' && items.length > 3) { more = '<button type="button" class="cal-more" data-cal-more="' + d + '">' + esc(t('calMore', items.length - 3)) + '</button>'; items = items.slice(0, 3) }
+      cells += '<div class="cal-day' + (d === TODAY ? ' today' : '') + (d < TODAY ? ' past' : '') + (mode === 'month' && parse(d).getMonth() !== ap.getMonth() ? ' out' : '') + '" data-cal-day="' + d + '">' +
+        '<div class="cal-dh">' + (mode === 'week' ? '<b>' + esc(wds(d)) + '</b> ' + esc(dm(d)) : String(parse(d).getDate())) + '</div>' + items.join('') + more + '</div>';
+    }
+    var head = mode === 'month' ? [1, 2, 3, 4, 5, 6, 0].map(function (k) { return '<div class="cal-wh">' + esc(L('WDS')[k]) + '</div>' }).join('') : '';
+    var bar = '<div class="cal-bar"><button type="button" class="cal-nav" data-cal-nav="-1" aria-label="' + esc(t('calPrev')) + '">&#x2039;</button>' +
+      '<button type="button" class="cal-nav" data-cal-nav="0">' + esc(t('calToday')) + '</button>' +
+      '<button type="button" class="cal-nav" data-cal-nav="1" aria-label="' + esc(t('calNext')) + '">&#x203A;</button><h2>' + esc(title) + '</h2>' +
+      '<span class="seg" role="group"><button type="button" data-cal-mode="week" aria-pressed="' + (mode === 'week') + '">' + esc(t('calWeek')) + '</button>' +
+      '<button type="button" data-cal-mode="month" aria-pressed="' + (mode === 'month') + '">' + esc(t('calMonth')) + '</button></span></div>';
+    var leg = '<div class="cal-leg"><span><i class="lg-due"></i>' + esc(t('calLegDue')) + '</span><span><i class="lg-over"></i>' + esc(t('calLegOver')) + '</span><span><i class="lg-plan"></i>' + esc(t('calLegPlan')) + '</span>' +
+      '<span><i class="lg-done"></i>' + esc(t('calLegDone')) + '</span><span><i class="lg-meet"></i>' + esc(t('calLegMeet')) + '</span><span class="cal-hint">' + esc(t('calHint')) + '</span></div>';
+    view.innerHTML = '<div class="cal mode-' + mode + '" aria-label="' + esc(t('calAria')) + '">' + bar + '<div class="cal-grid">' + head + cells + '</div>' + leg + '</div>';
+  }
+
   /* ---------- tab: Day ---------- */
   function renderDay() {
     if (!S.days.length) { view.innerHTML = '<div class="day"><section><div class="empty">' + esc(t('noDays')) + '</div></section></div>'; return }
@@ -2099,7 +2257,7 @@ html.ai-fold { --aibar-h: 41px }
   }
 
   /* ---------- routing + render ---------- */
-  var TABS = { 'hom-nay': renderToday, 'theo-nguoi': renderPeople, 'tuan': renderWeek, 'ngay': renderDay, 'chi-phi': renderCost };
+  var TABS = { 'hom-nay': renderToday, 'theo-nguoi': renderPeople, 'tuan': renderWeek, 'lich': renderCal, 'ngay': renderDay, 'chi-phi': renderCost };
   function tab() { var h = location.hash.replace('#', ''); return TABS[h] ? h : 'hom-nay' }
   /* ---------- keep your place across re-renders ----------
      Each render rebuilds the tab's HTML, which would reset every scroll box (lanes, rail, side panels)
@@ -2198,10 +2356,11 @@ html.ai-fold { --aibar-h: 41px }
   /* A "looks done?" answer also restores the suggestion on undo. */
   var SUG_UNDO = UNDO_FIELDS.concat(['suggestDone', 'suggestRejectedAt']);
   var FOLLOW_UNDO = UNDO_FIELDS.concat(['following', 'tier']);
+  var DUE_UNDO = UNDO_FIELDS.concat(['due', 'dueLabel', 'dueBy']);
   function snapOf(td, fields) { var o = {}; fields.forEach(function (k) { o[k] = td[k] === undefined ? null : td[k] }); return o }
   function write(td, patch, msg, inPlace) {
     if (!S.demo && (!db || !S.canWrite)) { toast(t('ownerOnly'), true); render(); return }
-    var fields = 'ai' in patch ? AI_UNDO : 'suggestDone' in patch ? SUG_UNDO : 'following' in patch ? FOLLOW_UNDO : UNDO_FIELDS;
+    var fields = 'ai' in patch ? AI_UNDO : 'suggestDone' in patch ? SUG_UNDO : 'following' in patch ? FOLLOW_UNDO : 'due' in patch ? DUE_UNDO : UNDO_FIELDS;
     var act = { id: td.id, fields: fields, snap: snapOf(td, fields), mode: 'ai' in patch ? 'ai' : inPlace ? 'pri' : 'full' };
     if (!S.demo) patch.updatedAt = new Date().toISOString();
     Object.assign(td, patch);
@@ -2356,7 +2515,9 @@ html.ai-fold { --aibar-h: 41px }
     dlg.innerHTML = '<button type="button" class="dlg-x" data-close aria-label="' + esc(t('dlgClose')) + '">✕</button>' +
       '<h2 id="msgTitle">' + esc(td.title) + '</h2>' +
       '<div class="dlg-meta"><span><b>' + esc((q && q.from) || person(td)) + '</b></span>' + (q && q.time ? '<span>' + esc(q.time) + '</span>' : '') +
-      '<span>' + esc(srcLabel(td.source) + (td.sourceLabel ? ' · ' + td.sourceLabel : '')) + '</span></div>' + body +
+      '<span>' + esc(srcLabel(td.source) + (td.sourceLabel ? ' · ' + td.sourceLabel : '')) + '</span></div>' +
+      (td.status !== 'done' ? '<div class="dlg-due"><span>' + esc(t('dlgDue')) + '</span><input type="date" data-dlg-due="' + esc(td.id) + '" value="' + esc(dueOf(td)) + '" aria-label="' + esc(t('dueEditAria', td.title)) + '">' +
+        (dueOf(td) ? '<button type="button" data-dlg-due-clear="' + esc(td.id) + '">' + esc(t('dueClear')) + '</button>' : '') + '</div>' : '') + body +
       '<div class="dlg-actions">' + copyBtn(td) + aiCtl(td) + (td.url ? '<a class="dlg-open" href="' + esc(td.url) + '" target="_blank" rel="noopener">' + esc(t('openIn', appOf(td))) + '</a>' : '') + '</div>';
     showDlg('msg', null);
   }
@@ -3206,6 +3367,7 @@ html.ai-fold { --aibar-h: 41px }
     if ((b = c('[data-cp-id]'))) { copyTask(b.getAttribute('data-cp-id'), !!e.shiftKey); return }
     if (c('[data-copy-cmd]')) { var ct = findTodo(S.aiPanel); if (ct) copyText(t('rnCmd', taskRef(ct)), function (ok) { snackShow(ok ? { kind: 'copy', verb: t('cpDone'), title: t('rnCmd', taskRef(ct)) } : { verb: t('cpFail') }, null) }); return }
     if (c('[data-open-set]')) { closeMsg(); openSettings(); return }
+    if ((b = c('[data-dlg-due-clear]'))) { var dq = b.getAttribute('data-dlg-due-clear'); setDue(dq, ''); openMsg(dq); return }
     if (c('[data-open-app]')) { openApp(); return }
     if ((b = c('[data-ai-submit]'))) { e.preventDefault(); submitAiReq(); return }
     if ((b = c('[data-ai-act]'))) { aiAction(b.getAttribute('data-ai-act')); return }
@@ -3216,6 +3378,7 @@ html.ai-fold { --aibar-h: 41px }
   dlg.addEventListener('submit', function (e) { e.preventDefault(); if (S.dlgMode === 'req') submitAiReq() });
   dlg.addEventListener('change', function (e) {
     var g = function (n) { return e.target.getAttribute ? e.target.getAttribute(n) : null }, f = S.aiForm;
+    var dd = g('data-dlg-due'); if (dd) { setDue(dd, e.target.value); openMsg(dd); return }
     if (!f || S.dlgMode !== 'req') return;
     if (g('data-ai-read') != null) { f.readSource = !!e.target.checked; return }
     if (g('data-ai-skip') != null) { f.skip = !!e.target.checked; return }
@@ -3840,6 +4003,7 @@ html.ai-fold { --aibar-h: 41px }
   });
 
   view.addEventListener('change', function (e) {
+    var di = e.target.getAttribute && e.target.getAttribute('data-due-input'); if (di) { setDue(di, e.target.value); return }
     var id = e.target.getAttribute && e.target.getAttribute('data-check'); if (!id) return;
     setDone(id, !!e.target.checked);
   });
@@ -3855,6 +4019,12 @@ html.ai-fold { --aibar-h: 41px }
     var fn = e.target.closest('[data-follow-drop]'); if (fn) { followAnswer(fn.getAttribute('data-follow-drop'), false); return }
     if (e.target.closest('[data-follow-more]')) { S.followAll = !S.followAll; render(); return }
     if (e.target.closest('[data-sug-only]')) { S.sugOnly = !S.sugOnly; render(); return }
+    var de = e.target.closest('[data-due-edit]'); if (de) { dueEdit(de.getAttribute('data-due-edit')); return }
+    var dc = e.target.closest('[data-due-clear]'); if (dc) { setDue(dc.getAttribute('data-due-clear'), ''); return }
+    if (e.target.closest('[data-due-cancel]')) { S.dueEdit = null; render(); return }
+    var cn = e.target.closest('[data-cal-nav]'); if (cn) { calNav(+cn.getAttribute('data-cal-nav')); return }
+    var cm = e.target.closest('[data-cal-mode]'); if (cm) { calSetMode(cm.getAttribute('data-cal-mode')); return }
+    var cmo = e.target.closest('[data-cal-more]'); if (cmo) { S.calAt = cmo.getAttribute('data-cal-more'); calSetMode('week'); return }
     var m = e.target.closest('[data-move]'); if (m) { move(m.dataset.id, m.dataset.move); return }
     var pr = e.target.closest('[data-pri]'); if (pr) { e.preventDefault(); cyclePri(pr.getAttribute('data-pri')); return }
     var vw = e.target.closest('[data-view]'); if (vw) { openMsg(vw.getAttribute('data-view')); return }
@@ -3869,10 +4039,16 @@ html.ai-fold { --aibar-h: 41px }
   });
   /* Drag and drop between lanes (desktop). Phones use the move buttons. */
   var dragId = null;
-  view.addEventListener('dragstart', function (e) { var c = e.target.closest && e.target.closest('.card'); if (!c) return; dragId = c.dataset.id; c.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; try { e.dataTransfer.setData('text/plain', dragId) } catch (err) {} });
-  view.addEventListener('dragend', function (e) { var c = e.target.closest && e.target.closest('.card'); if (c) c.classList.remove('dragging'); view.querySelectorAll('.lane.drop').forEach(function (l) { l.classList.remove('drop') }) });
-  view.addEventListener('dragover', function (e) { var l = e.target.closest('.lane'); if (!l || !dragId) return; e.preventDefault(); view.querySelectorAll('.lane.drop').forEach(function (x) { if (x !== l) x.classList.remove('drop') }); l.classList.add('drop') });
-  view.addEventListener('drop', function (e) { var l = e.target.closest('.lane'); if (!l || !dragId) return; e.preventDefault(); l.classList.remove('drop'); var id = dragId; dragId = null; move(id, l.dataset.lane) });
+  view.addEventListener('dragstart', function (e) { var c = e.target.closest && e.target.closest('.card, .cal-it[draggable="true"]'); if (!c) return; dragId = c.dataset.id; c.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; try { e.dataTransfer.setData('text/plain', dragId) } catch (err) {} });
+  view.addEventListener('dragend', function (e) { var c = e.target.closest && e.target.closest('.card, .cal-it'); if (c) c.classList.remove('dragging'); view.querySelectorAll('.lane.drop, .cal-day.drop').forEach(function (l) { l.classList.remove('drop') }) });
+  view.addEventListener('dragover', function (e) {
+    var cd = e.target.closest('[data-cal-day]');
+    if (cd && dragId) { e.preventDefault(); view.querySelectorAll('.cal-day.drop').forEach(function (x) { if (x !== cd) x.classList.remove('drop') }); cd.classList.add('drop'); return }
+    var l = e.target.closest('.lane'); if (!l || !dragId) return; e.preventDefault(); view.querySelectorAll('.lane.drop').forEach(function (x) { if (x !== l) x.classList.remove('drop') }); l.classList.add('drop') });
+  view.addEventListener('drop', function (e) {
+    var cd = e.target.closest('[data-cal-day]');
+    if (cd && dragId) { e.preventDefault(); cd.classList.remove('drop'); var ci = dragId; dragId = null; setDue(ci, cd.getAttribute('data-cal-day')); return }
+    var l = e.target.closest('.lane'); if (!l || !dragId) return; e.preventDefault(); l.classList.remove('drop'); var id = dragId; dragId = null; move(id, l.dataset.lane) });
 
   document.getElementById('dispBan').addEventListener('click', function (e) {
     if (!(e.target.closest && e.target.closest('[data-disp-retry]'))) return;

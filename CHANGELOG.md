@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.9.0
+
+- **Set and change a task's due date on the page.** Every open card has a due chip (📅 date, or "+ Due date" when there is none); click it to pick a date or clear it. The "View message" dialog has the same date field. Both are undoable. A date you set is stored with `dueBy: "user"` and labelled by the page (Today / Tomorrow / Wed Nov 19); the evening digest never overrides it.
+- **Calendar tab** (Lịch): week (Mon–Sun, default) or month view, with ‹ Today › navigation. Open tasks sit on their due date (overdue tinted red, colour by P0–P3); tasks without a due date sit on their planned day, dashed; done tasks on the day they were done, faded; meetings from the digests. Drag a task to another day to change its due date. Following items are not shown. The mode is remembered per browser.
+- The page changed: after the update it is republished to the same URL; your link and data stay as they are.
+
 ## 1.8.0
 
 - **Following / Đang theo dõi**: someone else's work that touches your areas (a group ask or decision about your `focusAreas`/`keywords`/`currentWork` where you're not @mentioned or named) is no longer a `watch` todo. The digest stores it as a todo with `following: {owner, matched, lastSeen, state}`, and the page shows it in a new block in the Today rail, under Highlights: who has it, why you see it (the matched terms), days left, and **Take it** / **Drop** (both undoable). It is kept out of the lanes, top 3, counts and stats.
