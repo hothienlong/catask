@@ -8,9 +8,9 @@
 
 <sub>catask = **cat** (mèo) + **task** (việc) + **ask** (nhờ): chú mèo canh mọi việc, mọi lời nhờ.</sub>
 
-[![Xem clip demo 58 giây](docs/video/catask-demo-vi-poster.jpg)](https://github.com/hothienlong/catask/releases/download/demo-video/catask-demo-vi.mp4)
+https://github.com/user-attachments/assets/3bcebf1d-4e4a-47dc-9991-6e04ca343e26
 
-<sub>▶ Clip demo 58 giây (chỉ dùng dữ liệu demo, có tiếng). Bấm để tải về xem (17 MB).</sub>
+<sub>▶ Clip demo 58 giây (chỉ dùng dữ liệu demo, có tiếng). Bấm play để xem ngay tại đây.</sub>
 
 ## 🤖 Cài bằng Claude
 
@@ -151,7 +151,7 @@ Nhờ Claude soạn trả lời hoặc tin nhắc, tóm tắt thread hay ticket,
    - **AI làm gì?** Gợi ý theo nguồn: Jira → *Viết description*, *Viết acceptance criteria*, *Ước lượng story point*, *Tóm tắt ticket*; Teams/Outlook → *Soạn trả lời*, *Tóm tắt thread*, *Soạn tin nhắc*; Lịch → *Chuẩn bị nội dung họp*; luôn có *Khác…*. Chọn một gợi ý sẽ điền sẵn **Hướng dẫn** ngắn (≤300, sửa được; bắt buộc với *Khác…*).
    - **Ngữ cảnh thêm** (≤2000): dán yêu cầu của đối tác, link tài liệu SDK, phạm vi thay đổi…
    - **Kết quả**: *Chỉ soạn nháp* (mặc định), hoặc — với ba gợi ý Jira trên việc có mã ticket — *Soạn để cập nhật lên Jira*.
-   - Tuỳ chọn: tick *Đọc lại tin gốc* khi dữ liệu trong sổ chưa đủ (tốn token hơn). Bấm *Giao*. Thanh dưới cùng có nút **Hoàn tác**.
+   - Tuỳ chọn: tick *Đọc lại tin gốc* khi nội dung đã lưu của việc chưa đủ (tốn token hơn). Bấm *Giao*. Thanh dưới cùng có nút **Hoàn tác**.
 3. **Chạy worker**: gõ **`xử lý việc giao AI`** / **`process AI queue`** với Claude, hoặc chạy **`/catask:ai-worker`**. Mỗi lần xử lý tối đa 5 việc đang chờ, việc giao trước làm trước. Worker vẫn chạy kể cả khi nút đang ẩn trên trang.
 4. **Xem lại**: chip trên thẻ đổi thành **✨ AI xong — xem**, đầu trang hiện **✨ N AI xong**. Mở ra để xem các bước, bản nháp hoặc tóm tắt (**📋 Chép**) và nguồn; rồi chọn *Dùng được*, *Làm lại* (kèm hướng dẫn mới) hoặc *Huỷ*. Nếu lỗi thì có *Thử lại*.
    - **Cập nhật Jira** (*Soạn để cập nhật lên Jira*): bảng hiện **Hiện tại trên Jira** (đọc lại khi mở) và **Nội dung mới** (sửa được). *Duyệt & cập nhật Jira* → xác nhận ngay trong bảng → trang đọc lại ticket; nếu ai đó đã sửa ticket từ lúc AI đọc thì phải xác nhận thêm lần nữa → trang ghi **đúng một** trường (description hoặc Story Points), chip đổi thành **🔗 Đã cập nhật Jira** kèm link. Ghi lên Jira thì không có Hoàn tác. *Dùng, tự cập nhật tay* đánh dấu đã dùng mà không ghi. Nếu mô tả hiện có ảnh hoặc định dạng đặc biệt, trang chỉ cho Chép (ghi bằng markdown sẽ làm mất chúng).
@@ -168,7 +168,7 @@ Dành cho dev có `devMode: true` (hỏi lúc thiết lập khi vai trò là dev
 
 1. **Khai báo repo**: lúc thiết lập (hoặc ⚙ Cài đặt → *Repo*), Claude **tự tìm repo trên máy** (chỉ đọc: `~/Developer`, `~/Projects`, `~/code`… và các thư mục dự án Claude Code, xếp theo số commit của bạn 30 ngày qua, kèm mã Jira thấy trong tên nhánh) và tick sẵn các repo đầu; bạn bỏ tick, sửa (mã Jira, nhánh gốc), thêm hoặc xoá. Mỗi repo là `{project, name, path, base, enabled}` trong config và `meta/settings`.
 2. **Chọn cách chạy** (⚙ Cài đặt → *Chế độ chạy AI*, `aiRunMode`):
-   - **runner** (mặc định): trả lời **có** khi lúc thiết lập Claude hỏi cài runner, hoặc sau này nói **`cài runner catask`** (hay "sửa runner" để sửa). Claude tự sao lưu và cập nhật cấu hình app Claude desktop, đăng ký cho Claude Code, kiểm tra `claude` CLI đã đăng nhập chưa (chưa thì bạn tự mở Terminal, chạy `claude` → `/login`), chạy selftest, rồi nhắc bạn thoát hẳn (⌘Q) và mở lại app. Làm tay: [`runner/README.md`](runner/README.md#cài-tay-dự-phòng). Mở trang **trong app Claude desktop**. Trang giao việc cho runner, runner chạy Claude nền; tiến độ và kết quả đi qua trang (Claude chạy nền không đọc/ghi sổ được, nên trang là cầu nối). Chi tiết: [`runner/README.md`](runner/README.md).
+   - **runner** (mặc định): trả lời **có** khi lúc thiết lập Claude hỏi cài runner, hoặc sau này nói **`cài runner catask`** (hay "sửa runner" để sửa). Claude tự sao lưu và cập nhật cấu hình app Claude desktop, đăng ký cho Claude Code, kiểm tra `claude` CLI đã đăng nhập chưa (chưa thì bạn tự mở Terminal, chạy `claude` → `/login`), chạy selftest, rồi nhắc bạn thoát hẳn (⌘Q) và mở lại app. Làm tay: [`runner/README.md`](runner/README.md#cài-tay-dự-phòng). Mở trang **trong app Claude desktop**. Trang giao việc cho runner, runner chạy Claude nền; tiến độ và kết quả đi qua trang (Claude chạy nền không đọc/ghi dữ liệu catask được, nên trang là cầu nối). Chi tiết: [`runner/README.md`](runner/README.md).
    - Giao việc code từ **trình duyệt** thì trang tự mở trong app Claude desktop và gửi việc cho runner từ đó. Cần mở trang trong app ít nhất một lần trước.
    - **desktop**: nói "bật chế độ desktop cho AI code", Claude tạo scheduled task trên app desktop (sau khi bạn xác nhận), kiểm hàng đợi mỗi ~2 phút trong giờ làm (cron theo giờ làm, vd 09:00–18:00 T2–T6 → `*/2 9-17 * * 1-5`; app không cho dưới 1 phút và tự lệch vài phút). Mỗi lần chạy đều tốn chút token kể cả khi không có việc.
    - Cách nào cũng có thể dán `catask#<id>` vào Claude (hoặc nói "làm task ABC-124").

@@ -8,9 +8,9 @@ English · [Tiếng Việt](README.vi.md)
 
 <sub>catask = **cat** + **task** + **ask**: a cat that keeps watch over every task and every ask.</sub>
 
-[![Watch the 58-second demo](docs/video/catask-demo-poster.jpg)](https://github.com/hothienlong/catask/releases/download/demo-video/catask-demo.mp4)
+https://github.com/user-attachments/assets/2b40e28c-7ef0-48d8-955a-37e09b6ab219
 
-<sub>▶ 58-second demo (demo data only, with sound). Click to download and watch (17 MB).</sub>
+<sub>▶ 58-second demo (demo data only, with sound). Press play to watch right here.</sub>
 
 ## 🤖 Install with Claude
 
@@ -57,7 +57,7 @@ Install the catask plugin for me: run `claude plugin marketplace add hothienlong
   - **Waiting on someone?** A task you are waiting on gets the same check: when a message or a Jira mail on the same ticket shows they finished their part, the card asks **Looks done?**. catask now also checks the ticket itself (status, assignee, new comments), but only tickets linked to your open tasks, and only the ones changed since the last digest. If they hand the next step to you (an ask in chat, a Jira mail or a ticket comment that asks you, or the ticket reassigned to you), that becomes a new task on your list, linked to the one you were waiting on ("follows up: …").
 - 🔄 **Catch-up after a failed run**: if the evening digest fails (network down, `ENOTFOUND`) or never runs (app closed), the next Claude Code session you open notices it and, once the network is up, starts the scheduled digest again (at most once an hour, 3 times per missed evening). Nothing is lost: the window starts at the last successful digest. Turn off with `catchUp: false`; an optional `catask catch-up` scheduled task does it without opening Claude ([`schedule-prompt.md`](skills/daily-digest-todo/schedule-prompt.md)).
 - 🏆 **Done today**: only recorded when there's real evidence in messages or mail.
-- 🗂 **The ledger page** (a private Artifact): Today / Tomorrow / Waiting / Done board (drag and drop), plus People, Week, Day (timeline) and Cost tabs. **Mark done from anywhere**: any tab, including Day timeline items. Every status or priority change shows a small bar with **Undo** (or Ctrl/Cmd+Z) for about 6 seconds.
+- 🗂 **The catask page** (a private Artifact): Today / Tomorrow / Waiting / Done board (drag and drop), plus People, Week, Day (timeline) and Cost tabs. **Mark done from anywhere**: any tab, including Day timeline items. Every status or priority change shows a small bar with **Undo** (or Ctrl/Cmd+Z) for about 6 seconds.
 - ⚙ **Settings on the page**: change language, channels, working hours, important people, key chats and skipped chats (remove), keywords, Jira boards and the Jira check, role/current work, and the privacy switches from the ⚙ Settings button instead of editing `config.json`. Page edits take effect on the next digest run; language and signals change on the page right away.
 - 💬 **View message**: open a short snapshot (≤500 characters) of the message that created a todo, right on the page, with a link to the original. Turn off with `storeQuotes: false`.
 - ⭐ **Key chats and important people**: chats you pick are always read first; asks from your boss/PO/lead are bumped to at least P1.
@@ -78,7 +78,7 @@ Install the catask plugin for me: run `claude plugin marketplace add hothienlong
 |---|---|---|
 | Claude desktop app | Yes | Runs the evening scheduled task at your digest time |
 | Microsoft 365 connector | Yes | Settings → Connectors → Microsoft 365. Read access is enough; chat-send permission is optional |
-| Artifacts with `db` | Yes | The ledger page stores its data in its own private store |
+| Artifacts with `db` | Yes | The catask page stores its data in its own private store |
 | Python 3 (3.9+) | Yes | Scripts use the standard library only and run with `python3 -I` |
 | `get_usage` (session management) | No | If present, the Cost tab also records weekly-quota %; otherwise skipped |
 | Atlassian connector | No | Settings → Connectors → Atlassian. If present, setup counts your Jira boards and the evening digest checks the tickets linked to your open tasks (read-only); otherwise both are skipped |
@@ -144,14 +144,14 @@ Note: the task only runs while the Claude app is open; if your computer is off a
 
 ## Hand to AI (optional, beta — off by default)
 
-Let Claude draft a reply or a nudge, summarize a thread or ticket, prepare a meeting, or propose a Jira description, acceptance criteria or story-point estimate. **AI only drafts: it never sends, posts, replies or changes anything outside the ledger.** You read the result on the page and copy it — or, for a Jira proposal, approve it on the page and the page itself updates that one field with your own Atlassian connection.
+Let Claude draft a reply or a nudge, summarize a thread or ticket, prepare a meeting, or propose a Jira description, acceptance criteria or story-point estimate. **AI only drafts: it never sends, posts, replies or changes anything outside catask.** You read the result on the page and copy it — or, for a Jira proposal, approve it on the page and the page itself updates that one field with your own Atlassian connection.
 
 1. **Turn it on**: page → ⚙ Settings → *AI assistant (beta)* → *Allow handing tasks to AI* → Save. Turning it off only hides the buttons; requests and results already stored are kept.
 2. **Hand a task over**: click **🤖 Hand to AI** on an open task (board card, top 3, People row, or the View message dialog). The form shows the task and a collapsible **AI already knows** block (why, quote, source, ticket/link, priority, due), so you don't retype any of it. Then:
    - **What should AI do?** Chips depend on the task: Jira → *Write the description*, *Write acceptance criteria*, *Estimate story points*, *Summarize the ticket*; Teams/Outlook → *Draft a reply*, *Summarize the thread*, *Draft a nudge*; Calendar → *Prepare for the meeting*; always *Other…*. A chip prefills a short **Instruction** (≤300, editable; required for *Other…*).
    - **Extra context** (≤2000): paste the partner's request, SDK doc links, the scope of the change…
    - **Output**: *Draft only* (default), or — for the three Jira chips on a task with a Jira key — *Draft for a Jira update*.
-   - Optional: tick *Re-read the source message* when the ledger isn't enough (costs more tokens). Click *Hand over*. The bar at the bottom offers **Undo**.
+   - Optional: tick *Re-read the source message* when the saved todo isn't enough (costs more tokens). Click *Hand over*. The bar at the bottom offers **Undo**.
 3. **Run the worker**: say **`process AI queue`** / **`xử lý việc giao AI`** in Claude, or run **`/catask:ai-worker`**. It processes up to 5 queued tasks per run, oldest first. The worker runs even while the button is hidden on the page.
 4. **Review**: the card's chip turns **✨ AI done — view** and the masthead shows **✨ N AI ready**. Open it to see the steps, the draft or summary (**📋 Copy**), and the sources; then *Looks good*, *Redo* (with a new instruction) or *Cancel*. An error offers *Try again*.
    - **Jira update** (*Draft for a Jira update*): the panel shows **Current in Jira** (re-read when you open it) and the **New content**, which you can edit. *Approve & update Jira* → a confirm inside the panel → the page re-reads the issue; if someone edited it since AI read it, you get a second confirm → the page writes **only** that field (description or Story Points) and the chip turns **🔗 Updated in Jira** with a link. There is no Undo for a Jira write. *Use it, update by hand* marks it used without writing. If the description has images or special formatting, the page offers Copy only (a markdown write would drop them).
@@ -168,7 +168,7 @@ For developers with `devMode: true` (asked in onboarding when your role is a dev
 
 1. **Map repos**: in onboarding (or ⚙ Settings → *Repos*), Claude **finds your repos** (read-only scan of `~/Developer`, `~/Projects`, `~/code`… and your Claude Code project folders, ranked by your commits in the last 30 days, with the Jira keys seen in branch names) and pre-checks the top ones; uncheck, edit (Jira key, base branch), add or delete. Each is `{project, name, path, base, enabled}` in config and `meta/settings`.
 2. **Pick how code runs start** (⚙ Settings → *AI run mode*, `aiRunMode`):
-   - **runner** (default): answer **yes** when onboarding offers to install the runner, or later say **`install catask runner`** / **`cài runner catask`** (also "sửa runner" to repair it). Claude backs up and updates the Claude desktop app config, registers it for Claude Code, checks that the `claude` CLI is logged in (if not, run `claude` → `/login` in Terminal yourself), runs the selftest, then asks you to quit (⌘Q) and reopen the app. Manual steps: [`runner/README.md`](runner/README.md#manual-install-fallback). Open the page **in the Claude desktop app**. The page hands the task to the runner, which starts a headless Claude run; progress and results come back through the page (the headless run has no ledger access, so the page is the bridge). Details: [`runner/README.md`](runner/README.md).
+   - **runner** (default): answer **yes** when onboarding offers to install the runner, or later say **`install catask runner`** / **`cài runner catask`** (also "sửa runner" to repair it). Claude backs up and updates the Claude desktop app config, registers it for Claude Code, checks that the `claude` CLI is logged in (if not, run `claude` → `/login` in Terminal yourself), runs the selftest, then asks you to quit (⌘Q) and reopen the app. Manual steps: [`runner/README.md`](runner/README.md#manual-install-fallback). Open the page **in the Claude desktop app**. The page hands the task to the runner, which starts a headless Claude run; progress and results come back through the page (the headless run can't read or write the catask data, so the page is the bridge). Details: [`runner/README.md`](runner/README.md).
    - Handing a code task over from a **browser** opens the page in the Claude desktop app automatically, and it starts the run from there. Open the page in the app at least once first.
    - **desktop**: say "enable desktop mode" / "bật chế độ desktop cho AI code" and Claude creates a desktop scheduled task (after you confirm) that checks the queue every ~2 minutes during working hours (cron from your working hours, e.g. 09:00–18:00 Mon–Fri → `*/2 9-17 * * 1-5`; the app can't go below 1 minute and adds a few minutes of jitter). Every run costs some tokens even when idle.
    - Either way you can also paste `catask#<id>` into Claude (or say "làm task ABC-124").
@@ -217,7 +217,7 @@ Example: [`config.example.json`](config.example.json).
 | `storeQuotes` | `true` | Store a ≤500-character snapshot of the source message on each todo for "View message". `false` = store no message text; the page opens the original link instead |
 | `crossSessionDone` | `true` | In your other interactive Claude Code sessions, Claude asks before marking a matching open todo done. `false` = the SessionStart hook stays silent |
 | `catchUp` | `true` | When the last scheduled digest failed or was missed, the next Claude Code session starts it again once online. `false` = off |
-| `retention` | `{archiveDoneAfterDays: 90, pruneDaysAfterDays: 120, quoteDaysAfterDone: 30}` | How long the ledger keeps things (see Privacy). Done todos older than `archiveDoneAfterDays` move to a monthly archive (min 45, the Week heatmap needs 6 weeks); daily digests and cost records older than `pruneDaysAfterDays` are deleted (min 60); quotes are removed from done todos after `quoteDaysAfterDone` |
+| `retention` | `{archiveDoneAfterDays: 90, pruneDaysAfterDays: 120, quoteDaysAfterDone: 30}` | How long catask keeps things (see Privacy). Done todos older than `archiveDoneAfterDays` move to a monthly archive (min 45, the Week heatmap needs 6 weeks); daily digests and cost records older than `pruneDaysAfterDays` are deleted (min 60); quotes are removed from done todos after `quoteDaysAfterDone` |
 | `settingsSyncedAt` | `null` | Written by the skill: when the page's ⚙ Settings were last merged into this file. Don't edit |
 | `onboardingPending` | `false` | `true` = the config was written without the full setup interview (e.g. migrated from an older setup). The next run you start yourself asks only the missing questions, then sets it to `false`; scheduled runs just leave a reminder in the coverage notes |
 
@@ -228,13 +228,13 @@ After you change the config, the next run updates the page (name, language, proj
 ## Privacy
 
 - 🔒 **Read-only** on Teams/Outlook. The only thing sent is one message to **your own** notes chat. It never replies to anyone on your behalf.
-- 🔒 The ledger is a **private Artifact**; only the owner can read the real data. Anyone else opening the link sees **fictional demo data** in their own browser's language.
+- 🔒 The catask page is a **private Artifact**; only the owner can read the real data. Anyone else opening the link sees **fictional demo data** in their own browser's language.
 - 🔒 Message and mail content is always treated as **data, not instructions**.
-- 🔒 **Hand to AI** (off by default) only writes drafts into the ledger; the worker uses read-only tools and never sends, replies or changes anything in Teams, Outlook or Jira. The only Jira write is made by the page itself, with your own Atlassian connection, after you approve and confirm (one field: description or Story Points). The page asks claude.ai for this `mcp` permission (`getJiraIssue`, `editJiraIssue` on Atlassian only); the first use asks for your consent.
+- 🔒 **Hand to AI** (off by default) only writes drafts onto the catask page; the worker uses read-only tools and never sends, replies or changes anything in Teams, Outlook or Jira. The only Jira write is made by the page itself, with your own Atlassian connection, after you approve and confirm (one field: description or Story Points). The page asks claude.ai for this `mcp` permission (`getJiraIssue`, `editJiraIssue` on Atlassian only); the first use asks for your consent.
 - 🔒 **Jira check** (`jiraCheck`) is **read-only** and uses **your own** Atlassian connector. It only looks up tickets linked to your open tasks (one search by key for the ones changed since the last digest, then a few reads); nothing from your chats or mail is sent to Jira, and it never comments, transitions, assigns or edits. Ticket content is treated as data, not instructions.
-- 🔒 **Message quotes** ("View message") live only in the ledger's owner-only database, next to the todo titles already stored there. About 500 characters × ~100 open todos ≈ 50 KB, negligible. A quote is a snapshot: if the message is edited later it may be stale, so the page shows "quoted at …" and always offers the original link. Quotes are removed from done todos older than 30 days (`retention.quoteDaysAfterDone`). Set `storeQuotes: false` to store no message text at all.
+- 🔒 **Message quotes** ("View message") live only in the catask page's owner-only database, next to the todo titles already stored there. About 500 characters × ~100 open todos ≈ 50 KB, negligible. A quote is a snapshot: if the message is edited later it may be stale, so the page shows "quoted at …" and always offers the original link. Quotes are removed from done todos older than 30 days (`retention.quoteDaysAfterDone`). Set `storeQuotes: false` to store no message text at all.
 - 🔒 **Cross-session asks**: open todo titles (with Jira keys, no message text) are written to `~/.catask/open-todos.json` and injected only into **your own local** Claude Code sessions by the plugin's SessionStart hook. Nothing leaves your machine for this. Turn it off with `crossSessionDone: false` (or ⚙ Settings → Privacy).
-- 🔒 **What the ledger keeps** (owner-only database, cleaned every run; days configurable in `retention`):
+- 🔒 **What catask keeps** (owner-only database, cleaned every run; days configurable in `retention`):
   - Open and waiting todos: kept as long as they're open, whatever their age. Each todo may carry a `ref` with ids only (Teams chat/message id, Outlook mail id, Jira issue key, calendar event id), never message text, and, if you used Hand to AI, an `ai` field with your request and the draft (≤2000 characters).
   - Done todos: kept in full for 90 days after they were done, so the Week tab and heatmap work. After that they move to a monthly archive (`archive/<YYYY-MM>`) with only id, title, done date, person, project, priority, kind and source; the full todo (why, link, quote) is deleted. A todo you changed on the page in the last 7 days is never moved that run.
   - Daily digests (`days/…`) and cost records (`runs/…`) older than 120 days are deleted. Your settings and profile (`meta/…`) and the archive are never deleted.
@@ -261,7 +261,7 @@ skills/daily-digest-todo/
   scripts/render.py        # JSON schema check + offline HTML backup
   scripts/ai_milestones.py # Claude Code work blocks (titles + times)
   scripts/run_tokens.py    # token usage of the scheduled runs
-  assets/catask.html       # the ledger page (Artifact), vi + en UI — GENERATED, see Develop
+  assets/catask.html       # the catask page (Artifact), vi + en UI — GENERATED, see Develop
   assets/digest-template.html
   assets/mascot/*.svg
   assets/peeps/*.svg       # Open Peeps, CC0 (see LICENSE.txt)
