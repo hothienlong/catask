@@ -36,24 +36,30 @@ https://github.com/user-attachments/assets/2b40e28c-7ef0-48d8-955a-37e09b6ab219
 | **Next morning** | The page shows the top 3, today's board, and a short note in your Teams | Do the top 3 first |
 | **During the day** | Cards show *Looks done?* when there's evidence; other Claude Code sessions ask before closing a matching task | Confirm with one click |
 
-![catask Today board, demo data](docs/screenshots/hom-nay.png)
+<p align="center"><a href="#overview"><img src="docs/screenshots/tour.gif" alt="catask tour: Today, Calendar, Following, People, Day, View message, Settings, Hand to AI, Review code, Cost" width="860"></a></p>
+
+### Screenshots
 
 <table>
   <tr>
-    <td width="50%"><img src="docs/screenshots/theo-nguoi.png" alt="People tab"><br><sub><b>People</b>: what you owe each person and what they owe you</sub></td>
-    <td width="50%"><img src="docs/screenshots/ngay.png" alt="Day tab"><br><sub><b>Day</b>: timeline of meetings, AI sessions and finished work</sub></td>
+    <td width="50%"><a href="#screenshots"><img src="docs/screenshots/hom-nay.png" alt="Today board"></a><br><sub><b>Today</b>: top 3 and the Today / Tomorrow / Waiting / Done board</sub></td>
+    <td width="50%"><a href="#screenshots"><img src="docs/screenshots/lich.png" alt="Calendar tab"></a><br><sub><b>Calendar</b>: week or month, drag a task to change its due date</sub></td>
   </tr>
   <tr>
-    <td width="50%"><img src="docs/screenshots/chi-phi.png" alt="Cost tab"><br><sub><b>Cost</b>: token cost of each scheduled run</sub></td>
-    <td width="50%"><img src="docs/screenshots/xem-tin.png" alt="View message dialog"><br><sub><b>View message</b>: short snapshot of the source message, with a link to the original</sub></td>
+    <td width="50%"><a href="#screenshots"><img src="docs/screenshots/dang-theo-doi.png" alt="Following block"></a><br><sub><b>Following</b>: others' work in your areas, out of your TODO list</sub></td>
+    <td width="50%"><a href="#screenshots"><img src="docs/screenshots/theo-nguoi.png" alt="People tab"></a><br><sub><b>People</b>: what you owe each person and what they owe you</sub></td>
   </tr>
   <tr>
-    <td width="50%"><img src="docs/screenshots/cai-dat.png" alt="Settings drawer"><br><sub><b>Settings</b>: language, channels, work hours, important people, right on the page</sub></td>
-    <td width="50%"><img src="docs/screenshots/giao-ai.png" alt="Hand to AI dialog"><br><sub><b>Hand to AI</b>: pick what AI should do; on a Jira ticket, 💻 Write code works in your local repo</sub></td>
+    <td width="50%"><a href="#screenshots"><img src="docs/screenshots/ngay.png" alt="Day tab"></a><br><sub><b>Day</b>: timeline of meetings, AI sessions and finished work</sub></td>
+    <td width="50%"><a href="#screenshots"><img src="docs/screenshots/xem-tin.png" alt="View message dialog"></a><br><sub><b>View message</b>: short snapshot of the source message, with a link to the original</sub></td>
   </tr>
   <tr>
-    <td width="50%"><img src="docs/screenshots/ai-review.png" alt="Code review panel"><br><sub><b>Review code</b>: plan, checks and diff from the AI branch; you approve before push + draft MR</sub></td>
-    <td width="50%"></td>
+    <td width="50%"><a href="#screenshots"><img src="docs/screenshots/cai-dat.png" alt="Settings drawer"></a><br><sub><b>Settings</b>: language, channels, work hours, important people, right on the page</sub></td>
+    <td width="50%"><a href="#screenshots"><img src="docs/screenshots/giao-ai.png" alt="Hand to AI dialog"></a><br><sub><b>Hand to AI</b>: pick what AI should do; on a Jira ticket, 💻 Write code works in your local repo</sub></td>
+  </tr>
+  <tr>
+    <td width="50%"><a href="#screenshots"><img src="docs/screenshots/ai-review.png" alt="Code review panel"></a><br><sub><b>Review code</b>: plan, checks and diff from the AI branch; you approve before push + draft MR</sub></td>
+    <td width="50%"><a href="#screenshots"><img src="docs/screenshots/chi-phi.png" alt="Cost tab"></a><br><sub><b>Cost</b>: token cost of each scheduled run</sub></td>
   </tr>
 </table>
 

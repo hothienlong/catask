@@ -36,24 +36,30 @@ https://github.com/user-attachments/assets/2b40e28c-7ef0-48d8-955a-37e09b6ab219
 | **Sáng hôm sau** | Trang có 3 việc làm trước, bảng việc hôm nay, kèm một dòng nhắc trong Teams | Làm 3 việc đầu |
 | **Trong ngày** | Thẻ hiện *Có vẻ đã xong?* khi có bằng chứng; các phiên Claude Code khác hỏi trước khi đóng việc khớp | Bấm xác nhận |
 
-![Bảng Hôm nay của catask, dữ liệu mẫu](docs/screenshots/hom-nay.png)
+<p align="center"><a href="#tổng-quan"><img src="docs/screenshots/tour.gif" alt="catask: Hôm nay, Lịch, Đang theo dõi, Theo người, Ngày, Xem tin, Cài đặt, Giao AI, Review code, Chi phí" width="860"></a></p>
+
+### Ảnh màn hình
 
 <table>
   <tr>
-    <td width="50%"><img src="docs/screenshots/theo-nguoi.png" alt="People tab"><br><sub><b>Theo người</b>: bạn nợ ai và ai nợ bạn việc gì</sub></td>
-    <td width="50%"><img src="docs/screenshots/ngay.png" alt="Day tab"><br><sub><b>Ngày</b>: dòng thời gian họp, phiên làm với AI và việc đã xong</sub></td>
+    <td width="50%"><a href="#ảnh-màn-hình"><img src="docs/screenshots/hom-nay.png" alt="Bảng Hôm nay"></a><br><sub><b>Hôm nay</b>: 3 việc làm trước và bảng Hôm nay / Mai / Đang chờ / Xong</sub></td>
+    <td width="50%"><a href="#ảnh-màn-hình"><img src="docs/screenshots/lich.png" alt="Tab Lịch"></a><br><sub><b>Lịch</b>: xem tuần hoặc tháng, kéo việc sang ngày khác để đổi hạn</sub></td>
   </tr>
   <tr>
-    <td width="50%"><img src="docs/screenshots/chi-phi.png" alt="Cost tab"><br><sub><b>Chi phí</b>: chi phí token của mỗi lần chạy theo lịch</sub></td>
-    <td width="50%"><img src="docs/screenshots/xem-tin.png" alt="View message dialog"><br><sub><b>Xem tin</b>: trích ngắn tin gốc, kèm link mở tin gốc</sub></td>
+    <td width="50%"><a href="#ảnh-màn-hình"><img src="docs/screenshots/dang-theo-doi.png" alt="Khối Đang theo dõi"></a><br><sub><b>Đang theo dõi</b>: việc của người khác trong mảng bạn làm, tách khỏi TODO</sub></td>
+    <td width="50%"><a href="#ảnh-màn-hình"><img src="docs/screenshots/theo-nguoi.png" alt="Tab Theo người"></a><br><sub><b>Theo người</b>: bạn nợ ai và ai nợ bạn việc gì</sub></td>
   </tr>
   <tr>
-    <td width="50%"><img src="docs/screenshots/cai-dat.png" alt="Settings drawer"><br><sub><b>Cài đặt</b>: ngôn ngữ, kênh, giờ làm, người quan trọng, ngay trên trang</sub></td>
-    <td width="50%"><img src="docs/screenshots/giao-ai.png" alt="Hand to AI dialog"><br><sub><b>Giao AI</b>: chọn việc cho AI; với ticket Jira, 💻 Code luôn chạy trong repo trên máy bạn</sub></td>
+    <td width="50%"><a href="#ảnh-màn-hình"><img src="docs/screenshots/ngay.png" alt="Tab Ngày"></a><br><sub><b>Ngày</b>: dòng thời gian họp, phiên làm với AI và việc đã xong</sub></td>
+    <td width="50%"><a href="#ảnh-màn-hình"><img src="docs/screenshots/xem-tin.png" alt="Hộp Xem tin"></a><br><sub><b>Xem tin</b>: trích ngắn tin gốc, kèm link mở bản gốc</sub></td>
   </tr>
   <tr>
-    <td width="50%"><img src="docs/screenshots/ai-review.png" alt="Code review panel"><br><sub><b>Duyệt code</b>: kế hoạch, kết quả kiểm tra và diff từ nhánh AI; bạn duyệt rồi mới push + tạo draft MR</sub></td>
-    <td width="50%"></td>
+    <td width="50%"><a href="#ảnh-màn-hình"><img src="docs/screenshots/cai-dat.png" alt="Ngăn Cài đặt"></a><br><sub><b>Cài đặt</b>: ngôn ngữ, nguồn đọc, giờ làm, người quan trọng ngay trên trang</sub></td>
+    <td width="50%"><a href="#ảnh-màn-hình"><img src="docs/screenshots/giao-ai.png" alt="Hộp Giao AI"></a><br><sub><b>Giao AI</b>: chọn việc cho AI; với ticket Jira, 💻 Code luôn làm trong repo của bạn</sub></td>
+  </tr>
+  <tr>
+    <td width="50%"><a href="#ảnh-màn-hình"><img src="docs/screenshots/ai-review.png" alt="Bảng review code"></a><br><sub><b>Review code</b>: kế hoạch, kiểm tra và diff từ nhánh AI; bạn duyệt rồi mới push + mở MR nháp</sub></td>
+    <td width="50%"><a href="#ảnh-màn-hình"><img src="docs/screenshots/chi-phi.png" alt="Tab Chi phí"></a><br><sub><b>Chi phí</b>: token của mỗi lần chạy theo lịch</sub></td>
   </tr>
 </table>
 
