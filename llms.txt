@@ -30,6 +30,7 @@
 
 ## Docs
 
-- [README](README.md) (English) · [README.vi.md](README.vi.md) (Tiếng Việt): full guide, configuration, privacy.
+- [README](README.md) (English) · [README.vi.md](README.vi.md) (Tiếng Việt): overview, install, features.
+- [docs/guide.md](docs/guide.md) · [docs/guide.vi.md](docs/guide.vi.md): full guide, every config field, privacy and retention, develop and release.
 - [Skill: daily-digest-todo](skills/daily-digest-todo/SKILL.md)
 - [Skill: ai-worker](skills/ai-worker/SKILL.md)
