@@ -38,6 +38,27 @@ https://github.com/user-attachments/assets/2b40e28c-7ef0-48d8-955a-37e09b6ab219
 
 ![Bảng Hôm nay của catask, dữ liệu mẫu](docs/screenshots/hom-nay.png)
 
+<table>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/theo-nguoi.png" alt="People tab"><br><sub><b>Theo người</b>: bạn nợ ai và ai nợ bạn việc gì</sub></td>
+    <td width="50%"><img src="docs/screenshots/ngay.png" alt="Day tab"><br><sub><b>Ngày</b>: dòng thời gian họp, phiên làm với AI và việc đã xong</sub></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/chi-phi.png" alt="Cost tab"><br><sub><b>Chi phí</b>: chi phí token của mỗi lần chạy theo lịch</sub></td>
+    <td width="50%"><img src="docs/screenshots/xem-tin.png" alt="View message dialog"><br><sub><b>Xem tin</b>: trích ngắn tin gốc, kèm link mở tin gốc</sub></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/cai-dat.png" alt="Settings drawer"><br><sub><b>Cài đặt</b>: ngôn ngữ, kênh, giờ làm, người quan trọng, ngay trên trang</sub></td>
+    <td width="50%"><img src="docs/screenshots/giao-ai.png" alt="Hand to AI dialog"><br><sub><b>Giao AI</b>: chọn việc cho AI; với ticket Jira, 💻 Code luôn chạy trong repo trên máy bạn</sub></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/ai-review.png" alt="Code review panel"><br><sub><b>Duyệt code</b>: kế hoạch, kết quả kiểm tra và diff từ nhánh AI; bạn duyệt rồi mới push + tạo draft MR</sub></td>
+    <td width="50%"></td>
+  </tr>
+</table>
+
+<sub>Ảnh chụp từ bản demo dữ liệu mẫu, không có tin nhắn hay người thật.</sub>
+
 ## Bắt đầu nhanh
 
 Dán đoạn này vào Claude Code (hoặc tab Code của app Claude):
@@ -77,17 +98,6 @@ Hoặc gõ tay:
 | 🗂 **Một trang, sáu góc nhìn** | Hôm nay, Theo người, Tuần, Lịch, Ngày, Chi phí. Mọi thay đổi đều Undo được |
 | ⚙ **Cài đặt ngay trên trang** | Ngôn ngữ, nguồn đọc, giờ làm, người quan trọng, chat quan trọng/bỏ qua, bảng Jira |
 | 🤖 **Giao AI** *(thử nghiệm, mặc định tắt)* | Viết nháp trả lời, tóm tắt, mô tả và ước lượng Jira; với dev, code trên một nhánh để bạn review |
-
-<details>
-<summary><b>Ảnh màn hình</b> (dữ liệu mẫu)</summary>
-
-| | |
-|---|---|
-| ![Theo người](docs/screenshots/theo-nguoi.png)<br><sub><b>Theo người</b>: bạn nợ ai việc gì, ai nợ bạn</sub> | ![Ngày](docs/screenshots/ngay.png)<br><sub><b>Ngày</b>: họp, phiên AI và việc đã xong theo dòng thời gian</sub> |
-| ![Xem tin](docs/screenshots/xem-tin.png)<br><sub><b>Xem tin</b>: trích ngắn tin gốc, kèm link</sub> | ![Cài đặt](docs/screenshots/cai-dat.png)<br><sub><b>Cài đặt</b>: đổi hồ sơ ngay trên trang</sub> |
-| ![Giao AI](docs/screenshots/giao-ai.png)<br><sub><b>Giao AI</b>: chọn việc cho AI viết nháp</sub> | ![Review code](docs/screenshots/ai-review.png)<br><sub><b>Review code</b>: duyệt trước khi push và mở MR nháp</sub> |
-
-</details>
 
 ## Giao AI (thử nghiệm, mặc định tắt)
 

@@ -38,6 +38,27 @@ https://github.com/user-attachments/assets/2b40e28c-7ef0-48d8-955a-37e09b6ab219
 
 ![catask Today board, demo data](docs/screenshots/hom-nay.png)
 
+<table>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/theo-nguoi.png" alt="People tab"><br><sub><b>People</b>: what you owe each person and what they owe you</sub></td>
+    <td width="50%"><img src="docs/screenshots/ngay.png" alt="Day tab"><br><sub><b>Day</b>: timeline of meetings, AI sessions and finished work</sub></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/chi-phi.png" alt="Cost tab"><br><sub><b>Cost</b>: token cost of each scheduled run</sub></td>
+    <td width="50%"><img src="docs/screenshots/xem-tin.png" alt="View message dialog"><br><sub><b>View message</b>: short snapshot of the source message, with a link to the original</sub></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/cai-dat.png" alt="Settings drawer"><br><sub><b>Settings</b>: language, channels, work hours, important people, right on the page</sub></td>
+    <td width="50%"><img src="docs/screenshots/giao-ai.png" alt="Hand to AI dialog"><br><sub><b>Hand to AI</b>: pick what AI should do; on a Jira ticket, 💻 Write code works in your local repo</sub></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/ai-review.png" alt="Code review panel"><br><sub><b>Review code</b>: plan, checks and diff from the AI branch; you approve before push + draft MR</sub></td>
+    <td width="50%"></td>
+  </tr>
+</table>
+
+<sub>Screenshots use the built-in demo data. No real messages or people.</sub>
+
 ## Quick start
 
 Paste this into Claude Code (or the Code tab of the Claude desktop app):
@@ -77,17 +98,6 @@ Or by hand:
 | 🗂 **One page, six views** | Today board, People, Week stats, Calendar, Day timeline, Cost. Undo on every change |
 | ⚙ **Settings on the page** | Language, channels, hours, important people, key and skipped chats, Jira boards |
 | 🤖 **Hand to AI** *(beta, off)* | Drafts replies, summaries, Jira descriptions and estimates; for developers, writes code on a branch you review |
-
-<details>
-<summary><b>Screenshots</b> (demo data)</summary>
-
-| | |
-|---|---|
-| ![People](docs/screenshots/theo-nguoi.png)<br><sub><b>People</b>: what you owe each person, and what they owe you</sub> | ![Day](docs/screenshots/ngay.png)<br><sub><b>Day</b>: meetings, AI sessions and finished work on a timeline</sub> |
-| ![View message](docs/screenshots/xem-tin.png)<br><sub><b>View message</b>: a short snapshot of the source, with a link</sub> | ![Settings](docs/screenshots/cai-dat.png)<br><sub><b>Settings</b>: change your profile right on the page</sub> |
-| ![Hand to AI](docs/screenshots/giao-ai.png)<br><sub><b>Hand to AI</b>: pick what AI should draft</sub> | ![Code review](docs/screenshots/ai-review.png)<br><sub><b>Review code</b>: approve before push and draft MR</sub> |
-
-</details>
 
 ## Hand to AI (beta, off by default)
 
